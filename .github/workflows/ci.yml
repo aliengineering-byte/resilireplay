@@ -35,7 +35,7 @@ jobs:
           RESILIREPLAY_NO_NETWORK: "1"
       - name: MCP stdio demo
         run: pnpm demo:mcp
-      - uses: github/codeql-action/upload-sarif@v4
+      - uses: github/codeql-action/upload-sarif@v4.37.3
         if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
         with:
           sarif_file: runs/demo/failed-report/report.sarif
