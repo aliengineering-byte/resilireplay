@@ -72,7 +72,7 @@ const install = spawnSync(process.execPath, [pnpmEntry, "install", "--offline"],
   windowsHide: true,
 });
 if (install.status !== 0) throw new Error("Installing packed workspaces failed");
-const cli = join(project, "node_modules", "resilireplay", "dist", "bin.js");
+const cli = join(project, "node_modules", "resilireplay", "bin", "resilireplay.mjs");
 const smoke = spawnSync(process.execPath, [cli, "--version"], {
   cwd: project,
   encoding: "utf8",

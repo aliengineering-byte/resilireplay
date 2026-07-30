@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "description": "Deterministic chaos testing and trace-to-regression tooling for AI agents and MCP servers.",
   "bin": {
-    "resilireplay": "./dist/bin.js"
+    "resilireplay": "./bin/resilireplay.mjs"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,6 +16,7 @@
     }
   },
   "files": [
+    "bin",
     "dist",
     "README.md"
   ],
