@@ -16,16 +16,16 @@ Result: PASS (exit 0).
 
 The aggregate command preserved these exact subcommands and results:
 
-| Command              | Result                                                                           |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `pnpm format:check`  | PASS; all matched files use Prettier style                                       |
-| `pnpm lint`          | PASS; zero ESLint findings                                                       |
-| `pnpm typecheck`     | PASS; 12 workspace projects plus strict test/config typecheck                    |
-| `pnpm build`         | PASS; all 12 non-root workspace projects built                                   |
-| `pnpm test`          | PASS; 8 test files, 34 tests, 0 failed/skipped/flaky                             |
-| `pnpm package:smoke` | PASS; five tarballs installed offline into a clean project; CLI returned `0.1.0` |
-| `pnpm secret:scan`   | PASS; no recognized credentials in working files or reachable Git history        |
-| `pnpm peers check`   | PASS; no peer-dependency issues                                                  |
+| Command              | Result                                                                    |
+| -------------------- | ------------------------------------------------------------------------- |
+| `pnpm format:check`  | PASS; all matched files use Prettier style                                |
+| `pnpm lint`          | PASS; zero ESLint findings                                                |
+| `pnpm typecheck`     | PASS; 12 workspace projects plus strict test/config typecheck             |
+| `pnpm build`         | PASS; all 12 non-root workspace projects built                            |
+| `pnpm test`          | PASS; 8 test files, 34 tests, 0 failed/skipped/flaky                      |
+| `pnpm package:smoke` | PASS; five tarballs installed into a clean project; CLI returned `0.1.0`  |
+| `pnpm secret:scan`   | PASS; no recognized credentials in working files or reachable Git history |
+| `pnpm peers check`   | PASS; no peer-dependency issues                                           |
 
 The 34 tests cover:
 
@@ -97,7 +97,11 @@ Result: PASS; eight validated events recorded and subprocess exit code 0.
 
 Workflow definitions cover Ubuntu/Windows, Node 20/22, format, lint, strict typecheck, tests, build, scenario execution, package smoke, no-network demo, MCP stdio demo, SARIF upload, Dependabot, and two secret scanners.
 
-CI status and public-clone verification remain unavailable until GitHub publication. The workstation did not have GitHub CLI installed at the required initial `gh auth status` check, so no authenticated GitHub account could be verified without requesting or exposing credentials. Local implementation and release evidence are complete.
+Public repository: `https://github.com/alivvvvvvvvvvvvveng-coder/resilireplay`.
+
+The first clean GitHub Actions run exposed two publication-only portability defects. The packed-package smoke workspace incorrectly required dependency metadata to be available offline from a separate workspace, and the third-party Gitleaks v2 action generated an invalid parent range for the repository's first push. The repository's own full-tree and reachable-history secret scanner passed that run, and all Ubuntu/Windows Node 20/22 platform jobs passed.
+
+The release correction permits registry resolution for external dependencies while continuing to install every ResiliReplay workspace package from its packed local tarball, updates the Gitleaks action runtime, and makes SARIF upload conditional on the report being present. No product feature or architecture changed. The complete local release gate, demos, and scenarios passed again before the still-unpublished annotated tag was moved to this correction commit.
 
 ## Known limitations
 

@@ -13,4 +13,4 @@ The occupied or confusing names specified in the project brief—AgentChaos, Age
 
 Final product name: **ResiliReplay**. Package scope: `@resilireplay/*`. CLI and intended repository: `resilireplay`.
 
-The repository remains in the mandated isolated workstation directory `E:\AI-Workbench\AgentReliabilityLab`; renaming that directory would conflict with the explicit isolation boundary.
+Development stayed inside its mandated isolated working directory. The public repository identity is `resilireplay`.

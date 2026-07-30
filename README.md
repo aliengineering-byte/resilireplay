@@ -11,7 +11,7 @@ ResiliReplay is a model-agnostic, local-first chaos-engineering toolkit. It reco
 Requirements: Node.js 20 or 22 and pnpm.
 
 ```console
-git clone <public-repository-url>
+git clone https://github.com/alivvvvvvvvvvvvveng-coder/resilireplay.git
 cd resilireplay
 corepack enable
 pnpm install
@@ -136,7 +136,7 @@ Report files are deterministic for the same trace. `run-manifest.json` records t
 Use the repository action:
 
 ```yaml
-- uses: your-account/resilireplay@v0.1.0
+- uses: alivvvvvvvvvvvvveng-coder/resilireplay@v0.1.0
   with:
     scenarios: scenarios
 ```

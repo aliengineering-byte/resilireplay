@@ -66,7 +66,7 @@ await writeFile(
     .join("\n")}\n`,
   "utf8",
 );
-const install = spawnSync(process.execPath, [pnpmEntry, "install", "--offline"], {
+const install = spawnSync(process.execPath, [pnpmEntry, "install"], {
   cwd: project,
   stdio: "inherit",
   windowsHide: true,
