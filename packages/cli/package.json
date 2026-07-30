@@ -1,0 +1,37 @@
+{
+  "name": "resilireplay",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Deterministic chaos testing and trace-to-regression tooling for AI agents and MCP servers.",
+  "bin": {
+    "resilireplay": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@resilireplay/core": "workspace:*",
+    "@resilireplay/mcp-chaos": "workspace:*",
+    "@resilireplay/reporters": "workspace:*",
+    "@resilireplay/trace": "workspace:*",
+    "commander": "14.0.0",
+    "yaml": "2.8.1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

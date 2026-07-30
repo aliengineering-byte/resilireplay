@@ -1,0 +1,13 @@
+schemaVersion: "1.0"
+id: malformed-failure
+description: A malformed local model response remains unrecovered and fails deterministically.
+seed: 42
+fixture: malformed-failure.fixture.jsonl
+expected:
+  outcome: failed
+rules:
+  - fault: malformed-json
+    event: model_response
+    occurrence: 1
+    probability: 1
+    parameters: {}

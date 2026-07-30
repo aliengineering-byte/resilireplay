@@ -1,0 +1,14 @@
+schemaVersion: "1.0"
+id: rate-limit-recovery
+description: The local agent backs off once and completes after an HTTP 429.
+seed: 42
+fixture: rate-limit-recovery.fixture.jsonl
+expected:
+  outcome: passed
+rules:
+  - fault: http-429
+    event: model_response
+    occurrence: 1
+    probability: 1
+    parameters:
+      retryAfterMs: 100

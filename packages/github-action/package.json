@@ -1,0 +1,16 @@
+{
+  "name": "@resilireplay/github-action",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@resilireplay/core": "workspace:*",
+    "@resilireplay/reporters": "workspace:*",
+    "@resilireplay/trace": "workspace:*"
+  }
+}

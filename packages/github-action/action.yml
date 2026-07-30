@@ -1,0 +1,14 @@
+name: ResiliReplay
+description: Run deterministic AI-agent reliability scenarios.
+inputs:
+  scenarios:
+    description: Scenario directory
+    required: false
+    default: scenarios
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    - shell: bash
+      run: node packages/cli/dist/bin.js test "${{ inputs.scenarios }}"

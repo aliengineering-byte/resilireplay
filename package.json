@@ -1,0 +1,44 @@
+{
+  "name": "resilireplay-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Crash-test AI agents and MCP servers, replay failures, and turn broken runs into deterministic regression tests.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -r --sort build",
+    "typecheck": "pnpm build && pnpm -r --sort typecheck && tsc -p tsconfig.tests.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm build && vitest run",
+    "test:coverage": "pnpm build && vitest run --coverage",
+    "demo": "node scripts/demo.mjs",
+    "demo:mcp": "node scripts/mcp-demo.mjs",
+    "fixtures": "node scripts/generate-fixtures.mjs",
+    "package:smoke": "node scripts/package-smoke.mjs",
+    "secret:scan": "node scripts/secret-scan.mjs",
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm package:smoke && pnpm secret:scan"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.32.0",
+    "@resilireplay/core": "workspace:*",
+    "@resilireplay/mcp-chaos": "workspace:*",
+    "@resilireplay/reporters": "workspace:*",
+    "@resilireplay/trace": "workspace:*",
+    "@types/node": "20.19.9",
+    "@typescript-eslint/eslint-plugin": "8.38.0",
+    "@typescript-eslint/parser": "8.38.0",
+    "@vitest/coverage-v8": "3.2.4",
+    "eslint": "9.32.0",
+    "globals": "16.3.0",
+    "prettier": "3.6.2",
+    "resilireplay": "workspace:*",
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
+  }
+}
