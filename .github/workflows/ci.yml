@@ -29,6 +29,7 @@ jobs:
       - run: pnpm test
       - run: pnpm package:smoke
       - run: pnpm secret:scan
+      - run: pnpm hygiene:scan
       - name: No-network deterministic demo
         run: pnpm demo
         env:

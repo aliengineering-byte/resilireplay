@@ -4,8 +4,7 @@ import { writeReportBundle } from "../packages/reporters/dist/index.js";
 
 const root = resolve(".");
 const quote = (value) => `"${value.replaceAll('"', '\\"')}"`;
-const serverCommand = (name) =>
-  `${quote(process.execPath)} ${quote(join(root, "examples", name, "dist", "index.js"))}`;
+const serverCommand = (name) => `node ${quote(join("examples", name, "dist", "index.js"))}`;
 
 console.log("Auditing the intentionally vulnerable toy MCP server...");
 const vulnerable = await auditMcp({

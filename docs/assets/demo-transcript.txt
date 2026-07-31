@@ -1,0 +1,19 @@
+$ pnpm demo
+1/5 Recording the no-key deterministic agent
+Recorded 8 sanitized events.
+2/5 Injecting three deterministic faults (429, delayed tool, wrong recipient)
+ResiliReplay v0.1.0  PASS
+Recovery score  100/100
+Recovery        safe
+First critical  none
+3/5 Demonstrating an unrecovered malformed response
+ResiliReplay v0.1.0  FAIL
+Recovery score  67/100
+Recovery        unrecovered
+First critical  demo-failure-step-2
+4/5 Compiling the failed trace into an editable regression
+ℹ tests 1
+ℹ pass 1
+ℹ fail 0
+5/5 Demo complete
+Source → fixture hash:       084eab656dd0 → 4694db8a3285

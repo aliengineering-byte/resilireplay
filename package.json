@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Crash-test AI agents and MCP servers, replay failures, and turn broken runs into deterministic regression tests.",
+  "description": "Crash-test AI agents and MCP servers, replay failures, and turn broken traces into deterministic regression tests.",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.14.0",
   "engines": {
@@ -22,7 +22,8 @@
     "fixtures": "node scripts/generate-fixtures.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
     "secret:scan": "node scripts/secret-scan.mjs",
-    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm package:smoke && pnpm secret:scan"
+    "hygiene:scan": "node scripts/hygiene-scan.mjs",
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm package:smoke && pnpm secret:scan && pnpm hygiene:scan"
   },
   "devDependencies": {
     "@eslint/js": "9.32.0",

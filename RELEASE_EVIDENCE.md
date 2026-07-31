@@ -97,7 +97,7 @@ Result: PASS; eight validated events recorded and subprocess exit code 0.
 
 Workflow definitions cover Ubuntu/Windows, Node 20/22, format, lint, strict typecheck, tests, build, scenario execution, package smoke, no-network demo, MCP stdio demo, SARIF upload, Dependabot, and two secret scanners.
 
-Public repository: `https://github.com/alivvvvvvvvvvvvveng-coder/resilireplay`.
+Public repository: `https://github.com/aliengineering-byte/resilireplay`.
 
 The first clean GitHub Actions run exposed two publication-only portability defects. The packed-package smoke workspace incorrectly required dependency metadata to be available offline from a separate workspace, and the third-party Gitleaks v2 action generated an invalid parent range for the repository's first push. The repository's own full-tree and reachable-history secret scanner passed that run, and all Ubuntu/Windows Node 20/22 platform jobs passed.
 
