@@ -26,20 +26,20 @@
     "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm package:smoke && pnpm secret:scan && pnpm hygiene:scan"
   },
   "devDependencies": {
-    "@eslint/js": "9.32.0",
+    "@eslint/js": "10.0.1",
     "@resilireplay/core": "workspace:*",
     "@resilireplay/mcp-chaos": "workspace:*",
     "@resilireplay/reporters": "workspace:*",
     "@resilireplay/trace": "workspace:*",
-    "@types/node": "20.19.9",
-    "@typescript-eslint/eslint-plugin": "8.38.0",
-    "@typescript-eslint/parser": "8.38.0",
-    "@vitest/coverage-v8": "3.2.4",
-    "eslint": "9.32.0",
-    "globals": "16.3.0",
-    "prettier": "3.6.2",
+    "@types/node": "26.1.2",
+    "@typescript-eslint/eslint-plugin": "8.65.0",
+    "@typescript-eslint/parser": "8.65.0",
+    "@vitest/coverage-v8": "4.1.10",
+    "eslint": "10.8.0",
+    "globals": "17.8.0",
+    "prettier": "3.9.6",
     "resilireplay": "workspace:*",
-    "typescript": "5.8.3",
-    "vitest": "3.2.4"
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
   }
 }
