@@ -1,0 +1,16 @@
+$ pnpm demo:mcp
+1/6 Importing the reviewed Inspector stdio configuration
+Dry-run plan: server=resilient-stdio; transport=stdio
+2/6 Auditing resilient and intentionally vulnerable stdio servers
+Stdio resilient=true; vulnerable expected-pass=false
+3/6 Injecting a recoverable MCP tool fault and verifying bounded retry
+Recovered=true; passed=true
+4/6 Injecting an unsafe MCP fault and compiling the causal regression
+PASS reproduces the captured ResiliReplay failure (4.8387ms)
+INFO tests 1
+INFO pass 1
+INFO fail 0
+5/6 Reusing an Inspector Streamable HTTP configuration with authentication
+Streamable HTTP passed=true; authenticated=true
+6/6 Writing source/config/scenario/fixture/test hashes
+MCP Inspector integration demo complete: runs/mcp-inspector-demo

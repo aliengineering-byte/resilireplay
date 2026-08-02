@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "path-with-spaces": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["path with spaces/resilient wrapper.mjs", "one argument with spaces"]
+    }
+  }
+}

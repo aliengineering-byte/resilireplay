@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "timeout-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["timeout-server.mjs"],
+      "env": {
+        "RR_PID_FILE": "${env:RESILIREPLAY_FIXTURE_PID_FILE}"
+      },
+      "connectionTimeout": 250,
+      "requestTimeout": 250
+    }
+  }
+}

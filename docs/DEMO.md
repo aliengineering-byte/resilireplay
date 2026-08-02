@@ -22,9 +22,15 @@ pnpm exec resilireplay test scenarios
 4. compiles the failed trace into a minimized fixture and executable regression;
 5. runs the generated regression with `node:test`.
 
-`pnpm demo:mcp` starts each bundled toy server over stdio and audits it with the official MCP TypeScript SDK. The vulnerable server intentionally produces two safe findings. The resilient server produces none.
+`pnpm demo:mcp` imports reviewed Inspector-shaped configurations and audits real resilient and
+intentionally vulnerable stdio servers. It also starts an authenticated Streamable HTTP server on an
+ephemeral loopback port, proves one bounded recovery, compiles an unsafe fault into a regression,
+executes that regression, and records source/config/scenario/fixture/test hashes.
 
-Generated evidence is written below `runs/demo/` and `runs/mcp-demo/`. Open `runs/demo/recovered-report/report.html` or `runs/mcp-demo/resilient/mcp-certification.html` in a browser. These HTML files are standalone and load no remote assets.
+Generated evidence is written below `runs/demo/` and `runs/mcp-inspector-demo/`. Open
+`runs/demo/recovered-report/report.html` or
+`runs/mcp-inspector-demo/http-resilient/mcp-certification.html` in a browser. These HTML files are
+standalone and load no remote assets.
 
 ## Captured transcript
 
@@ -34,10 +40,10 @@ The concise transcript used for the animation is committed at [`docs/assets/demo
 1/5 Recording the no-key deterministic agent
 Recorded 8 sanitized events.
 2/5 Injecting three deterministic faults (429, delayed tool, wrong recipient)
-ResiliReplay v0.1.0  PASS
+ResiliReplay v0.2.0  PASS
 Recovery score  100/100
 3/5 Demonstrating an unrecovered malformed response
-ResiliReplay v0.1.0  FAIL
+ResiliReplay v0.2.0  FAIL
 Recovery score  67/100
 4/5 Compiling the failed trace into an editable regression
 ℹ pass 1
@@ -46,6 +52,27 @@ Recovery score  67/100
 ```
 
 The animation is a selected, path-free rendering of output captured from a successful `pnpm demo` run. It does not invent terminal lines or present fixture-backed provider output as live.
+
+The Inspector transcript is committed at
+[`docs/assets/mcp-inspector-demo-transcript.txt`](assets/mcp-inspector-demo-transcript.txt). Its
+verified milestones include:
+
+```text
+1/6 Importing the reviewed Inspector stdio configuration
+Dry-run plan: server=resilient-stdio; transport=stdio
+2/6 Auditing resilient and intentionally vulnerable stdio servers
+Stdio resilient=true; vulnerable expected-pass=false
+3/6 Injecting a recoverable MCP tool fault and verifying bounded retry
+Recovered=true; passed=true
+5/6 Reusing an Inspector Streamable HTTP configuration with authentication
+Streamable HTTP passed=true; authenticated=true
+6/6 Writing source/config/scenario/fixture/test hashes
+MCP Inspector integration demo complete: runs/mcp-inspector-demo
+```
+
+![MCP Inspector integration demo](assets/mcp-inspector-demo.gif)
+
+Static fallback: [MCP Inspector integration demo PNG](assets/mcp-inspector-demo.png).
 
 ## Reproduce the assets
 
@@ -56,6 +83,8 @@ python -m pip install Pillow
 python scripts/generate-demo-assets.py
 ```
 
-The script runs `pnpm demo` itself, verifies the expected recovery and regression milestones, writes the concise transcript, renders `docs/assets/resilireplay-demo.gif`, and creates the 1280×640 social preview PNG plus its SVG source.
+The script runs both demos itself, verifies their recovery, transport, and regression milestones,
+writes path-free transcripts, renders both GIFs and the Inspector PNG fallback, and creates the
+1280×640 social preview PNG plus its SVG source.
 
 The generator deliberately omits absolute output paths from the visual transcript. The underlying run remains available under `runs/` for inspection.

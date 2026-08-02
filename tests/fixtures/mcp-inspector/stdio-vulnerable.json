@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "vulnerable-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["../../../examples/vulnerable-mcp-server/dist/index.js"]
+    }
+  }
+}

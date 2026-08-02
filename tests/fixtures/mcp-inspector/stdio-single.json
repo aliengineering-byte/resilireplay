@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "resilient-stdio": {
+      "command": "node",
+      "args": ["../../../examples/resilient-mcp-server/dist/index.js"],
+      "connectionTimeout": 5000,
+      "requestTimeout": 5000
+    }
+  }
+}

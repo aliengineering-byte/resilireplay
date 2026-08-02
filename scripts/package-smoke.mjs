@@ -24,7 +24,7 @@ for (const name of packages) {
 
 const tarballNames = (await readdir(artifacts)).filter((name) => name.endsWith(".tgz"));
 const tarballs = packages.map((packageName) => {
-  const prefix = packageName === "cli" ? "resilireplay-0.1.0" : `resilireplay-${packageName}-0.1.0`;
+  const prefix = packageName === "cli" ? "resilireplay-0.2.0" : `resilireplay-${packageName}-0.2.0`;
   const name = tarballNames.find((candidate) => candidate.startsWith(prefix));
   if (!name) throw new Error(`Packed tarball not found for ${packageName}`);
   return `file:${join(artifacts, name)}`;
@@ -78,7 +78,7 @@ const smoke = spawnSync(process.execPath, [cli, "--version"], {
   encoding: "utf8",
   windowsHide: true,
 });
-if (smoke.status !== 0 || smoke.stdout.trim() !== "0.1.0") {
+if (smoke.status !== 0 || smoke.stdout.trim() !== "0.2.0") {
   throw new Error(`Installed CLI smoke failed: ${smoke.stdout} ${smoke.stderr}`);
 }
 console.log(`Package installation smoke passed: ${smoke.stdout.trim()}`);

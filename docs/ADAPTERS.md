@@ -23,6 +23,6 @@ Emit the original causal order. Set `parentId` for structural ownership and `cau
 
 Never place authorization headers, cookies, credentials, or raw environment variables in payload or metadata. `createEvent` performs defense-in-depth redaction, but adapters should omit secrets at the source.
 
-For streaming, emit one `model_response` after deterministic aggregation in v0.1.0. Record provider usage metadata only when it exists; missing token data is reported as unavailable rather than estimated.
+For streaming, emit one `model_response` after deterministic aggregation in v0.2.0. Record provider usage metadata only when it exists; missing token data is reported as unavailable rather than estimated.
 
 The OpenAI-compatible example is a translation function and does not make a network call. Other providers should wrap the same model without changing core schemas.

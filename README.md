@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml)
 [![Secret scan](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml)
-[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.1.0)
+[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
 
 **ResiliReplay crash-tests AI agents and MCP servers, replays failures deterministically, and converts broken traces into regression tests.**
@@ -34,7 +34,10 @@ pnpm demo:mcp
 pnpm exec resilireplay test scenarios
 ```
 
-The MCP demo audits an intentionally vulnerable toy stdio server and a resilient one. The first has two expected safe-canary findings; the second has none. Open `runs/demo/recovered-report/report.html` in a browser to inspect the standalone recovery report.
+The MCP demo imports real Inspector-shaped configs, exercises resilient and intentionally vulnerable
+stdio servers plus authenticated Streamable HTTP, recovers one injected fault, detects one expected
+failure, and executes its generated regression. Open `runs/demo/recovered-report/report.html` in a
+browser to inspect the general recovery report.
 
 See the [demo guide and verified transcript](docs/DEMO.md) for expected output and asset reproduction.
 
@@ -50,6 +53,19 @@ pnpm exec resilireplay replay --trace runs/agent/trace.jsonl --report-dir runs/a
 Adapters for a real agent framework emit the same versioned `TraceEvent` objects. See the [adapter guide](docs/ADAPTERS.md); the OpenAI-compatible example is a translation fixture and does not claim to call a live provider.
 
 ## Practical MCP audit
+
+Already use MCP Inspector? Reuse the same reviewed `mcp.json` without rewriting its server command,
+argument array, environment declarations, URL, or headers:
+
+```console
+pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
+pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --output runs/mcp-inspector
+```
+
+MCP Inspector interactively tests and debugs servers. ResiliReplay introduces controlled failures,
+scores recovery, and creates executable regressions. The tools are complementary; compatibility with
+reviewed MCP Inspector exports does not imply endorsement or certification. See the
+[integration guide](docs/MCP_INSPECTOR.md) and [compatibility matrix](docs/MCP_INSPECTOR_COMPATIBILITY.md).
 
 Audit the bundled resilient server over stdio:
 
@@ -102,7 +118,7 @@ flowchart LR
 This excerpt is captured from the no-key demo:
 
 ```text
-ResiliReplay v0.1.0  PASS
+ResiliReplay v0.2.0  PASS
 Recovery score  100/100
 Completion      yes
 Recovery        safe
@@ -154,11 +170,11 @@ Read [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md) before ru
 
 ## Honest limitations
 
-- Streamable HTTP support has less integration coverage than stdio.
+- Inspector `protocolEra: "modern"`, interactive OAuth, and extended Inspector-only runtime settings are not yet supported and fail explicitly.
 - `record` is not an OS sandbox.
 - MCP tool calls may have server-side effects.
 - Causal minimization is strongest when adapters provide `parentId` and `causeId`.
-- Streaming provider output is aggregated into response events in v0.1.0.
+- Streaming provider output is aggregated into response events in v0.2.0.
 - Report hashes prove linkage and integrity, not authenticity; manifests are unsigned.
 - Packages are not published to npm.
 
@@ -175,11 +191,11 @@ pnpm quality
 Use the composite action:
 
 ```yaml
-- uses: aliengineering-byte/resilireplay@v0.1.0
+- uses: aliengineering-byte/resilireplay@v0.2.0
   with:
     scenarios: scenarios
 ```
 
-ResiliReplay is Apache-2.0 licensed. Contributions should be deterministic, bounded, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [launch reference](docs/LAUNCH.md), [release evidence](RELEASE_EVIDENCE.md), and the [v0.1.0 release](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.1.0).
+ResiliReplay is Apache-2.0 licensed. Contributions should be deterministic, bounded, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [launch reference](docs/LAUNCH.md), [release evidence](RELEASE_EVIDENCE.md), and the [v0.2.0 release](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0).
 
 Built and maintained by **Ali**.

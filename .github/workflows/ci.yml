@@ -27,6 +27,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - name: MCP Inspector config and real HTTP integration
+        run: pnpm exec vitest run tests/mcp-inspector.test.ts
       - run: pnpm package:smoke
       - run: pnpm secret:scan
       - run: pnpm hygiene:scan
@@ -34,7 +36,7 @@ jobs:
         run: pnpm demo
         env:
           RESILIREPLAY_NO_NETWORK: "1"
-      - name: MCP stdio demo
+      - name: MCP Inspector stdio and authenticated HTTP demo
         run: pnpm demo:mcp
       - uses: github/codeql-action/upload-sarif@v4
         if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
@@ -63,7 +65,7 @@ jobs:
       - run: pnpm exec resilireplay test scenarios
       - name: Windows path and quoting test
         if: runner.os == 'Windows'
-        run: pnpm exec vitest run tests/mcp.test.ts tests/cli.test.ts
+        run: pnpm exec vitest run tests/mcp.test.ts tests/mcp-inspector.test.ts tests/cli.test.ts
 
   package:
     runs-on: windows-latest

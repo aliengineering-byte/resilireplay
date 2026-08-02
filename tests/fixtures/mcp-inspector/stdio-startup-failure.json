@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "missing-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["missing-server.mjs"]
+    }
+  }
+}

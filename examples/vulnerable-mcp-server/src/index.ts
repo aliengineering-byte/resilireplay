@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const server = new McpServer({ name: "resilireplay-vulnerable-toy", version: "0.1.0" });
+const server = new McpServer({ name: "resilireplay-vulnerable-toy", version: "0.2.0" });
 
 server.registerTool(
   "reliability_probe",

@@ -18,6 +18,25 @@ describe("security boundaries", () => {
     expect(containsLikelySecret(value)).toBe(false);
   });
 
+  it("redacts encoded credentials and credential-shaped key suffixes", () => {
+    const encoded = Buffer.from(["fixture-user", "fixture-password"].join(":"), "utf8").toString(
+      "base64",
+    );
+    const urlEncodedModelKey = ["sk%2D", "abcdefghijklmnopqrstuvwxyz123456"].join("");
+    const value = sanitize({
+      SERVICE_API_KEY_BACKUP: "must-not-survive",
+      basic: `Basic ${encoded}`,
+      encoded: `base64:${encoded}`,
+      urlEncoded: urlEncodedModelKey,
+    });
+    const serialized = JSON.stringify(value);
+    expect(serialized).not.toContain("must-not-survive");
+    expect(serialized).not.toContain(encoded);
+    expect(serialized).not.toContain("abcdefghijklmnopqrstuvwxyz123456");
+    expect(serialized.match(/\[REDACTED\]/gu)?.length).toBeGreaterThanOrEqual(4);
+    expect(containsLikelySecret(value)).toBe(false);
+  });
+
   it("rejects output path traversal", () => {
     const base = resolve("safe-output");
     expect(() => safeOutputPath(base, "../escape.json")).toThrow("escapes");

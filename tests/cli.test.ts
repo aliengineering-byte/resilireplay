@@ -15,7 +15,7 @@ describe("CLI end to end and subprocess safety", () => {
       windowsHide: true,
     });
     expect(version.status).toBe(0);
-    expect(version.stdout.trim()).toBe("0.1.0");
+    expect(version.stdout.trim()).toBe("0.2.0");
     const faults = spawnSync(process.execPath, [cli, "faults"], {
       encoding: "utf8",
       windowsHide: true,
