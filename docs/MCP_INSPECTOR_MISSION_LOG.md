@@ -94,3 +94,42 @@ tests/cli.test.ts` passed 12/12 tests across 3/3 files. Measured wall time: 17.3
   byte sizes.
 - Peak memory was not available from existing repository instrumentation. No unsupported numerical
   claim is made.
+
+## 2026-08-02 - public release and clean-room verification
+
+- Feature commit: `396f24ae86e766193835b8a7861a8b7c7d0c8c25`, authored as Ali on
+  `codex/mcp-inspector-integration`.
+- Integration PR: https://github.com/aliengineering-byte/resilireplay/pull/11. All required checks
+  passed before merge: aggregate quality/demo, Ubuntu and Windows with Node 20 and 22, Windows packed
+  installation, repository check, and secret scans.
+- Merge commit: `e6710ce86b6f21a879c0303b620d5207eacf61cf`, recorded by GitHub with public
+  author name Ali.
+- Post-merge CI passed:
+  https://github.com/aliengineering-byte/resilireplay/actions/runs/30757707076.
+- Annotated tag `v0.2.0` was created only after merge. Tag object
+  `3411eb67d1aff991bec7ea33fb210515ef4281dc` resolves to the merge commit above. It was pushed once
+  and was not moved.
+- Tag verification passed frozen install, `pnpm quality`, both demos, and evidence upload:
+  https://github.com/aliengineering-byte/resilireplay/actions/runs/30757721587.
+- Public non-draft, non-prerelease release:
+  https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0.
+- A credential-disabled shallow public clone selected exact tag `v0.2.0` and commit
+  `e6710ce86b6f21a879c0303b620d5207eacf61cf`. Frozen install, full quality gate, 48/48 tests,
+  five-package v0.2.0 clean installation, secret/hygiene scans, no-key demo, and Inspector demo all
+  passed in 106.6 seconds.
+- The disposable fresh-clone directory existed only below the ignored repository `.artifacts`
+  directory. No file outside the project repository was modified.
+
+## 2026-08-02 - upstream connection package
+
+- After the release became public, searched upstream open issues, all pull requests, and indexed
+  Discussions for `mcp.json`, config export, configuration schema, third-party integration,
+  resilience, chaos, and ResiliReplay.
+- No direct duplicate was found. Related but non-duplicative work is Inspector CLI v2 (#1432), rich
+  server configuration (#1857), the server interface diff tool (#1034), client-config import PR
+  #1511, and the MCP standard client-configuration Discussion #2547.
+- Prepared `docs/upstream/MCP_INSPECTOR_PROPOSAL.md` with problem, complementary-tool boundary, exact
+  commands, public demo/release links, compatibility and security scope, CI/fresh-clone evidence,
+  duplicate-search record, suggested title, editable message, and an explicit statement that no
+  upstream code change is required.
+- Nothing was posted to MCP Inspector issues, Discussions, or pull requests.
