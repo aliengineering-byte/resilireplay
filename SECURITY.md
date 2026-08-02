@@ -2,7 +2,8 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged release. v0.1.0 is the initial supported line.
+Security fixes are provided for the latest tagged release. v0.2.0 is the current supported line;
+v0.1.0 is the initial release line.
 
 ## Reporting a vulnerability
 
@@ -16,9 +17,16 @@ ResiliReplay is defensive testing software. Run commands you trust and audit onl
 
 `record` executes exactly the user-supplied executable and arguments without a shell. That is intentional functionality, not a sandbox. Treat untrusted commands as untrusted code and isolate them outside ResiliReplay.
 
+The MCP Inspector importer also executes the reviewed `command` plus exact `args` without a shell.
+It reads the configuration file but never modifies it. Dry-run is the review boundary: it performs no
+server call and prints no environment or header value. Non-loopback URLs still require
+`--allow-remote`.
+
 ## Built-in boundaries
 
 - Secret-shaped strings and sensitive header/key names are redacted before storage.
+- Imported environment and header values are never included in reports, traces, manifests, or
+  generated regressions; Inspector proxy tokens and authentication-disable settings are rejected.
 - Filesystem faults use temporary directories created and owned by the test process.
 - Output paths must remain inside the selected output root.
 - Subprocesses and MCP calls have deadlines and cleanup.

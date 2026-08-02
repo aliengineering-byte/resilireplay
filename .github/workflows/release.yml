@@ -25,8 +25,8 @@ jobs:
       - run: pnpm demo:mcp
       - uses: actions/upload-artifact@v4
         with:
-          name: resilireplay-v0.1-evidence
+          name: resilireplay-v0.2-evidence
           path: |
             runs/demo
-            runs/mcp-demo
+            runs/mcp-inspector-demo
           retention-days: 30

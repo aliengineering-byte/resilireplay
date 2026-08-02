@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "resilient-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["../../../examples/resilient-mcp-server/dist/index.js"]
+    },
+    "vulnerable-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["../../../examples/vulnerable-mcp-server/dist/index.js"]
+    }
+  }
+}

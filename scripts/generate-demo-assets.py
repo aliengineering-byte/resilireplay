@@ -35,12 +35,12 @@ SANS_BOLD = font(("DejaVuSans-Bold.ttf", "arialbd.ttf", "Arial Bold.ttf"), 54)
 SANS = font(("DejaVuSans.ttf", "arial.ttf", "Arial.ttf"), 28)
 
 
-def run_demo() -> list[str]:
+def run_script(script: str) -> list[str]:
     pnpm = shutil.which("pnpm") or shutil.which("pnpm.cmd")
     if not pnpm:
         raise RuntimeError("pnpm was not found; install dependencies and place pnpm on PATH")
     result = subprocess.run(
-        [pnpm, "demo"],
+        [pnpm, script],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -51,7 +51,7 @@ def run_demo() -> list[str]:
     )
     output = ANSI.sub("", f"{result.stdout}\n{result.stderr}")
     if result.returncode != 0:
-        raise RuntimeError(f"pnpm demo failed with exit {result.returncode}\n{output}")
+        raise RuntimeError(f"pnpm {script} failed with exit {result.returncode}\n{output}")
     return [line.rstrip() for line in output.splitlines()]
 
 
@@ -78,9 +78,9 @@ def select_transcript(lines: list[str]) -> list[str]:
     selected = [line for line in lines if line.startswith(prefixes)]
     required = (
         "Recorded 8 sanitized events.",
-        "ResiliReplay v0.1.0  PASS",
+        "ResiliReplay v0.2.0  PASS",
         "Recovery score  100/100",
-        "ResiliReplay v0.1.0  FAIL",
+        "ResiliReplay v0.2.0  FAIL",
         "Recovery score  67/100",
         "5/5 Demo complete",
     )
@@ -155,6 +155,125 @@ def write_demo_assets(lines: list[str]) -> None:
         optimize=True,
         disposal=2,
     )
+
+
+def select_mcp_transcript(lines: list[str]) -> list[str]:
+    prefixes = (
+        "1/6 ",
+        "Dry-run plan:",
+        "2/6 ",
+        "Stdio resilient=",
+        "3/6 ",
+        "Recovered=",
+        "4/6 ",
+        "✔ reproduces ",
+        "ℹ tests ",
+        "ℹ pass ",
+        "ℹ fail ",
+        "5/6 ",
+        "Streamable HTTP ",
+        "6/6 ",
+        "MCP Inspector integration demo complete:",
+    )
+    selected = [
+        line.replace("✔", "PASS").replace("ℹ", "INFO")
+        for line in lines
+        if line.startswith(prefixes)
+    ]
+    required = (
+        "Dry-run plan: server=resilient-stdio; transport=stdio",
+        "Stdio resilient=true; vulnerable expected-pass=false",
+        "Recovered=true; passed=true",
+        "Streamable HTTP passed=true; authenticated=true",
+        "MCP Inspector integration demo complete: runs/mcp-inspector-demo",
+    )
+    missing = [entry for entry in required if entry not in selected]
+    if not any(line.endswith("pass 1") for line in selected):
+        missing.append("generated MCP regression pass count")
+    if not any(line.endswith("fail 0") for line in selected):
+        missing.append("generated MCP regression failure count")
+    if missing:
+        raise RuntimeError(
+            f"MCP demo output is missing verified milestones: {', '.join(missing)}"
+        )
+    return selected
+
+
+def mcp_color(line: str) -> str:
+    if "passed=true" in line or "Recovered=true" in line or line.endswith("fail 0"):
+        return "#65d89a"
+    if "expected-pass=false" in line:
+        return "#ffb86b"
+    if re.match(r"^[1-6]/6 ", line):
+        return "#79c0ff"
+    if line.startswith("Dry-run plan:"):
+        return "#d2a8ff"
+    return "#d8dee9"
+
+
+def render_mcp_terminal(lines: list[str], step: int) -> Image.Image:
+    image = Image.new("RGB", (WIDTH, HEIGHT), "#07111f")
+    draw = ImageDraw.Draw(image)
+    draw.rounded_rectangle(
+        (20, 20, WIDTH - 20, HEIGHT - 20),
+        radius=18,
+        fill="#0d1726",
+        outline="#26364a",
+        width=2,
+    )
+    draw.rounded_rectangle((20, 20, WIDTH - 20, 72), radius=18, fill="#182538")
+    draw.rectangle((20, 52, WIDTH - 20, 72), fill="#182538")
+    for x, color in ((48, "#ff5f57"), (76, "#febc2e"), (104, "#28c840")):
+        draw.ellipse((x - 7, 39 - 7, x + 7, 39 + 7), fill=color)
+    draw.text((132, 31), "ResiliReplay + MCP Inspector", font=MONO_BOLD, fill="#e6edf3")
+    draw.text((48, 96), "$ pnpm demo:mcp", font=MONO_BOLD, fill="#65d89a")
+    draw.rounded_rectangle((820, 92, 944, 128), radius=18, fill="#17385d")
+    draw.text((841, 98), f"STEP {step}/6", font=MONO_BOLD, fill="#79c0ff")
+    y = 148
+    line_height = 26 if len(lines) > 12 else 30
+    for line in lines:
+        draw.text((48, y), line, font=MONO_BOLD, fill=mcp_color(line))
+        y += line_height
+    draw.text(
+        (48, HEIGHT - 56),
+        "Inspector config -> resilience evidence -> regression",
+        font=MONO,
+        fill="#8b9bb4",
+    )
+    return image
+
+
+def mcp_transcript_frames(lines: list[str]) -> list[list[str]]:
+    boundaries = [
+        next(i for i, line in enumerate(lines) if line.startswith(f"{step}/6 "))
+        for step in range(2, 7)
+    ] + [len(lines)]
+    start = 0
+    frames = []
+    for end in boundaries:
+        frames.append(lines[start:end])
+        start = end
+    return frames
+
+
+def write_mcp_assets(lines: list[str]) -> None:
+    (ASSETS / "mcp-inspector-demo-transcript.txt").write_text(
+        "$ pnpm demo:mcp\n" + "\n".join(lines) + "\n", encoding="utf-8"
+    )
+    frames = [
+        render_mcp_terminal(segment, index + 1)
+        for index, segment in enumerate(mcp_transcript_frames(lines))
+    ]
+    frames[0].save(
+        ASSETS / "mcp-inspector-demo.gif",
+        save_all=True,
+        append_images=frames[1:],
+        duration=[1800, 2200, 2200, 2600, 2300, 2200],
+        loop=0,
+        optimize=True,
+        disposal=2,
+    )
+    render_mcp_terminal(lines, 6).save(ASSETS / "mcp-inspector-demo.png", optimize=True)
 
 
 def social_svg() -> str:
@@ -233,10 +352,14 @@ def write_social_preview() -> None:
 
 
 def main() -> int:
-    lines = select_transcript(run_demo())
+    lines = select_transcript(run_script("demo"))
     write_demo_assets(lines)
+    mcp_lines = select_mcp_transcript(run_script("demo:mcp"))
+    write_mcp_assets(mcp_lines)
     write_social_preview()
-    print("Generated docs/assets/resilireplay-demo.gif and social preview assets from a verified pnpm demo run.")
+    print(
+        "Generated deterministic and MCP Inspector demo assets from verified local demo runs."
+    )
     return 0
 
 

@@ -19,6 +19,7 @@ export interface RegressionArtifacts {
   manifestPath: string;
   sourceTraceHash: string;
   fixtureHash: string;
+  scenarioHash: string;
   testHash: string;
   firstCriticalStep: string;
   minimizedEventCount: number;
@@ -156,10 +157,11 @@ export async function compileRegression(
     critical.stepId,
   );
   const testHash = sha256(testSource);
+  const scenarioHash = sha256(scenario);
   const manifest = {
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    productVersion: "0.1.0",
+    productVersion: "0.2.0",
     sourceTraceSha256: sourceTraceHash,
     fixtureSha256: fixtureHash,
     testSha256: testHash,
@@ -167,7 +169,7 @@ export async function compileRegression(
     sourceEventCount: source.length,
     minimizedEventCount: sliced.length,
     causalStepIds: sliced.map((event) => event.stepId),
-    scenarioSha256: sha256(scenario),
+    scenarioSha256: scenarioHash,
   };
 
   await Promise.all([
@@ -184,6 +186,7 @@ export async function compileRegression(
     manifestPath,
     sourceTraceHash,
     fixtureHash,
+    scenarioHash,
     testHash,
     firstCriticalStep: critical.stepId,
     minimizedEventCount: sliced.length,

@@ -1,4 +1,4 @@
-import { access, readdir, readFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { spawn } from "node:child_process";
 import { Command } from "commander";
@@ -10,9 +10,18 @@ import {
   calculateMetrics,
   injectFaults,
   safeOutputPath,
+  stableStringify,
   type FaultScenario,
 } from "@resilireplay/core";
-import { auditMcp, MCP_FAULT_TYPES, writeMcpCertification } from "@resilireplay/mcp-chaos";
+import {
+  auditMcp,
+  loadInspectorConfig,
+  MCP_EXIT_CODES,
+  MCP_FAULT_TYPES,
+  McpInspectorConfigError,
+  writeMcpCertification,
+  type ImportedInspectorServer,
+} from "@resilireplay/mcp-chaos";
 import { terminalReport, writeReportBundle } from "@resilireplay/reporters";
 import {
   compileRegression,
@@ -103,7 +112,7 @@ export function createProgram(): Command {
     .description(
       "Crash-test AI agents and MCP servers, replay failures, and generate regression tests.",
     )
-    .version("0.1.0");
+    .version("0.2.0");
 
   program
     .command("record")
@@ -205,39 +214,126 @@ export function createProgram(): Command {
     .description("Controlled reliability testing for authorized MCP servers.");
   mcp
     .command("audit")
-    .description("Audit an explicitly supplied stdio or Streamable HTTP MCP server.")
+    .description("Audit a reviewed MCP Inspector config, stdio command, or HTTP endpoint.")
+    .option("--inspector-config <path>", "Reviewed MCP Inspector mcp.json file")
+    .option("--server <name>", "Named mcpServers entry (required when the file has multiple)")
+    .option("--dry-run", "Print a value-free execution plan without contacting the server")
     .option("--command <command>", "Authorized stdio server command")
     .option("--url <url>", "Authorized Streamable HTTP endpoint")
     .option("--allow-remote", "Confirm the HTTP endpoint is user-owned")
     .option("--call-tools", "Explicitly invoke tools with generated safe arguments")
     .option("--fault <name>", `Controlled MCP mutation: ${MCP_FAULT_TYPES.join(", ")}`)
+    .option("--recovery <mode>", "Fault recovery evaluation: none or retry", "none")
     .option("--seed <number>", "Mutation seed", "42")
-    .option("--timeout <ms>", "Connection and call timeout", "5000")
+    .option("--timeout <ms>", "Override connection and request timeouts")
     .option("-o, --output <directory>", "Certification output", "runs/mcp-latest")
     .action(
       async (options: {
+        inspectorConfig?: string;
+        server?: string;
+        dryRun?: boolean;
         command?: string;
         url?: string;
         allowRemote?: boolean;
         callTools?: boolean;
         fault?: (typeof MCP_FAULT_TYPES)[number];
+        recovery: string;
         seed: string;
-        timeout: string;
+        timeout?: string;
         output: string;
       }) => {
         if (options.fault && !MCP_FAULT_TYPES.includes(options.fault)) {
           throw new Error(`Unknown MCP fault: ${options.fault}`);
         }
+        if (options.recovery !== "none" && options.recovery !== "retry") {
+          throw new McpInspectorConfigError(
+            "--recovery must be either none or retry",
+            "RR_MCP_RECOVERY_MODE",
+          );
+        }
+        const targetCount = [options.inspectorConfig, options.command, options.url].filter(
+          Boolean,
+        ).length;
+        if (targetCount !== 1) {
+          throw new McpInspectorConfigError(
+            "Supply exactly one MCP target: --inspector-config, --command, or --url",
+            "RR_MCP_TARGET_SELECTION",
+          );
+        }
+        if (options.server && !options.inspectorConfig) {
+          throw new McpInspectorConfigError(
+            "--server is valid only with --inspector-config",
+            "RR_MCP_SERVER_WITHOUT_CONFIG",
+          );
+        }
+        if (options.dryRun && !options.inspectorConfig) {
+          throw new McpInspectorConfigError(
+            "--dry-run requires --inspector-config",
+            "RR_MCP_DRY_RUN_TARGET",
+          );
+        }
+        const timeout = options.timeout === undefined ? undefined : Number(options.timeout);
+        if (timeout !== undefined && (!Number.isSafeInteger(timeout) || timeout <= 0)) {
+          throw new McpInspectorConfigError(
+            "--timeout must be a positive integer number of milliseconds",
+            "RR_MCP_TIMEOUT",
+          );
+        }
+
+        let imported: ImportedInspectorServer | undefined;
+        if (options.inspectorConfig) {
+          imported = await loadInspectorConfig(options.inspectorConfig, {
+            ...(options.server ? { serverName: options.server } : {}),
+            allowRemote: options.allowRemote ?? false,
+            allowedRoot: process.cwd(),
+            environment: process.env,
+          });
+          if (options.dryRun) {
+            console.log(stableStringify(imported.plan));
+            return;
+          }
+        }
+
         const result = await auditMcp({
-          ...(options.command ? { command: options.command } : {}),
-          ...(options.url ? { url: options.url } : {}),
+          ...(imported?.transport === "stdio"
+            ? {
+                stdio: {
+                  command: imported.command,
+                  args: imported.args,
+                  env: imported.env,
+                  ...(imported.cwd ? { cwd: imported.cwd } : {}),
+                },
+              }
+            : {}),
+          ...(imported && imported.transport !== "stdio"
+            ? {
+                http: {
+                  url: imported.url,
+                  headers: imported.headers,
+                  transport: imported.transport,
+                },
+              }
+            : {}),
+          ...(!imported && options.command ? { command: options.command } : {}),
+          ...(!imported && options.url ? { url: options.url } : {}),
           allowRemote: options.allowRemote ?? false,
           callTools: options.callTools ?? false,
           ...(options.fault ? { fault: options.fault } : {}),
           seed: Number(options.seed),
-          timeoutMs: Number(options.timeout),
+          recoveryMode: options.recovery,
+          ...(timeout !== undefined ? { timeoutMs: timeout } : {}),
+          ...(imported
+            ? {
+                serverName: imported.serverName,
+                sourceConfigSha256: imported.configSha256,
+                connectionTimeoutMs: imported.connectionTimeoutMs,
+                requestTimeoutMs: imported.requestTimeoutMs,
+              }
+            : {}),
         });
         const output = boundedPath(options.output);
+        await mkdir(output, { recursive: true });
+        await writeTrace(join(output, "trace.jsonl"), result.events);
         await writeMcpCertification(result, output);
         const report = await writeReportBundle(result.events, output);
         console.log(report.terminal);
@@ -245,7 +341,11 @@ export function createProgram(): Command {
           console.log(`${finding.severity.toUpperCase()} ${finding.id} ${finding.title}`);
         }
         console.log(`MCP certification ${output}`);
-        if (!result.passed) process.exitCode = 1;
+        if (!result.passed) {
+          process.exitCode = result.secretOutputDetected
+            ? MCP_EXIT_CODES.SECRET_OUTPUT
+            : MCP_EXIT_CODES.FINDINGS;
+        }
       },
     );
 

@@ -56,6 +56,12 @@ importers:
 
   examples/deterministic-agent: {}
 
+  examples/mcp-http-fixture-server:
+    devDependencies:
+      '@types/node':
+        specifier: 20.19.9
+        version: 20.19.9
+
   examples/multi-agent-handoff: {}
 
   examples/openai-compatible-agent: {}

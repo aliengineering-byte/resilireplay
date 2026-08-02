@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "malformed-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["malformed-stdio.mjs"]
+    }
+  }
+}
