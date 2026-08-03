@@ -1,122 +1,124 @@
-# Prepared MCP Inspector ecosystem-integration proposal
+# Prepared MCP Inspector feature request
 
-Status: prepared for human review; not posted upstream.
+Status: prepared for upstream submission after a fresh duplicate search.
 
-## Suggested upstream title
+## Suggested title
 
-Ecosystem integration: reuse Inspector `mcp.json` configs for deterministic resilience testing
+Document read-only `mcp.json` interoperability for external reliability tooling
 
-## Concise problem
+## Which client does this request relate to?
 
-MCP Inspector gives developers an excellent interactive view of server behavior and exports reusable
-server configurations. Teams that want to test timeout, malformed-result, tool-error, and unsafe-
-instruction recovery currently have to translate those connection details into a separate harness.
-That translation can alter argument boundaries, paths, headers, or transport settings and makes the
-resilience evidence harder to relate to the configuration already reviewed in Inspector.
+All / shared configuration documentation.
 
-## Why the tools are complementary
+## Problem
 
-Inspector interactively connects, discovers, calls, and debugs. ResiliReplay reads the same reviewed
-configuration, introduces controlled failures, scores recovery, persists sanitized evidence, and
-turns a failed trace into an executable regression. It does not replace Inspector's UI, protocol
-exploration, OAuth experience, or server-debugging workflow.
+Inspector 2.0.0 documents a familiar top-level `mcpServers` configuration shape plus
+Inspector-specific settings. External reliability tools can consume that connection information,
+but users currently have to discover the interoperability boundary independently or copy the same
+configuration into another format. Copying can change argument boundaries, paths, headers, or
+transport selection, and can expose secrets if a tool treats the file as ordinary report data.
 
-## Exact integration command
+This was validated downstream against the exact published Inspector 2.0.0 tag at commit
+`7aebf168e6277ea26b1f04a7987a1cd11328ec83`. The documented base shape is also present on
+`v2/main` at `07a2b4bdfda06087cbdf8863d990a0c32f8009c3` as of 2026-08-03. The validation does not
+claim that Inspector owns or supports third-party importers.
 
-From a ResiliReplay source checkout after the documented frozen install and build:
+## Proposed solution
+
+Add a short, implementation-neutral note to `docs/mcp-server-configuration.md` stating that
+read-only use by external tools is a valid interoperability use case when those tools:
+
+- preserve stdio argument boundaries and do not rewrite the configuration;
+- handle or explicitly reject unknown Inspector-specific settings;
+- avoid copying credential values into logs, evidence, or generated files; and
+- document their own compatibility scope without implying Inspector or MCP endorsement.
+
+No Inspector code, schema, dependency, or UI change is requested.
+
+Possible neutral wording:
+
+> External tools may read an Inspector `mcp.json` to reuse reviewed server connection details. Such
+> tools should treat the file as read-only, preserve command argument boundaries, avoid exposing
+> environment or header values, and explicitly document which Inspector-specific settings they
+> support. Compatibility with an external tool does not imply endorsement by Inspector or the MCP
+> project.
+
+## Concrete downstream evidence
+
+The independent ResiliReplay project has a published read-only importer. A value-free dry run makes
+no server connection:
 
 ```console
-pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
-pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --fault mcp-tool-error --recovery retry --output runs/mcp-inspector
+npx --yes resilireplay@0.2.1 mcp audit --inspector-config ./mcp.json --server my-server --dry-run
 ```
 
-The first command prints a sanitized, value-free execution plan and makes no server call. The second
-performs the authorized audit and writes resilience evidence.
+After reviewing that plan, a user can explicitly authorize a controlled audit:
 
-## Demo and release
+```console
+npx --yes resilireplay@0.2.1 mcp audit --inspector-config ./mcp.json --server my-server --fault mcp-tool-error --recovery retry --output runs/mcp-inspector
+```
 
-- Release: https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0
-- Animated demo:
-  https://github.com/aliengineering-byte/resilireplay/blob/v0.2.0/docs/assets/mcp-inspector-demo.gif
-- Static fallback:
-  https://github.com/aliengineering-byte/resilireplay/blob/v0.2.0/docs/assets/mcp-inspector-demo.png
-- Integration guide:
-  https://github.com/aliengineering-byte/resilireplay/blob/v0.2.0/docs/MCP_INSPECTOR.md
+Public references:
 
-## Compatibility scope
+- Package: https://www.npmjs.com/package/resilireplay
+- Release: https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.1
+- Integration guide: https://github.com/aliengineering-byte/resilireplay/blob/v0.2.1/docs/MCP_INSPECTOR.md
+- Release verification: https://github.com/aliengineering-byte/resilireplay/actions/runs/30830557559
 
-The released importer is intentionally frozen to the reviewed MCP Inspector 2.0.0 tag at commit
-`7aebf168e6277ea26b1f04a7987a1cd11328ec83`.
+The published `0.2.1` package was also installed from the public registry without credentials and
+used against Inspector-shaped resilient and intentionally vulnerable fixtures from the reviewed
+configuration format. The resilient audit passed; the intentionally vulnerable audit produced the
+expected prompt-injection and canary-exposure findings; and a seeded MCP tool error recovered by
+retry. These are downstream results, not an Inspector conformance claim.
 
-- Complete files use a top-level `mcpServers` object.
-- One entry auto-selects; multiple entries require `--server`.
-- Missing/`stdio`, `http`/`streamable-http`, and deprecated `sse` transports are recognized.
-- `command`, boundary-preserving `args`, `env`, `cwd`, `url`, `headers`,
-  `connectionTimeout`, and `requestTimeout` have documented interpretations.
-- Interactive OAuth, `protocolEra: "modern"`, and Inspector-only extended runtime settings fail
-  explicitly. No compatibility claim is made for a newer Inspector release until it is reviewed.
+## Compatibility and security boundaries
 
-Compatibility means the documented export can be read. It does not imply partnership, endorsement,
-upstream ownership, or certification by the MCP project.
+The demonstrated importer recognizes the documented top-level `mcpServers` object and documented
+stdio, HTTP/Streamable HTTP, and deprecated SSE connection fields. It explicitly rejects unsupported
+Inspector-only runtime settings rather than silently changing their meaning.
 
-## Security boundaries
+The downstream safety boundary is intentionally narrow:
 
-- Configuration files are read-only and are never seeded, migrated, or rewritten.
-- Stdio execution does not use a shell and preserves every argument boundary.
-- Relative paths and realpaths must remain inside the allowed repository root.
-- Environment and header values stay in memory and appear only as `[REDACTED]` in plans and evidence.
-- URL credentials, header injection, duplicate keys, ambiguous transports, Inspector authentication
-  bypass, and Inspector proxy session-token declarations fail closed.
-- Non-loopback HTTP targets require explicit `--allow-remote` authorization.
-- Only the reserved `reliability_probe` tool is called by default; broader calls require explicit
-  review and `--call-tools`.
+- configuration files are never migrated, seeded, or rewritten;
+- stdio commands are launched without a shell and keep argument boundaries intact;
+- environment and header values are redacted from plans and evidence;
+- non-loopback HTTP targets require explicit authorization;
+- tool calls can have side effects and therefore require review; and
+- compatibility is pinned to a reviewed Inspector release until revalidated.
 
-## Test evidence
+Fault injection, recovery scoring, evidence storage, regression generation, and importer maintenance
+remain downstream responsibilities.
 
-- Integration PR: https://github.com/aliengineering-byte/resilireplay/pull/11
-- PR CI: https://github.com/aliengineering-byte/resilireplay/actions/runs/30757640713
-- Post-merge CI: https://github.com/aliengineering-byte/resilireplay/actions/runs/30757707076
-- Tag verification: https://github.com/aliengineering-byte/resilireplay/actions/runs/30757721587
+## Alternatives considered
 
-The release gate passed 48/48 tests on the repository suite. Dedicated coverage includes real stdio,
-authenticated Streamable HTTP on an ephemeral loopback listener, controlled failure, malformed
-responses, timeouts, spaces in paths, Windows/POSIX classification, stable exit codes, secret-output
-redaction, cleanup, recovery scoring, five evidence hashes, and execution of the generated
-regression. A credential-disabled public clone of `v0.2.0` independently passed frozen install, the
-full quality gate, packed-install smoke, scans, and both demos.
+1. Keep this guidance only in each downstream tool. This requires every user and tool author to
+   rediscover the same safety boundary.
+2. Wait for a canonical, versioned MCP client-configuration schema or export format. That would be a
+   larger cross-project effort and is not required for this documentation-only clarification.
 
-## Duplicate search performed 2026-08-02
+## Duplicate search performed 2026-08-03
 
-Searches covered open issues, all pull requests, and indexed Discussions using `mcp.json`, config
-export, configuration schema, third-party integration, resilience, chaos, and ResiliReplay terms. No
-direct proposal for documenting this resilience-tool integration was found. Related upstream work:
+Open and closed issues and pull requests were searched for `ResiliReplay`, resilience/fault/chaos
+testing, deterministic regression, configuration export/import, external tooling, and plugins. No
+direct request for this documentation clarification was found. The closest related work is:
 
-- [#1432, Inspector CLI v2](https://github.com/modelcontextprotocol/inspector/issues/1432) expands
-  Inspector's own automation surface and remains complementary.
-- [#1857, Rich server configuration experience](https://github.com/modelcontextprotocol/inspector/issues/1857)
-  concerns Inspector configuration UX.
-- [#1034, MCP Server Interface Diff Tool](https://github.com/modelcontextprotocol/inspector/issues/1034)
-  concerns interface change comparison, not runtime fault recovery.
-- [PR #1511, import client configs and registry server.json](https://github.com/modelcontextprotocol/inspector/pull/1511)
-  broadens Inspector input compatibility.
-- [MCP Discussion #2547](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2547)
-  discusses a future standard client configuration and secret handling; ResiliReplay's released
-  compatibility remains narrowly tied to the reviewed Inspector export.
+- [#1432, Inspector CLI v2](https://github.com/modelcontextprotocol/inspector/issues/1432), which
+  concerns Inspector's own automation surface;
+- [#1857, Rich server configuration experience](https://github.com/modelcontextprotocol/inspector/issues/1857),
+  which concerns Inspector configuration UX;
+- [#1346, Export current server list as a JSON download](https://github.com/modelcontextprotocol/inspector/issues/1346)
+  and its implementation [PR #1351](https://github.com/modelcontextprotocol/inspector/pull/1351),
+  which concern Inspector-produced configuration downloads;
+- [#1034, MCP Server Interface Diff Tool](https://github.com/modelcontextprotocol/inspector/issues/1034),
+  which concerns interface comparison; and
+- [PR #1511, import client configs and registry `server.json`](https://github.com/modelcontextprotocol/inspector/pull/1511),
+  which broadened Inspector's accepted input formats.
 
-If this message is posted later, re-run the duplicate search immediately beforehand and link or join
-any newer canonical thread.
+These are related but do not cover read-only external reliability-tool interoperability or its
+security boundary. Re-run this search immediately before submission and join a newer canonical issue
+if one appears.
 
-## Short human-editable message
+## Maintainer question
 
-> MCP Inspector's exported `mcp.json` is now directly reusable by ResiliReplay v0.2.0 for authorized,
-> deterministic resilience audits. Inspector remains the interactive debugging experience;
-> ResiliReplay adds controlled failure, recovery scoring, sanitized evidence, and executable
-> regression generation. Would maintainers be open to a short ecosystem/docs mention of this
-> complementary workflow? The integration is read-only, has real stdio and authenticated Streamable
-> HTTP coverage, and does not require any Inspector code or schema change.
-
-## Upstream change requirement
-
-No upstream code change is required. At most, a maintainer-approved Discussion or documentation
-reference could make the optional ecosystem workflow discoverable. This file is preparation only and
-must not be posted without separate user authorization.
+Would maintainers accept this small neutral documentation note, or do you prefer compatibility
+guidance for external tooling to remain entirely downstream?
