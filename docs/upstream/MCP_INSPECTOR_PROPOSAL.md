@@ -1,6 +1,6 @@
 # Prepared MCP Inspector feature request
 
-Status: prepared for upstream submission after a fresh duplicate search.
+Status: published upstream as [MCP Inspector issue #1912](https://github.com/modelcontextprotocol/inspector/issues/1912).
 
 ## Suggested title
 
