@@ -1,13 +1,13 @@
 {
   "name": "resilireplay-monorepo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Crash-test AI agents and MCP servers, replay failures, and turn broken traces into deterministic regression tests.",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.14.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "pnpm -r --sort build",
@@ -36,6 +36,7 @@
     "@typescript-eslint/parser": "8.38.0",
     "@vitest/coverage-v8": "3.2.4",
     "eslint": "9.32.0",
+    "esbuild": "0.28.1",
     "globals": "16.3.0",
     "prettier": "3.6.2",
     "resilireplay": "workspace:*",

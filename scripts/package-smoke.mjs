@@ -1,46 +1,60 @@
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { access, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve } from "node:path";
 
 const root = resolve(".");
 const artifacts = join(root, ".artifacts", "package-smoke");
-const pnpmEntry = process.env.npm_execpath;
-if (!pnpmEntry) throw new Error("pnpm executable entrypoint is unavailable");
-await rm(artifacts, { recursive: true, force: true });
-await mkdir(artifacts, { recursive: true });
+const packageDirectory = join(root, "packages", "cli");
+const project = join(artifacts, "installed");
+const npmCandidates = [
+  join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js"),
+  resolve(dirname(process.execPath), "..", "lib", "node_modules", "npm", "bin", "npm-cli.js"),
+];
+let npmCli;
+for (const candidate of npmCandidates) {
+  try {
+    await access(candidate);
+    npmCli = candidate;
+    break;
+  } catch {
+    // Try the next official Node distribution layout.
+  }
+}
+if (!npmCli) throw new Error("npm CLI was not found beside the active Node.js runtime");
 
-const packages = ["core", "trace", "reporters", "mcp-chaos", "cli"];
-for (const name of packages) {
-  const result = spawnSync(process.execPath, [pnpmEntry, "pack", "--pack-destination", artifacts], {
-    cwd: join(root, "packages", name),
+await rm(artifacts, { recursive: true, force: true });
+await mkdir(project, { recursive: true });
+
+function runNpm(arguments_, cwd) {
+  const cleanEnvironment = Object.fromEntries(
+    Object.entries(process.env).filter(([key]) => !key.toLowerCase().startsWith("npm_config_")),
+  );
+  const result = spawnSync(process.execPath, [npmCli, ...arguments_], {
+    cwd,
     stdio: "inherit",
     windowsHide: true,
+    env: {
+      ...cleanEnvironment,
+      npm_config_cache: join(artifacts, "npm-cache"),
+      npm_config_audit: "false",
+      npm_config_fund: "false",
+    },
   });
-  if (result.status !== 0)
+  if (result.status !== 0) {
     throw new Error(
-      `pnpm pack failed for ${name}: ${result.error?.message ?? `exit ${result.status}`}`,
+      `npm ${arguments_.join(" ")} failed: ${result.error?.message ?? `exit ${result.status}`}`,
     );
+  }
 }
 
-const tarballNames = (await readdir(artifacts)).filter((name) => name.endsWith(".tgz"));
-const tarballs = packages.map((packageName) => {
-  const prefix = packageName === "cli" ? "resilireplay-0.2.0" : `resilireplay-${packageName}-0.2.0`;
-  const name = tarballNames.find((candidate) => candidate.startsWith(prefix));
-  if (!name) throw new Error(`Packed tarball not found for ${packageName}`);
-  return `file:${join(artifacts, name)}`;
-});
-const project = join(artifacts, "installed");
-await mkdir(project, { recursive: true });
-const packageNames = [
-  "@resilireplay/core",
-  "@resilireplay/trace",
-  "@resilireplay/reporters",
-  "@resilireplay/mcp-chaos",
-  "resilireplay",
-];
-const localPackages = Object.fromEntries(
-  packageNames.map((packageName, index) => [packageName, tarballs[index]]),
+runNpm(["pack", packageDirectory, "--pack-destination", artifacts], root);
+
+const sourceManifest = JSON.parse(await readFile(join(packageDirectory, "package.json"), "utf8"));
+const tarballName = (await readdir(artifacts)).find(
+  (name) => name === `resilireplay-${sourceManifest.version}.tgz`,
 );
+if (!tarballName) throw new Error("Packed resilireplay tarball was not created");
+
 await writeFile(
   join(project, "package.json"),
   `${JSON.stringify(
@@ -48,37 +62,67 @@ await writeFile(
       name: "resilireplay-package-smoke",
       version: "1.0.0",
       private: true,
-      type: "module",
-      dependencies: localPackages,
     },
     null,
     2,
   )}\n`,
   "utf8",
 );
-await writeFile(
-  join(project, "pnpm-workspace.yaml"),
-  `packages: []\noverrides:\n${Object.entries(localPackages)
-    .map(
-      ([name, specifier]) =>
-        `  ${JSON.stringify(name)}: ${JSON.stringify(specifier.replaceAll("\\", "/"))}`,
-    )
-    .join("\n")}\n`,
-  "utf8",
+runNpm(
+  ["install", "--ignore-scripts", "--package-lock=false", join(artifacts, tarballName)],
+  project,
 );
-const install = spawnSync(process.execPath, [pnpmEntry, "install"], {
-  cwd: project,
-  stdio: "inherit",
-  windowsHide: true,
-});
-if (install.status !== 0) throw new Error("Installing packed workspaces failed");
-const cli = join(project, "node_modules", "resilireplay", "bin", "resilireplay.mjs");
-const smoke = spawnSync(process.execPath, [cli, "--version"], {
-  cwd: project,
-  encoding: "utf8",
-  windowsHide: true,
-});
-if (smoke.status !== 0 || smoke.stdout.trim() !== "0.2.0") {
-  throw new Error(`Installed CLI smoke failed: ${smoke.stdout} ${smoke.stderr}`);
+
+const installedRoot = join(project, "node_modules", "resilireplay");
+const installedManifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));
+if (installedManifest.dependencies && Object.keys(installedManifest.dependencies).length > 0) {
+  throw new Error("Published CLI unexpectedly contains runtime dependencies");
 }
-console.log(`Package installation smoke passed: ${smoke.stdout.trim()}`);
+if (
+  installedManifest.repository?.url !== "https://github.com/aliengineering-byte/resilireplay.git"
+) {
+  throw new Error("Published CLI repository metadata does not match the GitHub repository");
+}
+
+async function listFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    if (entry.name === "node_modules") continue;
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await listFiles(path)));
+    else files.push(relative(installedRoot, path).replaceAll("\\", "/"));
+  }
+  return files;
+}
+
+const actualFiles = (await listFiles(installedRoot)).sort();
+const expectedFiles = [
+  "LICENSE",
+  "README.md",
+  "bin/resilireplay.mjs",
+  "dist/resilireplay.js",
+  "package.json",
+];
+if (JSON.stringify(actualFiles) !== JSON.stringify(expectedFiles)) {
+  throw new Error(`Unexpected package contents: ${actualFiles.join(", ")}`);
+}
+
+const cli = join(installedRoot, "bin", "resilireplay.mjs");
+for (const [arguments_, expectation] of [
+  [["--version"], sourceManifest.version],
+  [["--help"], "Usage: resilireplay"],
+  [["faults"], "malformed-json"],
+]) {
+  const result = spawnSync(process.execPath, [cli, ...arguments_], {
+    cwd: project,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  const output = `${result.stdout ?? ""}${result.stderr ?? ""}`;
+  if (result.status !== 0 || !output.includes(expectation)) {
+    throw new Error(`Installed CLI smoke failed for ${arguments_.join(" ")}: ${output}`);
+  }
+}
+
+console.log(`Single-package npm installation smoke passed: resilireplay ${sourceManifest.version}`);

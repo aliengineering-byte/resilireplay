@@ -2,6 +2,21 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.2.1] - 2026-08-03
+
+### Fixed
+
+- Publish the supported `resilireplay` CLI as one self-contained npm package instead of exposing
+  unresolved monorepo `workspace:*` runtime dependencies.
+- Limit the npm tarball to the executable bundle, package documentation, manifest, and Apache-2.0
+  license, with repository, homepage, bugs, engine, and public-access metadata.
+- Verify an npm-packed tarball in a clean project and exercise its version, help, and fault-catalog
+  commands without installing internal workspace packages.
+
+### Changed
+
+- Support maintained Node.js 22 and 24 releases in the package metadata and cross-platform CI.
+
 ## [0.2.0] - 2026-08-02
 
 ### Added

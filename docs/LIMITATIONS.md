@@ -1,6 +1,6 @@
 # Known limitations
 
-ResiliReplay v0.2.0 is useful for deterministic local and CI testing, with these boundaries:
+ResiliReplay v0.2.1 is useful for deterministic local and CI testing, with these boundaries:
 
 - **Transport coverage:** stdio and authenticated Streamable HTTP MCP behavior are exercised end to end. Legacy SSE is retained for compatibility and has less integration coverage.
 - **Execution isolation:** `record` launches only the command a user explicitly supplies, without a shell, but it is not an OS sandbox. Use a container or OS sandbox for untrusted code.
@@ -12,6 +12,6 @@ ResiliReplay v0.2.0 is useful for deterministic local and CI testing, with these
 - **Authenticity:** SHA-256 hashes link traces, metrics, reports, and generated tests. They detect changes but do not establish who produced an artifact; manifests are unsigned.
 - **Redaction:** pattern-based redaction is defense in depth, not a proof that every application-specific secret format is removed. Adapters should omit secrets at the source.
 - **Scoring:** the deterministic score evaluates declared trace evidence and safety rules. It is not a semantic judge of open-ended answer quality.
-- **Distribution:** packages are not published to npm. Use the repository checkout and workspace scripts.
+- **Distribution:** npm supports the self-contained `resilireplay` CLI. Internal workspace packages are not public API and are not published separately.
 
 See the [roadmap](ROADMAP.md) and [security policy](../SECURITY.md) for residual risk.

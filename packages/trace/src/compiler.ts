@@ -161,7 +161,7 @@ export async function compileRegression(
   const manifest = {
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    productVersion: "0.2.0",
+    productVersion: "0.2.1",
     sourceTraceSha256: sourceTraceHash,
     fixtureSha256: fixtureHash,
     testSha256: testHash,

@@ -2,7 +2,8 @@
 
 [![CI](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml)
 [![Secret scan](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml)
-[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0)
+[![npm](https://img.shields.io/npm/v/resilireplay)](https://www.npmjs.com/package/resilireplay)
+[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.1)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
 
 **ResiliReplay crash-tests AI agents and MCP servers, replays failures deterministically, and converts broken traces into regression tests.**
@@ -13,9 +14,26 @@ It is a model-agnostic, local-first TypeScript toolkit: record versioned events,
 
 > ResiliReplay is defensive testing software. Audit only local or user-owned MCP targets. A report or badge is evidence for one declared suite and version, not a universal security certification.
 
-## Five-minute quick start
+## Install from npm
 
-Requirements: Node.js 20 or 22 and pnpm.
+Requirements: a supported Node.js release (22 or 24) and npm.
+
+```console
+npm install --global resilireplay@0.2.1
+resilireplay --help
+resilireplay faults
+```
+
+For a one-off run without a global install:
+
+```console
+npx --yes resilireplay@0.2.1 --version
+```
+
+## Run the verified no-key demos
+
+The repository supplies deterministic agent and MCP fixtures; the globally installed `resilireplay`
+command is the same self-contained CLI distributed by npm. Contributors also need pnpm 10.14.0.
 
 ```console
 git clone https://github.com/aliengineering-byte/resilireplay.git
@@ -31,7 +49,7 @@ Continue the local tour:
 
 ```console
 pnpm demo:mcp
-pnpm exec resilireplay test scenarios
+resilireplay test scenarios
 ```
 
 The MCP demo imports real Inspector-shaped configs, exercises resilient and intentionally vulnerable
@@ -46,8 +64,8 @@ See the [demo guide and verified transcript](docs/DEMO.md) for expected output a
 Record the bundled deterministic agent and emit a passing baseline report:
 
 ```console
-pnpm exec resilireplay record --output runs/agent/trace.jsonl -- node examples/deterministic-agent/dist/index.js
-pnpm exec resilireplay replay --trace runs/agent/trace.jsonl --report-dir runs/agent/report
+resilireplay record --output runs/agent/trace.jsonl -- node examples/deterministic-agent/dist/index.js
+resilireplay replay --trace runs/agent/trace.jsonl --report-dir runs/agent/report
 ```
 
 Adapters for a real agent framework emit the same versioned `TraceEvent` objects. See the [adapter guide](docs/ADAPTERS.md); the OpenAI-compatible example is a translation fixture and does not claim to call a live provider.
@@ -58,8 +76,8 @@ Already use MCP Inspector? Reuse the same reviewed `mcp.json` without rewriting 
 argument array, environment declarations, URL, or headers:
 
 ```console
-pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
-pnpm exec resilireplay mcp audit --inspector-config ./mcp.json --server my-server --output runs/mcp-inspector
+resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
+resilireplay mcp audit --inspector-config ./mcp.json --server my-server --output runs/mcp-inspector
 ```
 
 MCP Inspector interactively tests and debugs servers. ResiliReplay introduces controlled failures,
@@ -70,7 +88,7 @@ reviewed MCP Inspector exports does not imply endorsement or certification. See 
 Audit the bundled resilient server over stdio:
 
 ```console
-pnpm exec resilireplay mcp audit --command "node examples/resilient-mcp-server/dist/index.js" --output runs/mcp-audit
+resilireplay mcp audit --command "node examples/resilient-mcp-server/dist/index.js" --output runs/mcp-audit
 ```
 
 `mcp audit` captures `tools/list` schemas and calls only a tool named `reliability_probe` by default. Pass `--call-tools` only after reviewing tool behavior, because MCP calls may have server-side effects. Non-loopback Streamable HTTP targets also require `--allow-remote`.
@@ -82,12 +100,12 @@ The [MCP chaos guide](docs/MCP_CHAOS.md) covers controlled faults, transports, a
 Apply a built-in fault or reviewable YAML scenario. The same trace plus scenario plus seed produces the same mutation:
 
 ```console
-pnpm exec resilireplay inject --trace runs/agent/trace.jsonl --scenario malformed-json --seed 42 --output runs/agent/failed.jsonl
-pnpm exec resilireplay replay --trace runs/agent/failed.jsonl --report-dir runs/agent/failed-report
-pnpm exec resilireplay faults
+resilireplay inject --trace runs/agent/trace.jsonl --scenario malformed-json --seed 42 --output runs/agent/failed.jsonl
+resilireplay replay --trace runs/agent/failed.jsonl --report-dir runs/agent/failed-report
+resilireplay faults
 ```
 
-The replay command above intentionally exits 1: the minimal baseline has no recovery event after the injected malformed response. It still writes the failed report bundle for review. Use `pnpm exec resilireplay test scenarios` when a CI command should verify both expected-pass and expected-failure scenarios with exit 0.
+The replay command above intentionally exits 1: the minimal baseline has no recovery event after the injected malformed response. It still writes the failed report bundle for review. Use `resilireplay test scenarios` when a CI command should verify both expected-pass and expected-failure scenarios with exit 0.
 
 Provider and transport faults include bounded latency, timeout, 429/5xx, reset, truncation, malformed JSON, duplicates, and stale responses. Tool and workflow faults cover errors, permissions, disposable missing files, corrupt results, side-effect duplication, handoff loss, wrong recipients, stale state, conflicting instructions, and loops.
 
@@ -98,7 +116,7 @@ See [custom fault scenarios](docs/CUSTOM_FAULTS.md) for the YAML contract and sa
 `pnpm demo` creates a failed trace. Convert it into a minimized fixture, scenario, manifest, and executable `node:test`:
 
 ```console
-pnpm exec resilireplay generate-test --trace runs/demo/failed.jsonl --output runs/generated-regression
+resilireplay generate-test --trace runs/demo/failed.jsonl --output runs/generated-regression
 ```
 
 The generated test executes immediately by default. `manifest.json` links the source trace, minimized fixture, scenario, and test with SHA-256 hashes.
@@ -118,7 +136,7 @@ flowchart LR
 This excerpt is captured from the no-key demo:
 
 ```text
-ResiliReplay v0.2.0  PASS
+ResiliReplay v0.2.1  PASS
 Recovery score  100/100
 Completion      yes
 Recovery        safe
@@ -174,9 +192,9 @@ Read [SECURITY.md](SECURITY.md) and [THREAT_MODEL.md](THREAT_MODEL.md) before ru
 - `record` is not an OS sandbox.
 - MCP tool calls may have server-side effects.
 - Causal minimization is strongest when adapters provide `parentId` and `causeId`.
-- Streaming provider output is aggregated into response events in v0.2.0.
+- Streaming provider output is aggregated into response events in v0.2.1.
 - Report hashes prove linkage and integrity, not authenticity; manifests are unsigned.
-- Packages are not published to npm.
+- The supported npm distribution is the `resilireplay` CLI; internal workspace packages are not public API.
 
 See [known limitations](docs/LIMITATIONS.md) and the [roadmap](docs/ROADMAP.md).
 
@@ -191,11 +209,11 @@ pnpm quality
 Use the composite action:
 
 ```yaml
-- uses: aliengineering-byte/resilireplay@v0.2.0
+- uses: aliengineering-byte/resilireplay@v0.2.1
   with:
     scenarios: scenarios
 ```
 
-ResiliReplay is Apache-2.0 licensed. Contributions should be deterministic, bounded, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [launch reference](docs/LAUNCH.md), [release evidence](RELEASE_EVIDENCE.md), and the [v0.2.0 release](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0).
+ResiliReplay is Apache-2.0 licensed. Contributions should be deterministic, bounded, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [launch reference](docs/LAUNCH.md), [release evidence](RELEASE_EVIDENCE.md), and the [v0.2.1 release](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.1).
 
 Built and maintained by **Ali**.

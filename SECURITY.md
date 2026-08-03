@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged release. v0.2.0 is the current supported line;
-v0.1.0 is the initial release line.
+Security fixes are provided for the latest tagged release. v0.2.1 is the current supported line;
+v0.2.0 is retained as an immutable integration release.
 
 ## Reporting a vulnerability
 

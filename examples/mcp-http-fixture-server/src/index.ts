@@ -98,7 +98,7 @@ const server = createServer(async (request, response) => {
       jsonRpcResult(id, {
         protocolVersion: "2025-06-18",
         capabilities: { tools: {} },
-        serverInfo: { name: "resilireplay-http-fixture", version: "0.2.0" },
+        serverInfo: { name: "resilireplay-http-fixture", version: "0.2.1" },
       }),
     );
     return;
