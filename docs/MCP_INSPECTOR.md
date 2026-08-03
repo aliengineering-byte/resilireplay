@@ -166,7 +166,7 @@ Static fallback: [MCP Inspector integration demo image](assets/mcp-inspector-dem
   ResiliReplay. The error prints the variable name, never a value.
 - **Remote authorization is rejected:** use `--allow-remote` only after confirming the endpoint is
   owned by you or you have permission to audit it.
-- **`protocolEra: "modern"` is rejected:** ResiliReplay 0.2.0 uses the stable MCP SDK 1.30 client and
+- **`protocolEra: "modern"` is rejected:** ResiliReplay 0.2.1 uses the stable MCP SDK 1.30 client and
   audits Inspector's default legacy era. Modern 2026-07-28 wire-era negotiation is not yet supported.
 - **OAuth or other Inspector-only settings are rejected:** no field with execution impact is silently
   ignored. Use an already authorized static header for a controlled test server, or audit with

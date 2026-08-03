@@ -40,10 +40,10 @@ The concise transcript used for the animation is committed at [`docs/assets/demo
 1/5 Recording the no-key deterministic agent
 Recorded 8 sanitized events.
 2/5 Injecting three deterministic faults (429, delayed tool, wrong recipient)
-ResiliReplay v0.2.0  PASS
+ResiliReplay v0.2.1  PASS
 Recovery score  100/100
 3/5 Demonstrating an unrecovered malformed response
-ResiliReplay v0.2.0  FAIL
+ResiliReplay v0.2.1  FAIL
 Recovery score  67/100
 4/5 Compiling the failed trace into an editable regression
 ℹ pass 1

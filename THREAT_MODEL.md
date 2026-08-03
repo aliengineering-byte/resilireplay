@@ -41,8 +41,8 @@ The ResiliReplay libraries and checked-in scenarios are trusted. Recorded subpro
 - `--call-tools` can trigger side effects exposed by the server. Read schemas and server code first.
 - Pattern-based redaction cannot prove every secret format is covered. Avoid emitting secrets at the adapter source.
 - Literal commands in a reviewed Inspector file remain authorized code execution. Configuration review and OS-level sandboxing remain the user's responsibility.
-- ResiliReplay 0.2.0 does not implement Inspector's interactive OAuth/keychain flows or modern protocol era. It rejects those execution-affecting fields instead of silently weakening or downgrading them.
-- Hashes prove artifact linkage and integrity, not authenticity. v0.2.0 does not sign reports.
+- ResiliReplay 0.2.1 does not implement Inspector's interactive OAuth/keychain flows or modern protocol era. It rejects those execution-affecting fields instead of silently weakening or downgrading them.
+- Hashes prove artifact linkage and integrity, not authenticity. v0.2.1 does not sign reports.
 - An authorized remote MCP server can behave differently across requests; record server version and environment with the report.
 
 ## Non-goals
