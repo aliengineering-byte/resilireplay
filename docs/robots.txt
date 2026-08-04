@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aliengineering-byte.github.io/resilireplay/sitemap.xml

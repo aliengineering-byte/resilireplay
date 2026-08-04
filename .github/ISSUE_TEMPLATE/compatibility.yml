@@ -1,0 +1,44 @@
+name: MCP compatibility report
+description: Report a reproducible server, transport, or schema mismatch
+title: "[Compatibility]: "
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: Use a public or disposable target. Remove credentials, private paths, production traces, and personal data.
+  - type: input
+    id: versions
+    attributes:
+      label: Exact versions
+      description: ResiliReplay version plus server package version and source revision.
+      placeholder: resilireplay@0.3.0; @scope/server@1.2.3; gitHead abc123
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport
+      options: [stdio, Streamable HTTP, legacy SSE]
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Authorization and side-effect boundary
+      description: Name the exact target, allowed tools, data class, network boundary, and cleanup performed.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal sanitized reproduction
+      description: Include the config, campaign, reviewed hash, exact commands, expected result, and actual result.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I was authorized to test this target and removed secrets, personal data, and unsafe payloads.
+          required: true

@@ -1,0 +1,40 @@
+name: Link check
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 10 * * 2"
+
+permissions:
+  contents: read
+
+jobs:
+  internal-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: node scripts/check-site.mjs
+
+  external-links:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --accept 200,206,403,429
+            --exclude-loopback
+            README.md
+            ADOPTERS.md
+            docs/**/*.md
+            docs/index.html
+          fail: true
+          jobSummary: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

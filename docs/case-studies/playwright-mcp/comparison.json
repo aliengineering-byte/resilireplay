@@ -1,0 +1,13 @@
+{
+  "baselineHash": "703eaa0c94ea0fab6172dfe0ff9df2ded59894e0d523c38c963b6f569d286a31",
+  "campaignHash": "7473e2206608c81521c91866b0cecd29e70c9630ad9b83a56f7d04bd9fdde0b5",
+  "campaignId": "playwright-mcp-field-test",
+  "comparedAt": "2026-08-04T21:37:51.681Z",
+  "comparisonHash": "13eae0c2d9a91bfd66f26e8842dcdadaa0cc40725491bcf055cd1a8b84b9eb2f",
+  "differences": [],
+  "kind": "resilireplay-comparison",
+  "productVersion": "0.3.0",
+  "runHash": "da94fe7110d2702858500447d93bb9bae0c09d74ed5b7b12f64f9e89bed577d4",
+  "schemaVersion": "1.0",
+  "status": "pass"
+}

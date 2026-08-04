@@ -27,6 +27,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm field:verify
+      - run: pnpm site:check
       - name: MCP Inspector config and real HTTP integration
         run: pnpm exec vitest run tests/mcp-inspector.test.ts
       - run: pnpm package:smoke
@@ -99,4 +101,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm site:test
       - run: pnpm test:e2e

@@ -1,0 +1,10 @@
+ResiliReplay Campaign v0.3.0  PASS
+Campaign        playwright-mcp-field-test
+Run status      complete
+Scenarios       3/3 matched expectations
+Fault coverage  100%
+Evidence hash   da94fe7110d2702858500447d93bb9bae0c09d74ed5b7b12f64f9e89bed577d4
+
+PASSED    clean-control (playwright; none)
+PASSED    tool-error-retry (playwright; mcp-tool-error)
+PASSED    canary-negative-control (playwright; mcp-malicious-canary-instruction)

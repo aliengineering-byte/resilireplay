@@ -1,0 +1,13 @@
+{
+  "baselineHash": "db4264ac28a34cd604fb9834501e5f0a8145f67aa378dc6174ba6d2615db02fd",
+  "campaignHash": "360bcce3d129bbe3f3631980300929b35a86ba5a0772db3b1d2dab60db92136e",
+  "campaignId": "ui5-mcp-field-test",
+  "comparedAt": "2026-08-04T21:37:52.217Z",
+  "comparisonHash": "114833e2fdef8dee6b4277301283957c0d78b585fbbca0183be2c504866d80c1",
+  "differences": [],
+  "kind": "resilireplay-comparison",
+  "productVersion": "0.3.0",
+  "runHash": "c714117ccff611fbd46d4eaaee49164f09cc65ef020beb5403f5d7933d47727e",
+  "schemaVersion": "1.0",
+  "status": "pass"
+}

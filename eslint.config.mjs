@@ -11,6 +11,7 @@ export default [
       "**/coverage/**",
       "**/runs/**",
       "**/.artifacts/**",
+      "docs/case-studies/**/browsers/**",
     ],
   },
   eslint.configs.recommended,
@@ -39,6 +40,12 @@ export default [
     files: ["**/*.mjs", "**/*.js"],
     languageOptions: {
       globals: globals.node,
+    },
+  },
+  {
+    files: ["docs/**/*.js", "scripts/site-browser-test.mjs"],
+    languageOptions: {
+      globals: globals.browser,
     },
   },
 ];

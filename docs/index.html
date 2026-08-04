@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ResiliReplay — prove MCP recovery</title>
+    <meta
+      name="description"
+      content="ResiliReplay injects deterministic MCP faults, verifies bounded recovery, compares baselines, and exports executable regressions."
+    />
+    <meta name="theme-color" content="#10232a" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="ResiliReplay — prove MCP recovery" />
+    <meta
+      property="og:description"
+      content="Crash-test an MCP server, observe recovery, and keep the failure fixed."
+    />
+    <meta
+      property="og:image"
+      content="https://aliengineering-byte.github.io/resilireplay/assets/social-preview.png"
+    />
+    <meta property="og:url" content="https://aliengineering-byte.github.io/resilireplay/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://aliengineering-byte.github.io/resilireplay/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="site.css" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="ResiliReplay home">
+        <span class="brand-mark" aria-hidden="true">RR</span>
+        <span>ResiliReplay</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#workflow">Workflow</a>
+        <a href="#cases">Field cases</a>
+        <a href="#security">Safety</a>
+        <a href="https://github.com/aliengineering-byte/resilireplay">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">Local-first MCP reliability testing · v0.3.0</p>
+          <h1>Make recovery<br />reproducible.</h1>
+          <p class="hero-statement">
+            MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails,
+            whether it recovers safely, and whether that recovery remains fixed.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#quick-start">Run the quick start</a>
+            <a class="button secondary" href="#demo">Watch the real demo</a>
+          </div>
+          <ul class="trust-list" aria-label="Product boundaries">
+            <li>No API key</li>
+            <li>No telemetry</li>
+            <li>No hosted backend</li>
+          </ul>
+        </div>
+        <aside class="signal-card" aria-label="Verified field evidence">
+          <div class="signal-topline">
+            <span>FIELD EVIDENCE</span><span class="status">VERIFIED</span>
+          </div>
+          <p class="signal-number">3</p>
+          <p class="signal-label">independent MCP projects</p>
+          <dl>
+            <div>
+              <dt>Declared scenarios</dt>
+              <dd>9 / 9</dd>
+            </div>
+            <div>
+              <dt>Bounded recoveries</dt>
+              <dd>3 / 3</dd>
+            </div>
+            <div>
+              <dt>Generated regressions</dt>
+              <dd>3 / 3</dd>
+            </div>
+            <div>
+              <dt>Baseline differences</dt>
+              <dd>0</dd>
+            </div>
+          </dl>
+          <p class="signal-footnote">Bounded evidence, not a security certification.</p>
+        </aside>
+      </section>
+
+      <section class="quick-start band" id="quick-start">
+        <div>
+          <p class="eyebrow">Start in one command</p>
+          <h2>Install the public CLI.</h2>
+          <p>Node.js 22 or 24. The verified local workflow needs no account or provider.</p>
+        </div>
+        <div class="code-wrap">
+          <pre
+            tabindex="0"
+          ><code id="install-command">npx --yes resilireplay@0.3.0 --version</code></pre>
+          <button class="copy-button" type="button" data-copy="install-command">Copy</button>
+        </div>
+        <div class="quick-links">
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/FIELD_TEST_GUIDE.md"
+            >Five-minute field test →</a
+          >
+          <a href="https://www.npmjs.com/package/resilireplay/v/0.3.0">npm package →</a>
+        </div>
+      </section>
+
+      <section class="demo section" id="demo">
+        <div class="section-heading">
+          <p class="eyebrow">Verified 60-second workflow</p>
+          <h2>From reviewed target to executable regression.</h2>
+          <p>
+            This fixture-backed Studio capture is real. The measured workflow completed in 2.4
+            seconds and the GIF is assembled from six browser-driven frames.
+          </p>
+        </div>
+        <figure class="demo-frame">
+          <img
+            src="assets/studio-campaign.gif"
+            alt="ResiliReplay Studio moving through target review, campaign execution, timeline, baseline comparison, and evidence export"
+            width="1440"
+            height="900"
+          />
+          <figcaption>
+            Real local run · 4 stdio scenarios · Streamable HTTP check · 2 verified regressions ·
+            <a href="assets/studio-campaign.png">static PNG</a> ·
+            <a href="assets/studio-demo-transcript.txt">transcript</a> ·
+            <a
+              href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/DEMO_60_SECONDS.md"
+              >reproduce</a
+            >
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="section contrast" id="inspector">
+        <div class="section-heading narrow">
+          <p class="eyebrow">Complementary tools</p>
+          <h2>Inspect first. Break safely second.</h2>
+        </div>
+        <div class="comparison-grid">
+          <article>
+            <p class="step-number">01</p>
+            <h3>MCP Inspector</h3>
+            <p>
+              Discover tools, inspect schemas, and confirm that a server behaves on the happy path.
+            </p>
+          </article>
+          <div class="flow-arrow" aria-hidden="true">→</div>
+          <article class="accent-card">
+            <p class="step-number">02</p>
+            <h3>ResiliReplay</h3>
+            <p>
+              Inject bounded faults, observe recovery, approve evidence, and export a regression.
+            </p>
+          </article>
+        </div>
+        <p class="disclaimer">
+          ResiliReplay is not endorsed by MCP Inspector or the tested projects.
+        </p>
+      </section>
+
+      <section class="section" id="workflow">
+        <div class="section-heading">
+          <p class="eyebrow">Campaign workflow</p>
+          <h2>A reviewable path from config to CI.</h2>
+        </div>
+        <ol class="workflow-list">
+          <li>
+            <span>01</span>
+            <div>
+              <h3>Review</h3>
+              <p>Import an Inspector-shaped config and dry-run a value-free execution plan.</p>
+            </div>
+          </li>
+          <li>
+            <span>02</span>
+            <div>
+              <h3>Declare</h3>
+              <p>Pin the target, tool allowlist, seed, budgets, faults, and expected outcomes.</p>
+            </div>
+          </li>
+          <li>
+            <span>03</span>
+            <div>
+              <h3>Run</h3>
+              <p>
+                Execute a clean control, bounded fault, and recovery path through the real server.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span>04</span>
+            <div>
+              <h3>Compare</h3>
+              <p>Approve complete evidence and fail closed on later baseline differences.</p>
+            </div>
+          </li>
+          <li>
+            <span>05</span>
+            <div>
+              <h3>Keep fixed</h3>
+              <p>Generate and execute the minimized causal regression in Node or CI.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section cases" id="cases">
+        <div class="section-heading">
+          <p class="eyebrow">Independent field validation</p>
+          <h2>Three public servers. Three reproducible cases.</h2>
+          <p>
+            Each run used a pinned public package, one read-only tool, and public ResiliReplay
+            v0.3.0.
+          </p>
+        </div>
+        <div class="case-grid">
+          <article class="case-card">
+            <img
+              src="case-studies/mcp-everything/evidence.png"
+              alt="Passing MCP Everything campaign report"
+              width="1180"
+              height="720"
+            />
+            <div class="case-body">
+              <p class="case-kicker">LF Projects · stdio</p>
+              <h3>MCP Everything</h3>
+              <p>Echo control, one recovered tool error, and one declared canary failure.</p>
+              <ul>
+                <li>2.7 s</li>
+                <li>3 / 3 expected</li>
+                <li>0 baseline differences</li>
+              </ul>
+              <a
+                href="https://github.com/aliengineering-byte/resilireplay/tree/main/docs/case-studies/mcp-everything"
+                >Open evidence →</a
+              >
+            </div>
+          </article>
+          <article class="case-card">
+            <img
+              src="case-studies/playwright-mcp/evidence.png"
+              alt="Passing Playwright MCP campaign report"
+              width="1180"
+              height="720"
+            />
+            <div class="case-body">
+              <p class="case-kicker">Microsoft · stdio</p>
+              <h3>Playwright MCP</h3>
+              <p>Isolated blank-page snapshot with no navigation, profile, or remote target.</p>
+              <ul>
+                <li>4.8 s</li>
+                <li>3 / 3 expected</li>
+                <li>0 baseline differences</li>
+              </ul>
+              <a
+                href="https://github.com/aliengineering-byte/resilireplay/tree/main/docs/case-studies/playwright-mcp"
+                >Open evidence →</a
+              >
+            </div>
+          </article>
+          <article class="case-card">
+            <img
+              src="case-studies/ui5-mcp/evidence.png"
+              alt="Passing UI5 MCP campaign report"
+              width="1180"
+              height="720"
+            />
+            <div class="case-body">
+              <p class="case-kicker">UI5 · stdio</p>
+              <h3>UI5 MCP Server</h3>
+              <p>Bundled guidelines only—no project inspection, linting, generation, or writes.</p>
+              <ul>
+                <li>4.6 s</li>
+                <li>3 / 3 expected</li>
+                <li>0 baseline differences</li>
+              </ul>
+              <a
+                href="https://github.com/aliengineering-byte/resilireplay/tree/main/docs/case-studies/ui5-mcp"
+                >Open evidence →</a
+              >
+            </div>
+          </article>
+        </div>
+        <p class="center-link">
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/field-validation/FIELD_RESULTS.md"
+            >Compare the bounded field results →</a
+          >
+        </p>
+      </section>
+
+      <section class="section safety" id="security">
+        <div class="safety-copy">
+          <p class="eyebrow">Authorization before automation</p>
+          <h2>Fault injection needs a hard boundary.</h2>
+          <p>
+            Discovery calls no tool. Tool campaigns require an explicit allowlist and the exact hash
+            of the reviewed campaign. Remote HTTP requires separate ownership confirmation.
+          </p>
+          <a
+            class="button secondary light"
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/SECURITY.md"
+            >Read the security model</a
+          >
+        </div>
+        <ul class="boundary-list">
+          <li>
+            <span>Local by default</span>
+            <p>Studio binds only to 127.0.0.1 and has no cloud account.</p>
+          </li>
+          <li>
+            <span>Contained evidence</span>
+            <p>Reports are local and credential-shaped values are redacted before persistence.</p>
+          </li>
+          <li>
+            <span>Honest claims</span>
+            <p>
+              A matched campaign is bounded reliability evidence, never universal certification.
+            </p>
+          </li>
+          <li>
+            <span>Your authority</span>
+            <p>
+              Commands are not OS-sandboxed. Test only targets you own or are authorized to audit.
+            </p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="section ci" id="ci">
+        <div class="section-heading narrow">
+          <p class="eyebrow">Keep recovery fixed</p>
+          <h2>Put the baseline in GitHub Actions.</h2>
+          <p>
+            Discovery-only campaigns need no tool confirmation. Review tool-calling hashes in code.
+          </p>
+        </div>
+        <div class="code-wrap large">
+          <pre tabindex="0"><code id="ci-example">- uses: aliengineering-byte/resilireplay@v0.3.0
+  with:
+    campaign: reliability.campaign.yml
+
+- run: npx --yes resilireplay@0.3.0 campaign compare runs/latest \
+    --baseline baselines/reliability.json</code></pre>
+          <button class="copy-button" type="button" data-copy="ci-example">Copy</button>
+        </div>
+      </section>
+
+      <section class="section docs" id="docs">
+        <div class="section-heading">
+          <p class="eyebrow">Documentation</p>
+          <h2>Read the contract before the campaign.</h2>
+        </div>
+        <div class="docs-grid">
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/FIELD_TEST_GUIDE.md"
+            ><span>01</span>
+            <div>
+              <h3>Field-test guide</h3>
+              <p>Your server, about five minutes.</p>
+            </div></a
+          >
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/CAMPAIGN_SCHEMA.md"
+            ><span>02</span>
+            <div>
+              <h3>Campaign schema</h3>
+              <p>Seeds, budgets, faults, assertions.</p>
+            </div></a
+          >
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/MCP_INSPECTOR.md"
+            ><span>03</span>
+            <div>
+              <h3>Inspector import</h3>
+              <p>Supported config and transport subset.</p>
+            </div></a
+          >
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/STUDIO_SECURITY.md"
+            ><span>04</span>
+            <div>
+              <h3>Studio security</h3>
+              <p>Loopback, session, CSRF, containment.</p>
+            </div></a
+          >
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/LIMITATIONS.md"
+            ><span>05</span>
+            <div>
+              <h3>Known limitations</h3>
+              <p>What v0.3.0 does not prove.</p>
+            </div></a
+          >
+          <a href="https://github.com/aliengineering-byte/resilireplay/blob/main/CONTRIBUTING.md"
+            ><span>06</span>
+            <div>
+              <h3>Contribute</h3>
+              <p>Bring a sanitized reproduction.</p>
+            </div></a
+          >
+        </div>
+      </section>
+
+      <section class="section limitations">
+        <div>
+          <p class="eyebrow">Honest limits</p>
+          <h2>Evidence has edges.</h2>
+        </div>
+        <ul>
+          <li>Commands and servers are not OS-sandboxed.</li>
+          <li>Pattern redaction cannot prove every application secret is gone.</li>
+          <li>Hashes prove integrity, not signer identity.</li>
+          <li>v0.3.0 does not model incremental streaming or interactive OAuth.</li>
+          <li>The three case studies cover bounded tools, not whole projects.</li>
+        </ul>
+      </section>
+
+      <section class="cta section">
+        <p class="eyebrow">Bring a real server</p>
+        <h2>Can another developer reproduce your recovery?</h2>
+        <p>
+          Run the five-minute guide, sanitize the evidence, and share what did—or did not—recover.
+        </p>
+        <div class="hero-actions">
+          <a
+            class="button primary"
+            href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/FIELD_TEST_GUIDE.md"
+            >Test your MCP server</a
+          >
+          <a
+            class="button secondary"
+            href="https://github.com/aliengineering-byte/resilireplay/issues/new/choose"
+            >Report a field result</a
+          >
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p><strong>ResiliReplay</strong> · Apache-2.0 · Built and maintained by Ali.</p>
+      <p>No analytics. No cookies. No tracking.</p>
+    </footer>
+    <div class="copy-status" role="status" aria-live="polite"></div>
+    <script src="site.js" defer></script>
+  </body>
+</html>

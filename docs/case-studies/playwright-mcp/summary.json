@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1.0",
+  "kind": "resilireplay-field-case-summary",
+  "productVersion": "0.3.0",
+  "project": {
+    "name": "Playwright MCP",
+    "repository": "https://github.com/microsoft/playwright-mcp",
+    "package": "@playwright/mcp@0.0.78",
+    "revision": "5f8fc00210b27b4407c375b59cda4838045d429c",
+    "license": "Apache-2.0"
+  },
+  "authorizationBoundary": {
+    "transport": "stdio",
+    "remoteNetworkTarget": false,
+    "allowedTool": "browser_snapshot",
+    "toolClassification": "read-only, idempotent, disposable local state",
+    "productionData": false,
+    "credentials": false
+  },
+  "campaign": {
+    "id": "playwright-mcp-field-test",
+    "hash": "7473e2206608c81521c91866b0cecd29e70c9630ad9b83a56f7d04bd9fdde0b5",
+    "status": "complete",
+    "durationMs": 4790,
+    "runHash": "da94fe7110d2702858500447d93bb9bae0c09d74ed5b7b12f64f9e89bed577d4",
+    "targetSourceSha256": "d467b21c8fd334a98e1bd4d5ec2d56bdf5f2cd375695211b9520edfd99943f04",
+    "summary": {
+      "cancelledCount": 0,
+      "failedCount": 0,
+      "faultCoverage": 1,
+      "invalidCount": 0,
+      "passed": true,
+      "passedCount": 3,
+      "total": 3
+    }
+  },
+  "scenarios": [
+    {
+      "id": "clean-control",
+      "fault": "none",
+      "faultApplied": false,
+      "declaredResult": "passed",
+      "observedOutcome": "passed",
+      "durationMs": 1960,
+      "recoverySuccess": true,
+      "retryCount": 0,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "not-applicable",
+        "verified": false
+      }
+    },
+    {
+      "id": "tool-error-retry",
+      "fault": "mcp-tool-error",
+      "faultApplied": true,
+      "declaredResult": "passed",
+      "observedOutcome": "passed",
+      "durationMs": 1399,
+      "recoverySuccess": true,
+      "retryCount": 1,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "not-applicable",
+        "verified": false
+      }
+    },
+    {
+      "id": "canary-negative-control",
+      "fault": "mcp-malicious-canary-instruction",
+      "faultApplied": true,
+      "declaredResult": "passed",
+      "observedOutcome": "failed",
+      "durationMs": 1429,
+      "recoverySuccess": false,
+      "retryCount": 0,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "generated",
+        "verified": true,
+        "directory": "regression"
+      }
+    }
+  ],
+  "baseline": {
+    "hash": "703eaa0c94ea0fab6172dfe0ff9df2ded59894e0d523c38c963b6f569d286a31",
+    "sourceRunHash": "da94fe7110d2702858500447d93bb9bae0c09d74ed5b7b12f64f9e89bed577d4",
+    "comparisonStatus": "pass",
+    "comparisonHash": "13eae0c2d9a91bfd66f26e8842dcdadaa0cc40725491bcf055cd1a8b84b9eb2f",
+    "differences": 0
+  },
+  "cleanup": {
+    "serverProcessesRemaining": 0,
+    "listenersRemaining": 0
+  },
+  "disclosure": "Synthetic injected failures are reliability test conditions, not vulnerabilities. This is reliability evidence, not a security certification."
+}

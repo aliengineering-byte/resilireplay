@@ -1,0 +1,13 @@
+{
+  "baselineHash": "71b617302c02edf2f52725d31fdd53dd279ccb67e971f55c184e73d03f9d0de8",
+  "campaignHash": "334a5de0e11a67fcb1fc0581232b3137075e7f8d25795d991f3d459ab5c8e907",
+  "campaignId": "mcp-everything-field-test",
+  "comparedAt": "2026-08-04T21:37:51.094Z",
+  "comparisonHash": "259bb5396488c9a3ea514a3796c5f52cc879c9b9282ed3c30ea02f1460c9c398",
+  "differences": [],
+  "kind": "resilireplay-comparison",
+  "productVersion": "0.3.0",
+  "runHash": "2c4d3f38b338cb8c82a78840b5e0c820c05fd5cf02fd8c2a4da1c786a2ca56d5",
+  "schemaVersion": "1.0",
+  "status": "pass"
+}

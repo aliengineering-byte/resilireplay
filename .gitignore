@@ -10,3 +10,4 @@ test-results/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+/docs/case-studies/playwright-mcp/browsers/
