@@ -1,0 +1,43 @@
+name: Field-test submission
+description: Share a sanitized, reproducible ResiliReplay result
+title: "[Field test]: "
+labels: [field-test]
+body:
+  - type: markdown
+    attributes:
+      value: A field test is bounded reliability evidence, not a security certification or adopter claim.
+  - type: input
+    id: source
+    attributes:
+      label: Public target and pinned revision
+      placeholder: Repository URL, package@version, and gitHead or commit
+    validations:
+      required: true
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Declared test boundary
+      description: Transport, exact allowlist, expected side effects, data used, authorization, and cleanup.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results and limitations
+      description: Separate declared expectations, actual results, blocked attempts, failed recoveries, and what was not tested.
+    validations:
+      required: true
+  - type: input
+    id: evidence
+    attributes:
+      label: Reproducible public evidence URL
+      description: Link to sanitized config, campaign, hashes, compact report, and executable regression when generated.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I was authorized to run this test and removed credentials, private paths, personal data, and production traces.
+          required: true

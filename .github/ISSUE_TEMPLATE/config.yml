@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Questions and field-test discussion
+    url: https://github.com/aliengineering-byte/resilireplay/discussions
+    about: Ask usage questions or discuss a sanitized result before filing an issue.
   - name: Private security report
     url: https://github.com/aliengineering-byte/resilireplay/security/advisories/new
     about: Report vulnerabilities or sensitive security issues privately.

@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml)
 [![Secret scan](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml)
+[![Field validation](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml)
+[![Pages](https://github.com/aliengineering-byte/resilireplay/actions/workflows/pages.yml/badge.svg)](https://aliengineering-byte.github.io/resilireplay/)
 [![npm](https://img.shields.io/npm/v/resilireplay)](https://www.npmjs.com/package/resilireplay)
 [![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.3.0)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
@@ -9,6 +11,8 @@
 **MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails, whether it recovers safely, and whether that recovery remains fixed.**
 
 ResiliReplay Studio & Campaigns is a local-first reliability lab for AI agents and MCP servers. Import a reviewed Inspector-shaped target, inject deterministic faults, watch the causal timeline, approve a baseline, block regressions in CI, and export an executable test. The verified path needs no API key, Docker, external account, telemetry, or LLM judge.
+
+[Open the product page](https://aliengineering-byte.github.io/resilireplay/) | [Run a five-minute field test](docs/FIELD_TEST_GUIDE.md) | [Inspect three reproducible external cases](docs/field-validation/FIELD_RESULTS.md)
 
 ![Verified ResiliReplay Studio campaign](docs/assets/studio-campaign.png)
 
@@ -39,6 +43,24 @@ npm install --global resilireplay@0.3.0
 resilireplay --version
 resilireplay --help
 ```
+
+## Field evidence
+
+The immutable public `resilireplay@0.3.0` package was independently installed into each case and
+used against three actively maintained external MCP projects over their documented local stdio path:
+
+| Project                  | Reviewed operation            | Declared campaign result                                 | Reproduce                                                |
+| ------------------------ | ----------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| MCP Everything Server    | `echo`                        | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/mcp-everything/README.md) |
+| Microsoft Playwright MCP | blank-page `browser_snapshot` | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/playwright-mcp/README.md) |
+| UI5 MCP Server           | `get_guidelines`              | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/ui5-mcp/README.md)        |
+
+Each case pins the public package and upstream source revision, declares its authorization and
+side-effect boundary, preserves actual and expected results separately, provides SHA-256 manifests,
+and includes an executable sanitized regression. These maintainer-run tests are bounded evidence,
+not upstream endorsements, adopter claims, rankings, or security certifications. Read the
+[selection record](docs/field-validation/SERVER_SELECTION.md) and
+[complete results](docs/field-validation/FIELD_RESULTS.md).
 
 ## Studio
 
@@ -127,6 +149,7 @@ For a tool-calling campaign, supply the separately reviewed `campaign-confirmati
 ```console
 pnpm quality
 pnpm test:e2e
+pnpm site:test
 pnpm demo:studio
 pnpm release:gates
 ```
@@ -144,6 +167,6 @@ Read [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), [Studio sec
 
 ## Project
 
-ResiliReplay is Apache-2.0 licensed. Contributions must remain deterministic, bounded, secure by default, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [demo guide](docs/DEMO.md), and [v0.3.0 release evidence](RELEASE_EVIDENCE.md).
+ResiliReplay is Apache-2.0 licensed. Contributions must remain deterministic, bounded, secure by default, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), the [field-test guide](docs/FIELD_TEST_GUIDE.md), [adopter policy](ADOPTERS.md), [demo guide](docs/DEMO_60_SECONDS.md), and [v0.3.0 release evidence](RELEASE_EVIDENCE.md).
 
 Built and maintained by **Ali**.
