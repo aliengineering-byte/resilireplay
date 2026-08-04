@@ -15,8 +15,11 @@
   box-sizing: border-box;
 }
 html {
-  overflow-x: clip;
   scroll-behavior: smooth;
+}
+html,
+body {
+  overflow-x: clip;
 }
 body {
   margin: 0;
