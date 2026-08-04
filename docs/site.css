@@ -294,6 +294,10 @@ pre {
     Consolas,
     monospace;
 }
+pre code {
+  display: block;
+  width: 100%;
+}
 .copy-button {
   position: absolute;
   top: 12px;
