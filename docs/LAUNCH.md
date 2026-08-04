@@ -1,52 +1,40 @@
-# Launch reference
+# v0.3.0 launch reference
 
-This document keeps the public launch copy aligned with verified repository behavior. It does not
-record a Hacker News submission as completed; submission status and the final public thread URL are
-verified separately at launch time.
+This copy stays inside verified product behavior. It does not claim that a community submission was
+made; any external submission status must be checked separately.
 
-## Repository
+## Public links
 
-- Public URL: https://github.com/aliengineering-byte/resilireplay
-- Release: https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.2.0
-- No-key path: `pnpm install --frozen-lockfile && pnpm build && pnpm demo`
-- MCP path: `pnpm demo:mcp`
-- Scenario path: `pnpm exec resilireplay test scenarios`
+- Repository: https://github.com/aliengineering-byte/resilireplay
+- Release: https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.3.0
+- npm: https://www.npmjs.com/package/resilireplay/v/0.3.0
+- Verified path: `pnpm install --frozen-lockfile && pnpm build && pnpm demo:studio`
 
-## Show HN title
+## Suggested Show HN title
 
-> Show HN: ResiliReplay – Chaos testing for AI agents and MCP servers
+> Show HN: ResiliReplay Studio – prove MCP recovery and keep it fixed
 
-## First comment
+## Suggested first comment
 
-> I built ResiliReplay because most agent demos show the happy path, while real failures happen after
-> a tool times out, returns malformed data, loses a file, or corrupts state halfway through a
-> workflow.
+> I built ResiliReplay because interactive MCP debugging shows the happy path well, but it does not
+> answer whether a server recovers safely from a timeout, error, malformed response, or unsafe tool
+> output—and whether that recovery stays fixed.
 >
-> ResiliReplay is a model-agnostic TypeScript toolkit for chaos-testing AI agents and MCP servers. It
-> records canonical JSONL traces, injects deterministic faults, measures recovery, and turns
-> minimized causal traces into regression tests.
+> v0.3.0 adds a loopback Studio and versioned campaigns over the existing deterministic fault, trace,
+> MCP, reporting, and regression engines. A campaign imports a reviewed Inspector-shaped config,
+> declares seeds/budgets/expectations, runs resilient and intentionally vulnerable controls, compares
+> an approved baseline, and exports an executable causal regression.
 >
-> The current version includes agent and MCP fault injection, MCP Inspector configuration import,
-> real authenticated Streamable HTTP coverage, terminal/JSON/HTML/JUnit/SARIF reports, a loopback
-> provider-fault proxy, and deterministic demos that require no model API key.
+> The quick start uses local repository fixtures, needs no model key or external account, and covers
+> stdio plus authenticated Streamable HTTP. Tool calls require an explicit allowlist and confirmation
+> of the reviewed campaign hash.
 >
-> The quickest way to try it is the no-key demo in the README. I also included vulnerable and
-> resilient MCP examples so the findings can be reproduced locally.
+> The sharp edges are documented: commands are not OS-sandboxed, allowlisted MCP tools can have side
+> effects, Studio is local rather than hosted, Inspector OAuth/modern protocol-era settings are not
+> imported, and hashes provide integrity rather than signer identity.
 >
-> The main limitations today are that Inspector interactive OAuth and modern protocol-era extensions
-> are not imported, `record` is not an OS sandbox, MCP tool calls may have server-side effects, and
-> causal minimization works best when adapters provide parent/cause IDs.
->
-> I would especially value criticism of the fault model, recovery scoring, trace-to-test format, and
-> which agent-framework integrations would make this useful in real CI.
+> I would value criticism of the campaign schema, baseline thresholds, causal evidence, and whether
+> this is useful in real MCP CI.
 
-This copy makes no benchmark, novelty, adoption, or universal security claim and does not ask for
-votes, stars, or coordinated promotion.
-
-## Local launch verification
-
-The v0.2.0 release evidence is maintained in [`RELEASE_EVIDENCE.md`](../RELEASE_EVIDENCE.md). The
-release gate covers Windows and Linux, Node 20 and 22, real stdio and Streamable HTTP, generated
-regression execution, clean package installation, and repository hygiene.
-
-The `v0.1.0` tag remains immutable. The Inspector integration is released separately as `v0.2.0`.
+This copy makes no novelty, adoption, benchmark, or universal security claim and asks for no votes or
+coordinated promotion.

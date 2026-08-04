@@ -10,6 +10,8 @@
     { "path": "../core" },
     { "path": "../trace" },
     { "path": "../reporters" },
-    { "path": "../mcp-chaos" }
+    { "path": "../mcp-chaos" },
+    { "path": "../campaign" },
+    { "path": "../studio" }
   ]
 }

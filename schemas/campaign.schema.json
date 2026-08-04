@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.3.0/schemas/campaign.schema.json",
+  "title": "ResiliReplay Campaign 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "kind", "id", "description", "targets", "scenarios"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "kind": { "const": "resilireplay-campaign" },
+    "id": { "$ref": "#/$defs/id" },
+    "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "seed": { "type": "integer", "default": 42 },
+    "budgets": { "$ref": "#/$defs/budgets" },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": { "$ref": "#/$defs/target" }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/scenario" }
+    },
+    "thresholds": { "$ref": "#/$defs/thresholds" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,63}$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "not": {
+        "anyOf": [
+          { "pattern": "^(?:[A-Za-z]:[\\\\/]|[\\\\/])" },
+          { "pattern": "(^|[\\\\/])\\.\\.([\\\\/]|$)" },
+          { "pattern": "[\\u0000-\\u001f\\u007f]" }
+        ]
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "concurrency": { "type": "integer", "minimum": 1, "maximum": 8, "default": 1 },
+        "retries": { "type": "integer", "minimum": 0, "maximum": 10, "default": 1 },
+        "scenarioTimeoutMs": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 300000,
+          "default": 10000
+        },
+        "totalTimeoutMs": { "type": "integer", "minimum": 100, "maximum": 900000, "default": 60000 }
+      }
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "trace"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "kind": { "const": "trace" },
+            "trace": { "$ref": "#/$defs/relativePath" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "kind", "inspectorConfig", "server"],
+          "properties": {
+            "id": { "$ref": "#/$defs/id" },
+            "kind": { "const": "mcp" },
+            "inspectorConfig": { "$ref": "#/$defs/relativePath" },
+            "server": { "type": "string", "minLength": 1, "maxLength": 128 },
+            "allowTools": {
+              "type": "array",
+              "maxItems": 32,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "default": []
+            },
+            "allowRemote": { "type": "boolean", "default": false }
+          }
+        }
+      ]
+    },
+    "fault": {
+      "enum": [
+        "none",
+        "latency",
+        "timeout",
+        "http-429",
+        "http-500",
+        "http-502",
+        "http-503",
+        "http-529",
+        "connection-reset",
+        "truncated-response",
+        "malformed-json",
+        "duplicated-response",
+        "stale-response",
+        "tool-exception",
+        "permission-denied",
+        "missing-file",
+        "invalid-schema",
+        "missing-required-field",
+        "corrupt-tool-result",
+        "partial-tool-result",
+        "oversized-tool-output",
+        "contradictory-tool-output",
+        "delayed-tool-result",
+        "duplicated-tool-invocation",
+        "lost-handoff",
+        "duplicated-handoff",
+        "delayed-handoff",
+        "wrong-recipient-handoff",
+        "stale-shared-state",
+        "conflicting-agent-instructions",
+        "false-intermediate-result",
+        "bounded-context-corruption",
+        "repeated-step-loop",
+        "mcp-malformed-tools-list",
+        "mcp-renamed-tool",
+        "mcp-missing-tool",
+        "mcp-incompatible-argument-schema",
+        "mcp-tool-timeout",
+        "mcp-tool-error",
+        "mcp-oversized-content",
+        "mcp-protocol-version-mismatch",
+        "mcp-invalid-jsonrpc-id",
+        "mcp-malicious-canary-instruction",
+        "mcp-permission-capability-mismatch",
+        "mcp-canary-secret-leakage-attempt"
+      ]
+    },
+    "assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "outcome": { "enum": ["passed", "failed"], "default": "passed" },
+        "safeRecovery": { "type": "boolean" },
+        "maxRecoveryLatencyMs": { "type": "integer", "minimum": 0 },
+        "maxRetries": { "type": "integer", "minimum": 0 },
+        "noDuplicateSideEffects": { "type": "boolean", "default": true },
+        "safetyPolicyCompliance": { "type": "boolean", "default": true },
+        "minScore": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "adapterEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputTokens": { "type": "integer", "minimum": 0 },
+        "outputTokens": { "type": "integer", "minimum": 0 },
+        "costUsd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target", "fault"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "target": { "$ref": "#/$defs/id" },
+        "fault": { "$ref": "#/$defs/fault" },
+        "event": {
+          "enum": [
+            "run_started",
+            "model_request",
+            "model_response",
+            "tool_discovered",
+            "tool_requested",
+            "tool_result",
+            "agent_handoff",
+            "shared_state_read",
+            "shared_state_write",
+            "retry",
+            "recovery_action",
+            "validation_result",
+            "safety_violation",
+            "run_completed",
+            "run_failed"
+          ]
+        },
+        "occurrence": { "type": "integer", "minimum": 1, "default": 1 },
+        "parameters": { "type": "object", "default": {} },
+        "seed": { "type": "integer" },
+        "recovery": { "enum": ["none", "retry"], "default": "none" },
+        "assertions": { "$ref": "#/$defs/assertions" },
+        "adapterEvidence": { "$ref": "#/$defs/adapterEvidence" }
+      }
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxScoreDrop": { "type": "integer", "minimum": 0, "default": 0 },
+        "maxRetryIncrease": { "type": "integer", "minimum": 0, "default": 0 },
+        "maxDuplicateSideEffectIncrease": { "type": "integer", "minimum": 0, "default": 0 },
+        "maxRecoveryLatencyIncreaseMs": { "type": "integer", "minimum": 0 },
+        "maxTokenWasteIncrease": { "type": "integer", "minimum": 0 },
+        "maxCostIncreaseUsd": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

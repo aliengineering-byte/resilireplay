@@ -5,10 +5,31 @@ inputs:
     description: Scenario directory
     required: false
     default: scenarios
+  campaign:
+    description: Optional campaign YAML/JSON path; when set, the scenario directory is not run
+    required: false
+    default: ""
+  campaign-confirmation-hash:
+    description: Exact reviewed hash required only when the campaign allowlists tool calls
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
     - shell: bash
       run: corepack enable && pnpm install --frozen-lockfile && pnpm build
     - shell: bash
-      run: node packages/cli/dist/bin.js test "${{ inputs.scenarios }}"
+      env:
+        RESILIREPLAY_ACTION_SCENARIOS: ${{ inputs.scenarios }}
+        RESILIREPLAY_ACTION_CAMPAIGN: ${{ inputs.campaign }}
+        RESILIREPLAY_ACTION_CONFIRMATION: ${{ inputs.campaign-confirmation-hash }}
+      run: |
+        if [[ -n "$RESILIREPLAY_ACTION_CAMPAIGN" ]]; then
+          arguments=(campaign run "$RESILIREPLAY_ACTION_CAMPAIGN")
+          if [[ -n "$RESILIREPLAY_ACTION_CONFIRMATION" ]]; then
+            arguments+=(--confirm-tools "$RESILIREPLAY_ACTION_CONFIRMATION")
+          fi
+          node packages/cli/dist/bin.js "${arguments[@]}"
+        else
+          node packages/cli/dist/bin.js test "$RESILIREPLAY_ACTION_SCENARIOS"
+        fi

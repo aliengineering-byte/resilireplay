@@ -2,6 +2,34 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.3.0] - 2026-08-04
+
+### Added
+
+- Loopback-only ResiliReplay Studio with target review, campaign builder, cancellable live runs,
+  causal timeline, findings, baseline comparison, generated regressions, and evidence downloads.
+- Strict versioned YAML/JSON campaign schema, stable ordered runner, bounded concurrency/retries/time,
+  explicit expectations, safe tool allowlists, and real stdio plus Streamable HTTP coverage.
+- Versioned approved baselines and fail-closed comparisons with terminal, JSON, HTML, Markdown, JUnit,
+  SARIF, and GitHub step-summary reports.
+- Verified no-key Studio demo, real PNG/GIF/transcript, browser acceptance and WCAG A/AA checks,
+  hostile-input fuzzing, 100-cycle listener cleanup, and a 20,000-event stress gate.
+
+### Changed
+
+- The self-contained CLI now includes `studio` and `campaign init|validate|run|approve|compare`.
+- MCP recovery honors retry budgets from 0 through 10 and campaigns require an exact reviewed hash
+  before invoking explicitly allowlisted tools.
+- All workspace package versions and generated report version labels are aligned at 0.3.0.
+
+### Security
+
+- Studio enforces exact loopback Host/Origin, ephemeral HttpOnly SameSite sessions, CSRF tokens,
+  JSON/content-size limits, contained real paths, allowlisted downloads, CSP, and graceful cleanup.
+- Campaign input rejects aliases, unknown fields, absolute/traversing paths, symlink escapes, unsafe
+  remote targets, and unverifiable or incomplete baseline evidence.
+- Repeated object references are sanitized faithfully while actual cycles remain safely marked.
+
 ## [0.2.1] - 2026-08-03
 
 ### Fixed

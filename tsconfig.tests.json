@@ -5,6 +5,7 @@
     "declaration": false,
     "declarationMap": false,
     "noEmit": true,
+    "lib": ["ES2023", "DOM"],
     "types": ["node", "vitest/globals"]
   },
   "include": ["tests/**/*.ts", "vitest.config.ts"]

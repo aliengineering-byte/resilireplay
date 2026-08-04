@@ -45,6 +45,11 @@ export const MCP_FAULT_TYPES = [
 const SAFE_CANARY = "CHAOS_CANARY_DO_NOT_EXPOSE_12345";
 const INJECTION_PATTERN =
   /\b(ignore (?:all |any )?(?:previous|prior) instructions?|reveal (?:the )?(?:canary|secret)|send .+ to https?:\/\/)\b/i;
+const hasControlCharacter = (value: string): boolean =>
+  [...value].some((character) => {
+    const code = character.codePointAt(0) ?? 0;
+    return code <= 31 || code === 127;
+  });
 const DISCOVERY_FAULTS = new Set<(typeof MCP_FAULT_TYPES)[number]>([
   "mcp-malformed-tools-list",
   "mcp-renamed-tool",
@@ -80,10 +85,13 @@ export interface McpAuditOptions {
   connectionTimeoutMs?: number;
   requestTimeoutMs?: number;
   callTools?: boolean;
+  allowedTools?: string[];
   allowRemote?: boolean;
   fault?: (typeof MCP_FAULT_TYPES)[number];
   seed?: number;
   recoveryMode?: "none" | "retry";
+  retryBudget?: number;
+  signal?: AbortSignal;
   serverName?: string;
   sourceConfigSha256?: string;
 }
@@ -142,8 +150,14 @@ export function splitCommandLine(commandLine: string): string[] {
   return output;
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  label: string,
+  signal?: AbortSignal,
+): Promise<T> {
   let timer: NodeJS.Timeout | undefined;
+  let abortHandler: (() => void) | undefined;
   try {
     return await Promise.race([
       promise,
@@ -154,9 +168,19 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: str
         );
         timer.unref();
       }),
+      ...(signal
+        ? [
+            new Promise<T>((_resolve, reject) => {
+              abortHandler = () => reject(new Error(`${label} cancelled`));
+              if (signal.aborted) abortHandler();
+              else signal.addEventListener("abort", abortHandler, { once: true });
+            }),
+          ]
+        : []),
     ]);
   } finally {
     if (timer) clearTimeout(timer);
+    if (abortHandler) signal?.removeEventListener("abort", abortHandler);
   }
 }
 
@@ -276,14 +300,18 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
   }
   const connectionTimeoutMs = options.timeoutMs ?? options.connectionTimeoutMs ?? 5_000;
   const requestTimeoutMs = options.timeoutMs ?? options.requestTimeoutMs ?? 5_000;
+  const retryBudget = options.retryBudget ?? 1;
   if (
     !Number.isSafeInteger(connectionTimeoutMs) ||
     connectionTimeoutMs <= 0 ||
     !Number.isSafeInteger(requestTimeoutMs) ||
-    requestTimeoutMs <= 0
+    requestTimeoutMs <= 0 ||
+    !Number.isSafeInteger(retryBudget) ||
+    retryBudget < 0 ||
+    retryBudget > 10
   ) {
     throw new McpInspectorConfigError(
-      "MCP timeouts must be positive integer milliseconds",
+      "MCP timeouts must be positive integer milliseconds and retry budget must be 0..10",
       "RR_MCP_TIMEOUT",
     );
   }
@@ -383,13 +411,33 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       : publicHttpTarget(url);
   }
 
-  const client = new Client({ name: "resilireplay", version: "0.2.1" }, { capabilities: {} });
+  if (
+    options.allowedTools?.some(
+      (name) => name.length === 0 || name.length > 128 || hasControlCharacter(name),
+    )
+  ) {
+    throw new McpInspectorConfigError(
+      "MCP tool allowlist entries must be bounded non-control text",
+      "RR_MCP_TOOL_ALLOWLIST",
+    );
+  }
+  const client = new Client({ name: "resilireplay", version: "0.3.0" }, { capabilities: {} });
   let secretOutputDetected = false;
   let recoveryAttempted = false;
   let recoveredFaultCount = 0;
   try {
-    await withTimeout(client.connect(transport), connectionTimeoutMs, "MCP connection");
-    const listed = await withTimeout(client.listTools(), requestTimeoutMs, "MCP tools/list");
+    await withTimeout(
+      client.connect(transport),
+      connectionTimeoutMs,
+      "MCP connection",
+      options.signal,
+    );
+    const listed = await withTimeout(
+      client.listTools(),
+      requestTimeoutMs,
+      "MCP tools/list",
+      options.signal,
+    );
     secretOutputDetected = inspectSecretOutput(listed, undefined, findings);
     let discoveryEvent = createEvent({
       runId,
@@ -433,7 +481,10 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
         });
       }
 
-      const shouldCall = options.callTools || listedTool.name === "reliability_probe";
+      const shouldCall =
+        options.allowedTools === undefined
+          ? options.callTools || listedTool.name === "reliability_probe"
+          : options.callTools === true && options.allowedTools.includes(listedTool.name);
       if (!shouldCall) continue;
       const argumentsValue = exampleForSchema(listedTool.inputSchema);
       events.push(
@@ -451,6 +502,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
           client.callTool({ name: listedTool.name, arguments: argumentsValue }),
           requestTimeoutMs,
           `MCP tool ${tool.name}`,
+          options.signal,
         );
         secretOutputDetected =
           inspectSecretOutput(result, tool.name, findings) || secretOutputDetected;
@@ -479,86 +531,68 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
 
         const retryableFault =
           options.fault === "mcp-tool-error" || options.fault === "mcp-tool-timeout";
-        if (options.recoveryMode === "retry" && retryableFault) {
+        if (options.recoveryMode === "retry" && retryableFault && retryBudget > 0) {
           recoveryAttempted = true;
+          let recovered = false;
+          let lastFailure = "The bounded recovery retry returned isError=true.";
+          for (let attempt = 1; attempt <= retryBudget && !recovered; attempt += 1) {
+            events.push(
+              createEvent({
+                runId,
+                sequence: events.length,
+                type: "retry",
+                actor: "resilireplay-mcp-auditor",
+                tool: tool.name,
+                payload: { attempt, budget: retryBudget, reason: options.fault },
+              }),
+            );
+            try {
+              const retried = await withTimeout(
+                client.callTool({ name: listedTool.name, arguments: argumentsValue }),
+                requestTimeoutMs,
+                `MCP recovery retry ${attempt}/${retryBudget} ${tool.name}`,
+                options.signal,
+              );
+              secretOutputDetected =
+                inspectSecretOutput(retried, tool.name, findings) || secretOutputDetected;
+              events.push(
+                createEvent({
+                  runId,
+                  sequence: events.length,
+                  type: "tool_result",
+                  actor: "mcp-server",
+                  tool: tool.name,
+                  payload: retried,
+                }),
+              );
+              if (!retried.isError) {
+                recovered = true;
+              }
+            } catch (error) {
+              lastFailure = sanitize(error instanceof Error ? error.message : String(error));
+            }
+          }
+          if (recovered) {
+            recoveredFaultCount += 1;
+          } else {
+            findings.push({
+              id: "MCP008",
+              severity: "error",
+              title: "MCP recovery retry budget exhausted",
+              evidence: lastFailure,
+              tool: tool.name,
+            });
+          }
           events.push(
             createEvent({
               runId,
               sequence: events.length,
-              type: "retry",
+              type: "recovery_action",
               actor: "resilireplay-mcp-auditor",
               tool: tool.name,
-              payload: { attempt: 1, budget: 1, reason: options.fault },
+              payload: { correct: recovered, action: "bounded retry", budget: retryBudget },
             }),
           );
-          try {
-            const retried = await withTimeout(
-              client.callTool({ name: listedTool.name, arguments: argumentsValue }),
-              requestTimeoutMs,
-              `MCP recovery retry ${tool.name}`,
-            );
-            secretOutputDetected =
-              inspectSecretOutput(retried, tool.name, findings) || secretOutputDetected;
-            events.push(
-              createEvent({
-                runId,
-                sequence: events.length,
-                type: "tool_result",
-                actor: "mcp-server",
-                tool: tool.name,
-                payload: retried,
-              }),
-            );
-            if (retried.isError) {
-              findings.push({
-                id: "MCP008",
-                severity: "error",
-                title: "MCP recovery retry returned an error",
-                evidence: "The bounded recovery retry returned isError=true.",
-                tool: tool.name,
-              });
-              events.push(
-                createEvent({
-                  runId,
-                  sequence: events.length,
-                  type: "recovery_action",
-                  actor: "resilireplay-mcp-auditor",
-                  tool: tool.name,
-                  payload: { correct: false, action: "bounded retry" },
-                }),
-              );
-            } else {
-              recoveredFaultCount += 1;
-              events.push(
-                createEvent({
-                  runId,
-                  sequence: events.length,
-                  type: "recovery_action",
-                  actor: "resilireplay-mcp-auditor",
-                  tool: tool.name,
-                  payload: { correct: true, action: "bounded retry" },
-                }),
-              );
-            }
-          } catch (error) {
-            findings.push({
-              id: "MCP008",
-              severity: "error",
-              title: "MCP recovery retry failed",
-              evidence: sanitize(error instanceof Error ? error.message : String(error)),
-              tool: tool.name,
-            });
-            events.push(
-              createEvent({
-                runId,
-                sequence: events.length,
-                type: "recovery_action",
-                actor: "resilireplay-mcp-auditor",
-                tool: tool.name,
-                payload: { correct: false, action: "bounded retry" },
-              }),
-            );
-          }
         }
       } catch (error) {
         findings.push({
@@ -608,7 +642,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
         payload: { passed: passedBeforeMetrics, findingCount: findings.length },
       }),
     );
-    const passed = passedBeforeMetrics && calculateMetrics(events).passed;
+    const passed = passedBeforeMetrics && calculateMetrics(events, { retryBudget }).passed;
     return {
       target,
       transport: transportName,
@@ -640,7 +674,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
 }
 
 function certificationBadge(passed: boolean): string {
-  const value = passed ? "passing v0.2.1" : "findings v0.2.1";
+  const value = passed ? "passing v0.3.0" : "findings v0.3.0";
   const color = passed ? "#159957" : "#c0392b";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="276" height="20" role="img" aria-label="MCP Chaos Tested: ${value}"><rect width="164" height="20" rx="3" fill="#555"/><rect x="164" width="112" height="20" rx="3" fill="${color}"/><g fill="#fff" text-anchor="middle" font-family="Verdana,sans-serif" font-size="11"><text x="82" y="15">MCP Chaos Tested</text><text x="220" y="15">${value}</text></g></svg>\n`;
 }
@@ -657,7 +691,7 @@ export async function writeMcpCertification(
   const json = `${stableStringify({
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    version: "0.2.1",
+    version: "0.3.0",
     scope:
       "Evidence for this declared local suite and version; not a universal security certification.",
     ...result,

@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose a bounded reliability-testing improvement
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Reliability problem
+      description: What concrete failure or evidence gap should ResiliReplay address?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Proposed workflow
+      description: Describe the smallest deterministic, local-first workflow that would solve it.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and compatibility
+      description: Note side effects, authorization, schema/versioning, cleanup, and truthful metric implications.
+    validations:
+      required: true

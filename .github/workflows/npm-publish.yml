@@ -36,5 +36,6 @@ jobs:
           fi
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality
+      - run: pnpm demo:studio
       - name: Publish with npm Trusted Publishing
         run: npm publish packages/cli --access public
