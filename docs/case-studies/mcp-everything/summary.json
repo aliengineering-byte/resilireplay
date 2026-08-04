@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "1.0",
+  "kind": "resilireplay-field-case-summary",
+  "productVersion": "0.3.0",
+  "project": {
+    "name": "MCP Everything Server",
+    "repository": "https://github.com/modelcontextprotocol/servers",
+    "package": "@modelcontextprotocol/server-everything@2026.7.4",
+    "revision": "6dd0a683e198783e30feabf7abaf42f925bd18b1",
+    "license": "Apache-2.0/MIT transition; documentation CC-BY-4.0"
+  },
+  "authorizationBoundary": {
+    "transport": "stdio",
+    "remoteNetworkTarget": false,
+    "allowedTool": "echo",
+    "toolClassification": "read-only, idempotent, disposable local state",
+    "productionData": false,
+    "credentials": false
+  },
+  "campaign": {
+    "id": "mcp-everything-field-test",
+    "hash": "334a5de0e11a67fcb1fc0581232b3137075e7f8d25795d991f3d459ab5c8e907",
+    "status": "complete",
+    "durationMs": 2697,
+    "runHash": "2c4d3f38b338cb8c82a78840b5e0c820c05fd5cf02fd8c2a4da1c786a2ca56d5",
+    "targetSourceSha256": "40d5040e597007796dc0ea848ebe0c8c730fd9064509f50989c791a717ade607",
+    "summary": {
+      "cancelledCount": 0,
+      "failedCount": 0,
+      "faultCoverage": 1,
+      "invalidCount": 0,
+      "passed": true,
+      "passedCount": 3,
+      "total": 3
+    }
+  },
+  "scenarios": [
+    {
+      "id": "clean-control",
+      "fault": "none",
+      "faultApplied": false,
+      "declaredResult": "passed",
+      "observedOutcome": "passed",
+      "durationMs": 866,
+      "recoverySuccess": true,
+      "retryCount": 0,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "not-applicable",
+        "verified": false
+      }
+    },
+    {
+      "id": "tool-error-retry",
+      "fault": "mcp-tool-error",
+      "faultApplied": true,
+      "declaredResult": "passed",
+      "observedOutcome": "passed",
+      "durationMs": 870,
+      "recoverySuccess": true,
+      "retryCount": 1,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "not-applicable",
+        "verified": false
+      }
+    },
+    {
+      "id": "canary-negative-control",
+      "fault": "mcp-malicious-canary-instruction",
+      "faultApplied": true,
+      "declaredResult": "passed",
+      "observedOutcome": "failed",
+      "durationMs": 960,
+      "recoverySuccess": false,
+      "retryCount": 0,
+      "duplicateSideEffectAttempts": 0,
+      "regression": {
+        "status": "generated",
+        "verified": true,
+        "directory": "regression"
+      }
+    }
+  ],
+  "baseline": {
+    "hash": "71b617302c02edf2f52725d31fdd53dd279ccb67e971f55c184e73d03f9d0de8",
+    "sourceRunHash": "2c4d3f38b338cb8c82a78840b5e0c820c05fd5cf02fd8c2a4da1c786a2ca56d5",
+    "comparisonStatus": "pass",
+    "comparisonHash": "259bb5396488c9a3ea514a3796c5f52cc879c9b9282ed3c30ea02f1460c9c398",
+    "differences": 0
+  },
+  "cleanup": {
+    "serverProcessesRemaining": 0,
+    "listenersRemaining": 0
+  },
+  "disclosure": "Synthetic injected failures are reliability test conditions, not vulnerabilities. This is reliability evidence, not a security certification."
+}

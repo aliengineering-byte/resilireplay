@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ui5": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["node_modules/@ui5/mcp-server/bin/ui5mcp.js"],
+      "cwd": ".",
+      "connectionTimeout": 10000,
+      "requestTimeout": 10000
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@ui5/mcp-server": "0.2.17",
+    "resilireplay": "0.3.0"
+  }
+}

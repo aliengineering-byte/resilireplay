@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "node_modules/@playwright/mcp/cli.js",
+        "--headless",
+        "--browser",
+        "chromium",
+        "--isolated",
+        "--block-service-workers",
+        "--output-mode",
+        "stdout"
+      ],
+      "cwd": ".",
+      "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "browsers"
+      },
+      "connectionTimeout": 20000,
+      "requestTimeout": 20000
+    }
+  }
+}
