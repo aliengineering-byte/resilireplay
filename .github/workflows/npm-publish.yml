@@ -3,6 +3,12 @@ name: Publish npm package
 on:
   push:
     tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Existing v-prefixed release tag to publish
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -14,11 +20,15 @@ concurrency:
 
 jobs:
   publish:
-    if: github.repository == 'aliengineering-byte/resilireplay' && github.ref_type == 'tag'
+    if: >-
+      github.repository == 'aliengineering-byte/resilireplay' &&
+      (github.ref_type == 'tag' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment: npm
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref }}
       - uses: pnpm/action-setup@v6
         with:
           version: 10.14.0
@@ -28,14 +38,16 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - name: Verify release tag and package version
         shell: bash
+        env:
+          RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.ref_name }}
         run: |
           package_version="$(node --print "require('./packages/cli/package.json').version")"
-          if [[ "v${package_version}" != "${GITHUB_REF_NAME}" ]]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match resilireplay ${package_version}." >&2
+          if [[ "v${package_version}" != "${RELEASE_REF}" ]]; then
+            echo "Tag ${RELEASE_REF} does not match resilireplay ${package_version}." >&2
             exit 1
           fi
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality
       - run: pnpm demo:studio
       - name: Publish with npm Trusted Publishing
-        run: npm publish packages/cli --access public
+        run: npm publish ./packages/cli --access public
