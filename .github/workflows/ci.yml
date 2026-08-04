@@ -38,6 +38,10 @@ jobs:
           RESILIREPLAY_NO_NETWORK: "1"
       - name: MCP Inspector stdio and authenticated HTTP demo
         run: pnpm demo:mcp
+      - name: Studio and campaign fixture demo
+        run: pnpm demo:studio
+      - name: Lifecycle, stress, and package-size gates
+        run: pnpm release:gates
       - uses: github/codeql-action/upload-sarif@v4
         if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
         with:
@@ -81,3 +85,18 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm package:smoke
+
+  studio-browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e

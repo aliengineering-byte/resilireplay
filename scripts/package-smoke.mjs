@@ -20,7 +20,10 @@ for (const candidate of npmCandidates) {
     // Try the next official Node distribution layout.
   }
 }
-if (!npmCli) throw new Error("npm CLI was not found beside the active Node.js runtime");
+const packageManagerCli = process.env.npm_execpath;
+if (!npmCli && !packageManagerCli) {
+  throw new Error("Neither npm nor the invoking package manager could be located");
+}
 
 await rm(artifacts, { recursive: true, force: true });
 await mkdir(project, { recursive: true });
@@ -47,7 +50,25 @@ function runNpm(arguments_, cwd) {
   }
 }
 
-runNpm(["pack", packageDirectory, "--pack-destination", artifacts], root);
+function runInvokingPackageManager(arguments_, cwd) {
+  const result = spawnSync(process.execPath, [packageManagerCli, ...arguments_], {
+    cwd,
+    stdio: "inherit",
+    windowsHide: true,
+    env: {
+      ...process.env,
+      PNPM_HOME: process.env.PNPM_HOME,
+    },
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `package manager ${arguments_.join(" ")} failed: ${result.error?.message ?? `exit ${result.status}`}`,
+    );
+  }
+}
+
+if (npmCli) runNpm(["pack", packageDirectory, "--pack-destination", artifacts], root);
+else runInvokingPackageManager(["pack", "--pack-destination", artifacts], packageDirectory);
 
 const sourceManifest = JSON.parse(await readFile(join(packageDirectory, "package.json"), "utf8"));
 const tarballName = (await readdir(artifacts)).find(
@@ -68,10 +89,17 @@ await writeFile(
   )}\n`,
   "utf8",
 );
-runNpm(
-  ["install", "--ignore-scripts", "--package-lock=false", join(artifacts, tarballName)],
-  project,
-);
+if (npmCli) {
+  runNpm(
+    ["install", "--ignore-scripts", "--package-lock=false", join(artifacts, tarballName)],
+    project,
+  );
+} else {
+  runInvokingPackageManager(
+    ["add", "--ignore-scripts", "--save-exact", join(artifacts, tarballName)],
+    project,
+  );
+}
 
 const installedRoot = join(project, "node_modules", "resilireplay");
 const installedManifest = JSON.parse(await readFile(join(installedRoot, "package.json"), "utf8"));

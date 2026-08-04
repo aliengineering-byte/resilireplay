@@ -21,12 +21,17 @@ function visit(value: unknown, seen: WeakSet<object>): unknown {
   if (value === null || typeof value !== "object") return value;
   if (seen.has(value)) return "[CIRCULAR]";
   seen.add(value);
-  if (Array.isArray(value)) return value.map((entry) => visit(entry, seen));
+  if (Array.isArray(value)) {
+    const output = value.map((entry) => visit(entry, seen));
+    seen.delete(value);
+    return output;
+  }
 
   const output: Record<string, unknown> = {};
   for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
     output[key] = SENSITIVE_KEY.test(key) ? REDACTED : visit(entry, seen);
   }
+  seen.delete(value);
   return output;
 }
 

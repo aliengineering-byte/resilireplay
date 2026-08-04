@@ -10,6 +10,8 @@ export default defineConfig({
       "@resilireplay/trace": `${root}packages/trace/src/index.ts`,
       "@resilireplay/reporters": `${root}packages/reporters/src/index.ts`,
       "@resilireplay/mcp-chaos": `${root}packages/mcp-chaos/src/index.ts`,
+      "@resilireplay/campaign": `${root}packages/campaign/src/index.ts`,
+      "@resilireplay/studio": `${root}packages/studio/src/index.ts`,
     },
   },
   test: {

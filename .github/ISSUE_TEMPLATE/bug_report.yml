@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a reproducible ResiliReplay defect without private data
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not paste credentials, production traces, private MCP data, or destructive proofs of concept.
+  - type: input
+    id: version
+    attributes:
+      label: ResiliReplay version
+      placeholder: 0.3.0
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options:
+        - Studio
+        - Campaign CLI
+        - MCP audit
+        - Trace/replay/regression
+        - Reports or GitHub Action
+        - Packaging or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Use sanitized local fixtures and include exact commands, expected behavior, and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: OS, Node version, package manager, transport
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed secrets, personal data, production traces, and unsafe targets.
+          required: true

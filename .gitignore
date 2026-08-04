@@ -3,6 +3,8 @@ dist/
 coverage/
 .artifacts/
 runs/
+playwright-report/
+test-results/
 *.tgz
 *.log
 *.tsbuildinfo

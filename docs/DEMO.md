@@ -1,90 +1,72 @@
-# Deterministic demo
+# Verified demos
 
-The ResiliReplay demo is a real, local execution path. It uses the bundled deterministic agent and toy MCP servers; it does not use an API key, paid model, network service, external account, or prerecorded result fixture.
+ResiliReplay demos execute repository-owned local fixtures. They use no API key, paid model, external
+account, telemetry, or prerecorded pass result. Fixture output is not presented as a live provider.
 
-## Run it
+## Studio & Campaigns
 
 From a fresh clone:
 
 ```console
 pnpm install --frozen-lockfile
 pnpm build
+pnpm demo:studio
+pnpm exec resilireplay studio --open
+```
+
+`pnpm demo:studio`:
+
+1. imports the reviewed Inspector-shaped stdio config;
+2. runs resilient/vulnerable negative controls and deterministic recovery/failure scenarios;
+3. approves and compares a versioned baseline;
+4. executes generated causal regression tests;
+5. starts a real authenticated Streamable HTTP fixture and verifies a bounded retry;
+6. verifies Studio startup and graceful listener shutdown; and
+7. records the measured wall time and privacy disclosures.
+
+Evidence is written below `.artifacts/studio-demo/`; the path is ignored because it contains local run
+state. The sanitized, path-free transcript is committed at
+[`docs/assets/studio-demo-transcript.txt`](assets/studio-demo-transcript.txt).
+
+![Verified Studio campaign](assets/studio-campaign.png)
+
+Animated walkthrough: [Studio campaign GIF](assets/studio-campaign.gif).
+
+Regenerate the browser captures after building:
+
+```console
+pnpm capture:studio
+python scripts/generate-studio-gif.py
+```
+
+The capture script drives the real Studio with Playwright through review, confirmation, a complete
+campaign, causal timeline, baseline comparison, and evidence downloads. The GIF generator only
+assembles those verified frames.
+
+## Original deterministic trace and Inspector demos
+
+```console
 pnpm demo
 pnpm demo:mcp
 pnpm exec resilireplay test scenarios
 ```
 
-`pnpm demo` performs five steps:
+`pnpm demo` records the deterministic agent, injects three faults, scores recovered and unrecovered
+runs, compiles a causal regression, and executes it. `pnpm demo:mcp` covers reviewed stdio config,
+resilient/vulnerable servers, bounded recovery, unsafe-content detection, an authenticated real
+Streamable HTTP fixture, and artifact hashes.
 
-1. records a baseline run from `examples/deterministic-agent`;
-2. injects an HTTP 429, delayed tool result, and wrong-recipient handoff;
-3. scores the recovered run and a separate unrecovered malformed response;
-4. compiles the failed trace into a minimized fixture and executable regression;
-5. runs the generated regression with `node:test`.
-
-`pnpm demo:mcp` imports reviewed Inspector-shaped configurations and audits real resilient and
-intentionally vulnerable stdio servers. It also starts an authenticated Streamable HTTP server on an
-ephemeral loopback port, proves one bounded recovery, compiles an unsafe fault into a regression,
-executes that regression, and records source/config/scenario/fixture/test hashes.
-
-Generated evidence is written below `runs/demo/` and `runs/mcp-inspector-demo/`. Open
-`runs/demo/recovered-report/report.html` or
-`runs/mcp-inspector-demo/http-resilient/mcp-certification.html` in a browser. These HTML files are
+Their captured transcripts and launch assets remain in `docs/assets/`. All generated HTML reports are
 standalone and load no remote assets.
 
-## Captured transcript
-
-The concise transcript used for the animation is committed at [`docs/assets/demo-transcript.txt`](assets/demo-transcript.txt). Its expected milestones are:
-
-```text
-1/5 Recording the no-key deterministic agent
-Recorded 8 sanitized events.
-2/5 Injecting three deterministic faults (429, delayed tool, wrong recipient)
-ResiliReplay v0.2.1  PASS
-Recovery score  100/100
-3/5 Demonstrating an unrecovered malformed response
-ResiliReplay v0.2.1  FAIL
-Recovery score  67/100
-4/5 Compiling the failed trace into an editable regression
-ℹ pass 1
-ℹ fail 0
-5/5 Demo complete
-```
-
-The animation is a selected, path-free rendering of output captured from a successful `pnpm demo` run. It does not invent terminal lines or present fixture-backed provider output as live.
-
-The Inspector transcript is committed at
-[`docs/assets/mcp-inspector-demo-transcript.txt`](assets/mcp-inspector-demo-transcript.txt). Its
-verified milestones include:
-
-```text
-1/6 Importing the reviewed Inspector stdio configuration
-Dry-run plan: server=resilient-stdio; transport=stdio
-2/6 Auditing resilient and intentionally vulnerable stdio servers
-Stdio resilient=true; vulnerable expected-pass=false
-3/6 Injecting a recoverable MCP tool fault and verifying bounded retry
-Recovered=true; passed=true
-5/6 Reusing an Inspector Streamable HTTP configuration with authentication
-Streamable HTTP passed=true; authenticated=true
-6/6 Writing source/config/scenario/fixture/test hashes
-MCP Inspector integration demo complete: runs/mcp-inspector-demo
-```
-
-![MCP Inspector integration demo](assets/mcp-inspector-demo.gif)
-
-Static fallback: [MCP Inspector integration demo PNG](assets/mcp-inspector-demo.png).
-
-## Reproduce the assets
-
-Python 3 and Pillow are required only to regenerate the committed launch assets, not to use ResiliReplay:
+## Release/stress reproduction
 
 ```console
-python -m pip install Pillow
-python scripts/generate-demo-assets.py
+pnpm test:e2e
+pnpm release:gates
 ```
 
-The script runs both demos itself, verifies their recovery, transport, and regression milestones,
-writes path-free transcripts, renders both GIFs and the Inspector PNG fallback, and creates the
-1280×640 social preview PNG plus its SVG source.
-
-The generator deliberately omits absolute output paths from the visual transcript. The underlying run remains available under `runs/` for inspection.
+The browser gate exercises keyboard navigation and axe-core WCAG A/AA serious/critical checks. The
+release gate performs 100 Studio start/stop cycles, a 20,000-event trace round trip, the real campaign,
+the sub-60-second workflow assertion, and package-size measurement. Machine-readable measurements are
+written to `.artifacts/release-gates/report.json`.

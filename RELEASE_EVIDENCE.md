@@ -1,110 +1,115 @@
-# v0.2.0 release evidence
+# v0.3.0 release evidence
 
-Evidence date: 2026-08-02
+Evidence date: 2026-08-04
 
-Local verification: Windows, Node 24.14.0, pnpm 11.9.0
+Release title: **ResiliReplay Studio & Campaigns**
 
-Supported CI matrix: Node 20 and 22 on Ubuntu and Windows
+Local verification: Windows, Node.js 24.14.0, pnpm 11.9.0
 
-## Baseline and scope
+Supported CI matrix: Ubuntu and Windows; Node.js 22 and 24
 
-- Frozen baseline: clean `main` at `053f2dfac4c515f04377c9756ab2934e0c3c3347`, aligned with
-  `origin/main` before implementation.
-- Previous immutable release: `v0.1.0`, annotated tag object
-  `724ee89ccc1c34d34242d35b01852c1f7cd22f57`, resolving to
-  `0d78460c80176a04809b3f947e355fdc4753539f`.
-- Inspector compatibility reference: stable MCP Inspector `2.0.0`, commit
-  `7aebf168e6277ea26b1f04a7987a1cd11328ec83`.
-- Baseline gate: 34/34 tests passed before implementation. The baseline had real stdio coverage but
-  no successful real Streamable HTTP integration test.
+## Baseline and frozen scope
 
-## Aggregate local gate
+- Baseline branch: clean `main` at `52bfcfc441d5044899ff44b335a3564df5dc2533` before
+  implementation.
+- Previous immutable release: annotated `v0.2.1` tag object
+  `489266a5fa0963a9b5b1323a74b65e9e61b78fc2`, resolving to commit
+  `b5ea7bdb785bff955d8c6f5e4881aa89654d7085`; the public npm package was 0.2.1.
+- Baseline suite: 9 files and 48 tests passed before implementation.
+- Scope: exactly four release epics in [`V0_3_SCOPE.md`](V0_3_SCOPE.md): Studio, campaigns,
+  baselines/CI gates, and evidence-backed onboarding.
+- Product claim: “MCP Inspector shows what a server does. ResiliReplay proves what happens when it
+  fails, whether it recovers safely, and whether that recovery remains fixed.”
 
-Command:
+## Implemented vertical slice
 
-```console
-pnpm quality
+- Loopback-only nine-screen Studio over the same campaign/MCP/trace/report/regression APIs as the CLI.
+- Strict campaign schema and stable runner with seeds, bounded concurrency/retries/time, cancellation,
+  expectations, allowlisted tools, stdio, Streamable HTTP, and generated causal regressions.
+- Integrity-checked approved baselines and fail-closed comparison evidence in terminal, JSON, HTML,
+  Markdown, JUnit, SARIF, and GitHub step summary.
+- Verified local fixture workflow, real Studio PNG/GIF/transcript, browser acceptance/accessibility,
+  adversarial fuzzing, and lifecycle/stress measurement.
+
+## Local release gates
+
+| Gate               | Result                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Format             | Prettier repository check passed                                                                      |
+| Lint               | ESLint passed with zero findings                                                                      |
+| Strict types/build | All 15 non-root workspace projects and test/config types passed                                       |
+| Functional tests   | 12 Vitest files; 57 tests passed; zero failures or skips                                              |
+| Coverage           | 76.54% statements/lines; 72.43% branches; 88.8% functions before the final CLI workflow test          |
+| Browser acceptance | 1 Playwright test passed; full Studio flow, keyboard use, axe WCAG A/AA serious/critical findings = 0 |
+| Package smoke      | Clean tarball installation passed; CLI reported 0.3.0 and contained exactly five expected files       |
+| Supply chain       | Frozen lockfile policy passed; npm package has no runtime dependency on internal workspaces           |
+| Security/privacy   | Secret scan and hygiene scan included in aggregate gate                                               |
+
+The aggregate `pnpm quality` command passed after the campaign CLI and cancellation tests were added.
+
+## Real workflow evidence
+
+`pnpm demo:studio` passed with four stdio scenarios plus two authenticated Streamable HTTP scenarios.
+The stdio campaign included resilient and deliberately vulnerable negative controls, a recovered
+tool-error fault, an unsafe-content expected failure, two generated and executed regressions, baseline
+approval, and a passing zero-difference comparison. No external provider was used.
+
+Measured transcript result:
+
+```text
+workflow=PASS wall=2412ms under-60s=true
+telemetry=false api-keys=false external-provider=false fixture-backed=true
 ```
 
-Result: PASS (exit 0).
+The committed static Studio screenshot is 59,219 bytes; the six-frame GIF is 441,459 bytes; the
+sanitized transcript is 1,716 bytes.
 
-| Gate           | Verified result                                                                                                    |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Formatting     | Prettier check passed                                                                                              |
-| Lint           | ESLint passed with zero findings                                                                                   |
-| Strict types   | All 13 non-root workspaces plus test/config typecheck passed                                                       |
-| Build          | All 13 non-root workspaces built                                                                                   |
-| Tests          | 9/9 files, 48/48 tests, zero failed or skipped                                                                     |
-| Packed install | Five v0.2.0 tarballs installed into a clean project; CLI reported `0.2.0`                                          |
-| Secret scan    | Working tree and reachable history passed                                                                          |
-| Hygiene scan   | Tracked/generated content contained no personal emails, workstation paths, private artifacts, or stale owner links |
+## Performance and stress
 
-The 13 Inspector-specific tests exercise reviewed config import, single/multi-server selection,
-stdio argument boundaries and paths with spaces, Windows/POSIX path classification, value-free
-environment/header plans, deprecated SSE parsing, authenticated real Streamable HTTP, controlled
-failure, malformed HTTP, remote authorization, duplicate-key and unknown-field rejection,
-path/symlink containment, startup/protocol/timeout failures, child/listener cleanup, secret-output
-redaction, recovery scoring, generated-regression execution, and stable CLI exit codes 10–13.
+Machine-readable evidence: `.artifacts/release-gates/report.json` (local, ignored).
 
-## Scenario and demo evidence
+| Measurement                      |                                                  Result |
+| -------------------------------- | ------------------------------------------------------: |
+| Studio start/stop cycles         |                                                     100 |
+| Orphan listeners after cycles    |                                                       0 |
+| Average / maximum Studio startup |                                            1 ms / 14 ms |
+| Large trace                      |                          20,000 events; 7,075,709 bytes |
+| Large-trace round trip           |                                                  954 ms |
+| Peak process RSS                 |                                245.4 MiB (512 MiB gate) |
+| Verified quick-start wall time   |                              2,412 ms (<60,000 ms gate) |
+| CLI tarball                      | 273,778 bytes packed; 1,356,546 bytes unpacked; 5 files |
 
-```console
-pnpm exec resilireplay test scenarios
-pnpm demo
-pnpm demo:mcp
-python scripts/generate-demo-assets.py
-```
+The campaign measurement includes four real MCP subprocess audits, artifact/report persistence, and
+generated-test execution, so it is not compared as equivalent to a direct single-trace read. This is
+the explicit justification for exceeding a raw 20% wrapper-overhead comparison; the measured user
+workflow remains far under the 60-second gate.
 
-Result: PASS.
+## Security/adversarial evidence
 
-- Repository scenarios: 3/3 passed or validated as declared.
-- General no-key demo: recovered run PASS at 100/100; expected malformed-response run FAIL at
-  67/100; generated `node:test` 1 passed, 0 failed.
-- Inspector integration demo: reviewed stdio config imported; resilient server passed; intentionally
-  vulnerable server produced the expected failure; bounded retry recovered the retryable fault; the
-  unsafe fault failed; the compiled regression executed successfully.
-- A real authenticated Streamable HTTP server bound to an ephemeral loopback port and passed. Its
-  listener was closed by the demo and cleanup is independently tested.
-- The committed Inspector transcript is path-free. The GIF is 1000×630 and 110,998 bytes; its static
-  PNG fallback is 1000×630 and 73,789 bytes.
+- Exact Host, Origin, session, CSRF, JSON content type, 64 KiB body, traversal, session-not-in-URL,
+  one-time confirmation, and allowlisted download cases are automated.
+- Inspector tests cover command/argument separation, Windows/POSIX path classification, header
+  injection, URL credentials, auth bypass, remote authorization, config duplicate/unknown fields,
+  symlink escape, timeouts, malformed protocols, secret output, and cleanup.
+- Campaign tests include 500 hostile/fuzz inputs, YAML alias rejection, stable concurrent ordering,
+  repeatability, tampered/incomplete evidence, unavailable adapter metrics, stdio, and authenticated
+  Streamable HTTP.
+- Trace input is capped at 100,000 events and 32 MiB. Studio sessions expire after 15 minutes or
+  immediately on shutdown.
+- DeepSeek's read-only architecture/security hypotheses and independent dispositions are retained in
+  [`docs/HYBRID_EXECUTION_REPORT.md`](docs/HYBRID_EXECUTION_REPORT.md).
 
-The final demo manifest linked five distinct SHA-256 values:
+## Release/publication policy
 
-| Evidence                | SHA-256                                                            |
-| ----------------------- | ------------------------------------------------------------------ |
-| Inspector source config | `10d4ce1d793e6d041b1ee50b98d1dbe4aab550bf25833ca135b8dfe686ca700c` |
-| Failed source trace     | `b2decefe42be3e44e5929d35b65c27dd456ae19b5cf33e4b4250ab87420816ec` |
-| Generated scenario      | `31fb2544972481f95993185dffad36c5540c2915a60078327ac9733b89126a3a` |
-| Minimized fixture       | `b83b939a54eb709b5efdf1386188f145b1cc8a985be6e0f770ce82ef82cbc30b` |
-| Executable test         | `de18bdc89ef14727bf4564afcc550e643c0fe09bf6fab63ebdec30a89e3f3960` |
-
-## Security invariants verified
-
-- Imported Inspector files are read-only and never rewritten or migrated.
-- Stdio uses direct executable/argument invocation without a shell.
-- Relative executable, argument, and working-directory paths remain inside the allowed repository
-  root, including realpath checks against link escapes.
-- Imported environment and header values remain in memory and are represented as `[REDACTED]` in
-  plans, traces, certifications, reports, badges, and error output.
-- Credential-shaped raw, URL-encoded, Basic/base64, and sensitive-key output is detected before
-  persistence.
-- Remote HTTP requires explicit authorization; URL credentials, header injection, Inspector auth
-  bypass, and Inspector proxy session tokens fail closed.
-- Dry-run performs no connection and creates no evidence directory.
-
-## CI and release verification
-
-CI definitions run the complete test suite on Ubuntu and Windows with Node 20 and 22. The quality job
-also runs the focused Inspector/real-HTTP integration and both demos. The tag workflow reruns the
-aggregate gate and demos and uploads `runs/demo` plus `runs/mcp-inspector-demo` as release evidence.
-Public run URLs and immutable tag verification are recorded in the append-only mission log after the
-remote gates complete.
+The feature branch is merged only after all required PR checks pass. The annotated `v0.3.0` tag is
+created from the verified merge commit, GitHub Release assets are published, and npm Trusted
+Publishing must complete before a clean credential-disabled install/CLI/demo verification. Public
+run, release, tag, and package URLs are recorded in the final release-leader report.
 
 ## Honest limitations
 
-- The compatibility boundary is reviewed MCP Inspector 2.0.0 `mcp.json`; interactive OAuth,
-  `protocolEra: "modern"`, and extended Inspector-only runtime settings fail explicitly.
-- Legacy SSE is parsed for backwards compatibility but Streamable HTTP is preferred.
-- `record` is not an OS sandbox, and explicit MCP tool calls can have server-side effects.
-- Report hashes prove integrity and linkage, not signer identity; manifests are unsigned.
-- Packages are verified as tarballs but are not published to npm.
+Commands are not OS-sandboxed; allowlisted MCP tools can have side effects; Studio is local rather
+than hosted; remote campaigns are CLI-only; Inspector interactive OAuth/explicit modern protocol era
+are unsupported; incremental streaming is not yet versioned; redaction is pattern-based; hashes are
+unsigned; and internal workspace packages are not separate public APIs. See
+[`docs/LIMITATIONS.md`](docs/LIMITATIONS.md).

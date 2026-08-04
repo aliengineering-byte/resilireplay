@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { injectFaults } from "@resilireplay/core";
 import {
+  MAX_TRACE_EVENTS,
   compileRegression,
   identifyFirstCriticalEvent,
   parseTrace,
@@ -13,6 +14,12 @@ import {
 import { failedTrace, passingTrace } from "./helpers.js";
 
 describe("trace serialization and regression compiler", () => {
+  it("rejects traces above the hard event limit before parsing their payloads", () => {
+    expect(() => parseTrace("{}\n".repeat(MAX_TRACE_EVENTS + 1))).toThrow(
+      `Trace exceeds ${MAX_TRACE_EVENTS} events`,
+    );
+  });
+
   it("round-trips deterministic JSONL", () => {
     const trace = passingTrace();
     expect(serializeTrace(parseTrace(serializeTrace(trace)))).toBe(serializeTrace(trace));

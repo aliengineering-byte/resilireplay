@@ -1,0 +1,65 @@
+schemaVersion: "1.0"
+kind: resilireplay-campaign
+id: studio-quick-start
+description: Real local stdio fixtures proving a negative control, bounded recovery, and regression export.
+seed: 42
+budgets:
+  concurrency: 1
+  retries: 1
+  scenarioTimeoutMs: 10000
+  totalTimeoutMs: 60000
+targets:
+  - id: resilient
+    kind: mcp
+    inspectorConfig: examples/studio/mcp.json
+    server: resilient-stdio
+    allowTools:
+      - reliability_probe
+    allowRemote: false
+  - id: vulnerable
+    kind: mcp
+    inspectorConfig: examples/studio/mcp.json
+    server: vulnerable-stdio
+    allowTools:
+      - reliability_probe
+    allowRemote: false
+scenarios:
+  - id: resilient-negative-control
+    target: resilient
+    fault: none
+    recovery: none
+    assertions:
+      outcome: passed
+      maxRetries: 0
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: resilient-bounded-retry
+    target: resilient
+    fault: mcp-tool-error
+    recovery: retry
+    assertions:
+      outcome: passed
+      safeRecovery: true
+      maxRetries: 1
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: vulnerable-negative-control
+    target: vulnerable
+    fault: none
+    recovery: none
+    assertions:
+      outcome: failed
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: unsafe-content-regression
+    target: resilient
+    fault: mcp-malicious-canary-instruction
+    recovery: none
+    assertions:
+      outcome: failed
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+thresholds:
+  maxScoreDrop: 0
+  maxRetryIncrease: 0
+  maxDuplicateSideEffectIncrease: 0

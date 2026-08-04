@@ -1,0 +1,24 @@
+ResiliReplay v0.3.0 verified local fixture demo
+Fixture disclosure: resilient/vulnerable stdio and Streamable HTTP are repository-owned local processes; no external provider is used.
+
+1/7 Inspector-shaped config -> reviewed deterministic campaign
+campaign=studio-quick-start hash=f4cdf7ea8289253f05c1793fe622e1fd025ce88084b4ebacfd5257deb0974dba
+targets=resilient-stdio,vulnerable-stdio; allowTools=reliability_probe; secret values redacted
+2/7 Running resilient and vulnerable stdio controls with injected recovery/failure
+PASSED resilient-negative-control observed=passed fault=none recovery=true regression=not-applicable
+PASSED resilient-bounded-retry observed=passed fault=mcp-tool-error recovery=true regression=not-applicable
+PASSED vulnerable-negative-control observed=failed fault=none recovery=true regression=generated
+PASSED unsafe-content-regression observed=failed fault=mcp-malicious-canary-instruction recovery=false regression=generated
+stdio evidence=e749c4e2628e1c76d534f4b0d0912fe14c4c9a4567428fd5ab998309cca2432b
+3/7 Approving and comparing a reliability baseline
+comparison=pass differences=0 baseline=19264224ebd5b3d233f516314710612eee7b309226c830456e9935e1552ff48d
+4/7 Verifying generated causal regression tests
+generated=2 verified=true
+5/7 Running the real local Streamable HTTP negative control and bounded retry
+http=PASS scenarios=2/2 hash=0af128145bbcdc660e7532bdfebf43e1a13ae3eb6adfb9a1f76bd5391dc26604
+6/7 Measuring Studio startup and graceful shutdown
+studio startup=14ms bind=127.0.0.1 session=ephemeral url-secret=false
+studio listener closed=true
+7/7 Final result
+workflow=PASS wall=2412ms under-60s=true
+telemetry=false api-keys=false external-provider=false fixture-backed=true

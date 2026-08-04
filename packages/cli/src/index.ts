@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { spawn } from "node:child_process";
 import { Command } from "commander";
@@ -31,6 +31,23 @@ import {
   writeTrace,
 } from "@resilireplay/trace";
 import { recordCommand } from "./record.js";
+import {
+  CAMPAIGN_EXIT_CODES,
+  approveCampaignBaseline,
+  campaignTerminalReport,
+  compareCampaignRun,
+  comparisonTerminalReport,
+  createCampaignTemplate,
+  loadCampaignBaseline,
+  loadCampaignFile,
+  loadCampaignRun,
+  runCampaign,
+  writeCampaignBaseline,
+  writeCampaignComparisonReports,
+  writeCampaignFile,
+  writeCampaignRunReports,
+} from "@resilireplay/campaign";
+import { startStudio } from "@resilireplay/studio";
 
 async function exists(path: string): Promise<boolean> {
   return access(path).then(
@@ -41,6 +58,28 @@ async function exists(path: string): Promise<boolean> {
 
 function boundedPath(candidate: string): string {
   return safeOutputPath(process.cwd(), candidate);
+}
+
+async function persistedRunPath(input: string): Promise<string> {
+  const path = boundedPath(input);
+  const information = await stat(path);
+  return information.isDirectory() ? join(path, "campaign-run.json") : path;
+}
+
+function openBrowser(url: string): void {
+  const command =
+    process.platform === "win32"
+      ? { executable: "rundll32.exe", args: ["url.dll,FileProtocolHandler", url] }
+      : process.platform === "darwin"
+        ? { executable: "open", args: [url] }
+        : { executable: "xdg-open", args: [url] };
+  const child = spawn(command.executable, command.args, {
+    stdio: "ignore",
+    windowsHide: true,
+    detached: true,
+    shell: false,
+  });
+  child.unref();
 }
 
 async function loadScenario(input: string, seed?: number): Promise<FaultScenario> {
@@ -112,7 +151,195 @@ export function createProgram(): Command {
     .description(
       "Crash-test AI agents and MCP servers, replay failures, and generate regression tests.",
     )
-    .version("0.2.1");
+    .version("0.3.0");
+
+  program
+    .command("studio")
+    .description("Start the local, loopback-only ResiliReplay Studio.")
+    .option("--port <number>", "Loopback port; 0 selects an available port", "4199")
+    .option("--open", "Open the local Studio URL in the default browser")
+    .action(async (options: { port: string; open?: boolean }) => {
+      const port = Number(options.port);
+      if (!Number.isSafeInteger(port) || port < 0 || port > 65_535) {
+        throw Object.assign(new Error("--port must be an integer from 0 to 65535"), {
+          exitCode: 2,
+        });
+      }
+      const studio = await startStudio({ rootDirectory: process.cwd(), port });
+      console.log(`ResiliReplay Studio v0.3.0 ready in ${studio.startupMs}ms`);
+      console.log(studio.url);
+      console.log("Loopback only · ephemeral session · no telemetry · Ctrl+C to stop");
+      if (options.open) openBrowser(studio.url);
+      await new Promise<void>((resolveStop) => {
+        const stop = (): void => resolveStop();
+        process.once("SIGINT", stop);
+        process.once("SIGTERM", stop);
+      });
+      await studio.close();
+      console.log("Studio stopped; active campaigns, processes, and listeners were cleaned up.");
+    });
+
+  const campaign = program
+    .command("campaign")
+    .description("Create, run, approve, and compare deterministic fault campaigns.");
+
+  campaign
+    .command("init")
+    .description("Create a versioned campaign template without overwriting existing files.")
+    .argument("[path]", "Campaign YAML or JSON path", "campaign.yml")
+    .action(async (path: string) => {
+      const written = await writeCampaignFile(createCampaignTemplate(), path, process.cwd());
+      console.log(`Created ${written.path}`);
+      console.log(`Campaign hash ${written.campaignHash}`);
+    });
+
+  campaign
+    .command("validate")
+    .description("Validate a campaign and print its confirmation hash.")
+    .argument("<path>", "Campaign YAML or JSON")
+    .action(async (path: string) => {
+      const loaded = await loadCampaignFile(path, process.cwd());
+      console.log(`VALID ${loaded.campaign.id}`);
+      console.log(`Campaign hash ${loaded.campaignHash}`);
+      console.log(
+        stableStringify({
+          targets: loaded.campaign.targets.map((target) =>
+            target.kind === "trace"
+              ? { id: target.id, kind: target.kind, trace: target.trace }
+              : {
+                  id: target.id,
+                  kind: target.kind,
+                  inspectorConfig: target.inspectorConfig,
+                  server: target.server,
+                  allowTools: target.allowTools,
+                  allowRemote: target.allowRemote,
+                },
+          ),
+          scenarios: loaded.campaign.scenarios.map((scenario) => ({
+            id: scenario.id,
+            target: scenario.target,
+            fault: scenario.fault,
+            seed: scenario.seed ?? loaded.campaign.seed,
+            recovery: scenario.recovery,
+          })),
+          budgets: loaded.campaign.budgets,
+        }),
+      );
+    });
+
+  campaign
+    .command("run")
+    .description("Run a reviewed campaign with bounded concurrency and sanitized artifacts.")
+    .argument("<path>", "Campaign YAML or JSON")
+    .option("-o, --output <directory>", "Campaign run directory")
+    .option(
+      "--confirm-tools <campaign-sha256>",
+      "Confirm the exact reviewed hash when a campaign calls allowlisted tools",
+    )
+    .option("--allow-remote", "Confirm ownership of declared remote MCP targets")
+    .action(
+      async (
+        path: string,
+        options: { output?: string; confirmTools?: string; allowRemote?: boolean },
+      ) => {
+        const loaded = await loadCampaignFile(path, process.cwd());
+        console.log(`Reviewed campaign ${loaded.campaign.id}`);
+        console.log(`Campaign hash ${loaded.campaignHash}`);
+        console.log(
+          stableStringify(
+            loaded.campaign.targets.map((target) =>
+              target.kind === "trace"
+                ? { id: target.id, kind: target.kind, trace: target.trace }
+                : {
+                    id: target.id,
+                    kind: target.kind,
+                    inspectorConfig: target.inspectorConfig,
+                    server: target.server,
+                    allowTools: target.allowTools,
+                    allowRemote: target.allowRemote,
+                  },
+            ),
+          ),
+        );
+        const controller = new AbortController();
+        const cancel = (): void => controller.abort(new Error("Campaign cancelled by signal"));
+        process.once("SIGINT", cancel);
+        process.once("SIGTERM", cancel);
+        try {
+          const result = await runCampaign(loaded.campaign, {
+            rootDirectory: process.cwd(),
+            ...(options.output ? { outputDirectory: options.output } : {}),
+            ...(options.confirmTools ? { confirmedToolCampaignHash: options.confirmTools } : {}),
+            allowRemoteTargets: options.allowRemote ?? false,
+            signal: controller.signal,
+            onProgress: (progress) => {
+              if (progress.phase === "scenario-completed") {
+                console.log(
+                  `${progress.scenarioStatus?.toUpperCase()} ${progress.scenarioId} (${progress.completed}/${progress.total})`,
+                );
+              }
+            },
+          });
+          await writeCampaignRunReports(
+            result.run,
+            safeOutputPath(result.outputDirectory, "reports"),
+          );
+          console.log(campaignTerminalReport(result.run));
+          console.log(`Campaign evidence ${result.path}`);
+          if (result.run.status === "cancelled" || result.run.status === "incomplete") {
+            process.exitCode = CAMPAIGN_EXIT_CODES.INCOMPLETE;
+          } else if (result.run.status === "invalid") {
+            process.exitCode = CAMPAIGN_EXIT_CODES.TARGET;
+          } else if (!result.run.summary.passed) {
+            process.exitCode = CAMPAIGN_EXIT_CODES.REGRESSION;
+          }
+        } finally {
+          process.removeListener("SIGINT", cancel);
+          process.removeListener("SIGTERM", cancel);
+        }
+      },
+    );
+
+  campaign
+    .command("approve")
+    .description("Approve a complete expectation-passing run as a versioned baseline.")
+    .argument("<run>", "campaign-run.json or its containing directory")
+    .requiredOption("-o, --output <path>", "Baseline JSON path")
+    .action(async (runInput: string, options: { output: string }) => {
+      const run = await loadCampaignRun(await persistedRunPath(runInput));
+      const baseline = approveCampaignBaseline(run);
+      const output = boundedPath(options.output);
+      await mkdir(dirname(output), { recursive: true });
+      await writeCampaignBaseline(baseline, output);
+      console.log(`Approved baseline ${output}`);
+      console.log(`Baseline hash ${baseline.baselineHash}`);
+    });
+
+  campaign
+    .command("compare")
+    .description("Compare a complete run with a verified reliability baseline.")
+    .argument("<run>", "campaign-run.json or its containing directory")
+    .requiredOption("--baseline <path>", "Approved baseline JSON")
+    .option("-o, --output <directory>", "Comparison report directory")
+    .action(async (runInput: string, options: { baseline: string; output?: string }) => {
+      const runPath = await persistedRunPath(runInput);
+      const run = await loadCampaignRun(runPath);
+      const baseline = await loadCampaignBaseline(boundedPath(options.baseline));
+      const comparison = compareCampaignRun(run, baseline);
+      const output = options.output
+        ? boundedPath(options.output)
+        : safeOutputPath(dirname(runPath), "comparison");
+      await writeCampaignComparisonReports(comparison, output);
+      console.log(comparisonTerminalReport(comparison));
+      console.log(`Comparison reports ${output}`);
+      if (comparison.status === "regression") {
+        process.exitCode = CAMPAIGN_EXIT_CODES.REGRESSION;
+      } else if (comparison.status === "invalid") {
+        process.exitCode = CAMPAIGN_EXIT_CODES.INVALID_SCHEMA;
+      } else if (comparison.status === "incomplete") {
+        process.exitCode = CAMPAIGN_EXIT_CODES.INCOMPLETE;
+      }
+    });
 
   program
     .command("record")
