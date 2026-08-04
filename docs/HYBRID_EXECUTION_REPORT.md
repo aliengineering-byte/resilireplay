@@ -24,6 +24,24 @@ Retry behavior internal to provider gateways was not observable through the appr
 surface and is reported as unverifiable rather than inferred. No custom-provider section was found in
 the local Codex configuration available to the release leader.
 
+## Usage measurement
+
+| Work                                      | Approximate calls / attempts | Observed elapsed time                                                                                                                                       | Token availability                                                                                 | Result                                                                 |
+| ----------------------------------------- | ---------------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| GLM H0 capability probe                   |                            5 | Approximately 44, 49, 67, 40, and 9 seconds                                                                                                                 | Provider-reported transient counts were not retained; no stable available-token budget was exposed | Advisory-only eligibility; no repository work assigned                 |
+| DeepSeek H0 capability probe              |                            5 | Approximately 12, 18, 25, 25, and 9 seconds                                                                                                                 | Provider-reported transient counts were not retained; no stable available-token budget was exposed | Read-only advisory eligibility                                         |
+| Qwen H0 capability probe                  |                            4 | Approximately 124, 34, 49, and 9 seconds                                                                                                                    | Unavailable because no probe completed                                                             | Excluded from the critical path                                        |
+| DeepSeek architecture/security assignment |                            3 | Two bounded attempts failed before an advisory; the third completed. Exact per-attempt wall time and token count were not retained in the sanitized record. | No stable available-token budget was exposed                                                       | One compact advisory completed; five hypotheses independently reviewed |
+
+The 14 H0 calls consumed approximately 8 minutes 34 seconds of model-process wall time in aggregate;
+this is not a parallel critical-path duration. Exact upstream HTTP request counts remained
+unverifiable because the approved launchers do not expose gateway retry telemetry.
+
+**Measured Codex usage reduction: not measurable.** No advisory model authored code, tests, or
+documentation, and Codex independently performed and verified every repository change. The review
+may have focused two hardening checks, but there is no defensible token or elapsed-time baseline from
+which to calculate avoided Codex usage.
+
 ## Delegated advisory
 
 DeepSeek received a read-only architecture/security assignment. Two attempts to inspect the full file
