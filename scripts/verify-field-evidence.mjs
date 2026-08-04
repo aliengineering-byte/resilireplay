@@ -77,6 +77,10 @@ for (const [slug, packageVersion, allowedTool] of cases) {
   );
   invariant(summary.authorizationBoundary.credentials === false, `${slug}: credentials enabled`);
   invariant(summary.campaign.status === "complete", `${slug}: campaign is incomplete`);
+  invariant(
+    summary.campaign.targetSourceSha256 === (await sha256(join(directory, "mcp.json"))),
+    `${slug}: committed target config differs from executed evidence`,
+  );
   invariant(summary.campaign.summary.passed === true, `${slug}: expectations did not pass`);
   invariant(summary.campaign.summary.total === 3, `${slug}: scenario count changed`);
   invariant(summary.campaign.summary.passedCount === 3, `${slug}: not all scenarios passed`);

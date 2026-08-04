@@ -55,6 +55,7 @@ jobs:
           node docs/case-studies/${{ matrix.case }}/node_modules/resilireplay/bin/resilireplay.mjs campaign compare .artifacts/field-validation-ci/${{ matrix.case }} --baseline docs/case-studies/${{ matrix.case }}/baseline.json --output .artifacts/field-validation-ci/${{ matrix.case }}-comparison
           node --test docs/case-studies/${{ matrix.case }}/regression/regression.test.mjs
       - name: Verify server cleanup
+        if: always()
         shell: bash
         run: |
           if pgrep -af 'server-everything|playwright-mcp|ui5mcp' >/tmp/resilireplay-processes.txt; then
