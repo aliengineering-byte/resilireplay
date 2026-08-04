@@ -1,0 +1,63 @@
+name: Public MCP field validation
+
+on:
+  pull_request:
+    paths:
+      - "docs/case-studies/**"
+      - "scripts/verify-field-evidence.mjs"
+      - ".github/workflows/field-validation.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  public-package-campaign:
+    name: ${{ matrix.case }} / public packages
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: mcp-everything
+            confirmation: 334a5de0e11a67fcb1fc0581232b3137075e7f8d25795d991f3d459ab5c8e907
+            browser: false
+          - case: playwright-mcp
+            confirmation: 7473e2206608c81521c91866b0cecd29e70c9630ad9b83a56f7d04bd9fdde0b5
+            browser: true
+          - case: ui5-mcp
+            confirmation: 360bcce3d129bbe3f3631980300929b35a86ba5a0772db3b1d2dab60db92136e
+            browser: false
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: docs/case-studies/${{ matrix.case }}/pnpm-lock.yaml
+      - name: Install exact public packages outside the workspace
+        run: pnpm --dir docs/case-studies/${{ matrix.case }} --ignore-workspace install --frozen-lockfile
+      - name: Install isolated Chrome for Testing
+        if: matrix.browser
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: browsers
+        working-directory: docs/case-studies/playwright-mcp
+        run: node node_modules/@playwright/mcp/cli.js install-browser chrome-for-testing
+      - name: Validate and run bounded campaign
+        run: |
+          node docs/case-studies/${{ matrix.case }}/node_modules/resilireplay/bin/resilireplay.mjs campaign validate docs/case-studies/${{ matrix.case }}/campaign.yml
+          node docs/case-studies/${{ matrix.case }}/node_modules/resilireplay/bin/resilireplay.mjs campaign run docs/case-studies/${{ matrix.case }}/campaign.yml --confirm-tools ${{ matrix.confirmation }} --output .artifacts/field-validation-ci/${{ matrix.case }}
+          node docs/case-studies/${{ matrix.case }}/node_modules/resilireplay/bin/resilireplay.mjs campaign compare .artifacts/field-validation-ci/${{ matrix.case }} --baseline docs/case-studies/${{ matrix.case }}/baseline.json --output .artifacts/field-validation-ci/${{ matrix.case }}-comparison
+          node --test docs/case-studies/${{ matrix.case }}/regression/regression.test.mjs
+      - name: Verify server cleanup
+        shell: bash
+        run: |
+          if pgrep -af 'server-everything|playwright-mcp|ui5mcp' >/tmp/resilireplay-processes.txt; then
+            cat /tmp/resilireplay-processes.txt
+            exit 1
+          fi

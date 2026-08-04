@@ -22,12 +22,16 @@
     "demo:mcp": "node scripts/mcp-demo.mjs",
     "demo:studio": "node scripts/studio-demo.mjs",
     "capture:studio": "node scripts/capture-studio-demo.mjs",
+    "capture:field": "node scripts/capture-field-evidence.mjs",
+    "field:verify": "node scripts/verify-field-evidence.mjs",
+    "site:check": "node scripts/check-site.mjs",
+    "site:test": "node scripts/site-browser-test.mjs",
     "release:gates": "node scripts/release-gates.mjs",
     "fixtures": "node scripts/generate-fixtures.mjs",
     "package:smoke": "node scripts/package-smoke.mjs",
     "secret:scan": "node scripts/secret-scan.mjs",
     "hygiene:scan": "node scripts/hygiene-scan.mjs",
-    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm package:smoke && pnpm secret:scan && pnpm hygiene:scan"
+    "quality": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm field:verify && pnpm site:check && pnpm package:smoke && pnpm secret:scan && pnpm hygiene:scan"
   },
   "devDependencies": {
     "@resilireplay/campaign": "workspace:*",

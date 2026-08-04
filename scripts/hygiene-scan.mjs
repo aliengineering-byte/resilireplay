@@ -39,7 +39,7 @@ function allowedEmail(value) {
 
 function inspectText(name, content) {
   for (const match of content.matchAll(personalEmail)) {
-    if (!allowedEmail(match[0]) && name !== "pnpm-lock.yaml") {
+    if (!allowedEmail(match[0]) && !/(?:^|\/)pnpm-lock\.yaml$/u.test(name)) {
       findings.push(`${name}: personal email address`);
     }
   }
