@@ -14,7 +14,7 @@ resilireplay --help
 Or run a pinned version without installing globally:
 
 ```console
-npx --yes resilireplay@0.3.0 --version
+npx --yes resilireplay@0.3.1 --version
 ```
 
 Start Studio or inspect campaign commands:

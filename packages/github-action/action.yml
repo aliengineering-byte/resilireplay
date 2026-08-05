@@ -1,5 +1,6 @@
-name: ResiliReplay
-description: Run deterministic AI-agent reliability scenarios.
+name: ResiliReplay — Agent and MCP Reliability Tests
+author: Ali
+description: Run deterministic fault campaigns, verify recovery, compare reliability baselines, and generate AI-agent and MCP regressions.
 inputs:
   scenarios:
     description: Scenario directory
@@ -16,10 +17,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - shell: bash
+    - name: Build the immutable Action source
+      shell: bash
+      working-directory: ${{ github.action_path }}
       run: corepack enable && pnpm install --frozen-lockfile && pnpm build
-    - shell: bash
+    - name: Run the reliability campaign
+      shell: bash
       env:
+        RESILIREPLAY_ACTION_ROOT: ${{ github.action_path }}
         RESILIREPLAY_ACTION_SCENARIOS: ${{ inputs.scenarios }}
         RESILIREPLAY_ACTION_CAMPAIGN: ${{ inputs.campaign }}
         RESILIREPLAY_ACTION_CONFIRMATION: ${{ inputs.campaign-confirmation-hash }}
@@ -29,7 +34,10 @@ runs:
           if [[ -n "$RESILIREPLAY_ACTION_CONFIRMATION" ]]; then
             arguments+=(--confirm-tools "$RESILIREPLAY_ACTION_CONFIRMATION")
           fi
-          node packages/cli/dist/bin.js "${arguments[@]}"
+          node "$RESILIREPLAY_ACTION_ROOT/packages/cli/dist/bin.js" "${arguments[@]}"
         else
-          node packages/cli/dist/bin.js test "$RESILIREPLAY_ACTION_SCENARIOS"
+          node "$RESILIREPLAY_ACTION_ROOT/packages/cli/dist/bin.js" test "$RESILIREPLAY_ACTION_SCENARIOS"
         fi
+branding:
+  icon: activity
+  color: purple

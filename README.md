@@ -5,7 +5,7 @@
 [![Field validation](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml)
 [![Pages](https://github.com/aliengineering-byte/resilireplay/actions/workflows/pages.yml/badge.svg)](https://aliengineering-byte.github.io/resilireplay/)
 [![npm](https://img.shields.io/npm/v/resilireplay)](https://www.npmjs.com/package/resilireplay)
-[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.3.0)
+[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.3.1)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
 
 **MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails, whether it recovers safely, and whether that recovery remains fixed.**
@@ -39,7 +39,7 @@ The demo runs four real stdio scenarios, a real authenticated Streamable HTTP ne
 Install the self-contained CLI:
 
 ```console
-npm install --global resilireplay@0.3.0
+npm install --global resilireplay@0.3.1
 resilireplay --version
 resilireplay --help
 ```
@@ -136,15 +136,29 @@ The stable boundary is the provider-neutral `TraceEvent`; Studio and the CLI cal
 
 ## CI
 
-`campaign run` and `campaign compare` append Markdown to `GITHUB_STEP_SUMMARY` when GitHub Actions provides it. A discovery-only campaign can run through the composite action:
+`campaign run` and `campaign compare` append Markdown to `GITHUB_STEP_SUMMARY` when GitHub Actions provides it. The Action makes no GitHub API calls, requires no credential, and works with read-only repository permissions. A deterministic scenario quick start is:
 
 ```yaml
-- uses: aliengineering-byte/resilireplay@v0.3.0
-  with:
-    campaign: reliability.campaign.yml
+permissions:
+  contents: read
+
+steps:
+  - uses: actions/checkout@v6
+  - uses: actions/setup-node@v6
+    with:
+      node-version: 24
+  - uses: aliengineering-byte/resilireplay@v0.3.1
+    with:
+      scenarios: scenarios
 ```
 
-For a tool-calling campaign, supply the separately reviewed `campaign-confirmation-hash` and keep target authorization under repository review. The aggregate local gate is:
+| Input                        | Required | Default     | Purpose                                                               |
+| ---------------------------- | -------- | ----------- | --------------------------------------------------------------------- |
+| `scenarios`                  | No       | `scenarios` | Directory of deterministic YAML scenarios.                            |
+| `campaign`                   | No       | empty       | Campaign YAML/JSON path; when set, the scenario directory is skipped. |
+| `campaign-confirmation-hash` | No       | empty       | Exact reviewed hash required only for allowlisted tool calls.         |
+
+The Action defines no outputs; reports and step summaries are produced by the selected CLI workflow. For a tool-calling campaign, supply the separately reviewed `campaign-confirmation-hash` and keep target authorization under repository review. The aggregate local gate is:
 
 ```console
 pnpm quality

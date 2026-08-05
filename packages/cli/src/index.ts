@@ -151,7 +151,7 @@ export function createProgram(): Command {
     .description(
       "Crash-test AI agents and MCP servers, replay failures, and generate regression tests.",
     )
-    .version("0.3.0");
+    .version("0.3.1");
 
   program
     .command("studio")
@@ -166,7 +166,7 @@ export function createProgram(): Command {
         });
       }
       const studio = await startStudio({ rootDirectory: process.cwd(), port });
-      console.log(`ResiliReplay Studio v0.3.0 ready in ${studio.startupMs}ms`);
+      console.log(`ResiliReplay Studio v0.3.1 ready in ${studio.startupMs}ms`);
       console.log(studio.url);
       console.log("Loopback only · ephemeral session · no telemetry · Ctrl+C to stop");
       if (options.open) openBrowser(studio.url);

@@ -1,9 +1,10 @@
 {
   "name": "resilireplay",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "license": "Apache-2.0",
   "description": "Deterministic chaos testing and trace-to-regression tooling for AI agents and MCP servers.",
+  "author": "Ali <268342250+aliengineering-byte@users.noreply.github.com>",
   "bin": {
     "resilireplay": "./bin/resilireplay.mjs"
   },
@@ -12,7 +13,7 @@
     "url": "https://github.com/aliengineering-byte/resilireplay.git",
     "directory": "packages/cli"
   },
-  "homepage": "https://github.com/aliengineering-byte/resilireplay#readme",
+  "homepage": "https://aliengineering-byte.github.io/resilireplay/",
   "bugs": "https://github.com/aliengineering-byte/resilireplay/issues",
   "publishConfig": {
     "access": "public"
