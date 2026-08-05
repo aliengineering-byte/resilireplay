@@ -2,6 +2,21 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.3.1] - 2026-08-04
+
+### Fixed
+
+- Run the composite GitHub Action's installation and build from the immutable Action checkout while
+  keeping scenario and campaign inputs relative to the caller repository.
+- Cover Marketplace metadata, input defaults, branding, and caller/action path separation with an
+  automated metadata regression test.
+- Keep the package smoke test from adding its disposable install path to the workspace lockfile.
+
+### Changed
+
+- Position the Marketplace listing as “ResiliReplay — Agent and MCP Reliability Tests,” document its
+  read-only permissions and inputs, and align workspace/package version labels at 0.3.1.
+
 ## [0.3.0] - 2026-08-04
 
 ### Added

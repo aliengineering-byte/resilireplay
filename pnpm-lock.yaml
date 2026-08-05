@@ -69,12 +69,6 @@ importers:
         specifier: 3.2.4
         version: 3.2.4(@types/node@20.19.9)(yaml@2.8.1)
 
-  .artifacts/package-smoke/installed:
-    dependencies:
-      resilireplay:
-        specifier: file:E:/AI-Workbench/AgentReliabilityLab/.artifacts/package-smoke/resilireplay-0.3.0.tgz
-        version: file:.artifacts/package-smoke/resilireplay-0.3.0.tgz
-
   examples/deterministic-agent: {}
 
   examples/mcp-http-fixture-server:
@@ -1513,12 +1507,6 @@ packages:
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
     engines: {node: '>=0.10.0'}
-
-  resilireplay@file:.artifacts/package-smoke/resilireplay-0.3.0.tgz:
-    resolution: {integrity: sha512-Tkw0cVe/qYmhZviuleyUlAtu7morMbEUa5JfOf9sDUKUfAxHPxwJTOpwNCeI/2RWurVtuo7fkbzehJs1RsfavA==, tarball: file:.artifacts/package-smoke/resilireplay-0.3.0.tgz}
-    version: 0.3.0
-    engines: {node: '>=22'}
-    hasBin: true
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -3023,8 +3011,6 @@ snapshots:
       unpipe: 1.0.0
 
   require-from-string@2.0.2: {}
-
-  resilireplay@file:.artifacts/package-smoke/resilireplay-0.3.0.tgz: {}
 
   resolve-from@4.0.0: {}
 

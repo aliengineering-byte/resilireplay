@@ -724,7 +724,7 @@ export async function runCampaign(
     const withoutHash: Omit<CampaignRun, "runHash"> = {
       schemaVersion: "1.0",
       kind: "resilireplay-campaign-run",
-      productVersion: "0.3.0",
+      productVersion: "0.3.1",
       campaignId: campaign.id,
       campaignHash: hash,
       runId,

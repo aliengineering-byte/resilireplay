@@ -231,7 +231,7 @@ async function reviewCampaign(root: string, campaignPath: string): Promise<Revie
       continue;
     }
     if (target.allowRemote) {
-      throw new StudioHttpError(403, "Studio v0.3.0 accepts loopback MCP targets only");
+      throw new StudioHttpError(403, "Studio v0.3.1 accepts loopback MCP targets only");
     }
     const imported = await loadInspectorConfig(resolve(root, target.inspectorConfig), {
       serverName: target.server,
@@ -319,7 +319,7 @@ function publicRun(entry: StudioRun): Record<string, unknown> {
 export async function startStudio(options: StudioOptions = {}): Promise<StudioInstance> {
   const started = performance.now();
   if (options.host !== undefined && options.host !== HOST) {
-    throw new Error("Studio v0.3.0 binds only to 127.0.0.1");
+    throw new Error("Studio v0.3.1 binds only to 127.0.0.1");
   }
   const portInput = options.port ?? 0;
   if (!Number.isSafeInteger(portInput) || portInput < 0 || portInput > 65_535) {
@@ -381,7 +381,7 @@ export async function startStudio(options: StudioOptions = {}): Promise<StudioIn
       if (method === "GET" && url.pathname === "/api/status") {
         sendJson(response, 200, {
           product: "ResiliReplay Studio",
-          version: "0.3.0",
+          version: "0.3.1",
           bind: HOST,
           telemetry: false,
         });

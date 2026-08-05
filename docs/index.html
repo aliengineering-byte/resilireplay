@@ -48,7 +48,7 @@
     <main id="main">
       <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow">Local-first MCP reliability testing · v0.3.0</p>
+          <p class="eyebrow">Local-first MCP reliability testing · v0.3.1</p>
           <h1>Make recovery<br />reproducible.</h1>
           <p class="hero-statement">
             MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails,
@@ -101,7 +101,7 @@
         <div class="code-wrap">
           <pre
             tabindex="0"
-          ><code id="install-command">npx --yes resilireplay@0.3.0 --version</code></pre>
+          ><code id="install-command">npx --yes resilireplay@0.3.1 --version</code></pre>
           <button class="copy-button" type="button" data-copy="install-command">Copy</button>
         </div>
         <div class="quick-links">
@@ -109,7 +109,7 @@
             href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/FIELD_TEST_GUIDE.md"
             >Five-minute field test →</a
           >
-          <a href="https://www.npmjs.com/package/resilireplay/v/0.3.0">npm package →</a>
+          <a href="https://www.npmjs.com/package/resilireplay/v/0.3.1">npm package →</a>
         </div>
       </section>
 
@@ -346,11 +346,11 @@
           </p>
         </div>
         <div class="code-wrap large">
-          <pre tabindex="0"><code id="ci-example">- uses: aliengineering-byte/resilireplay@v0.3.0
+          <pre tabindex="0"><code id="ci-example">- uses: aliengineering-byte/resilireplay@v0.3.1
   with:
     campaign: reliability.campaign.yml
 
-- run: npx --yes resilireplay@0.3.0 campaign compare runs/latest \
+- run: npx --yes resilireplay@0.3.1 campaign compare runs/latest \
     --baseline baselines/reliability.json</code></pre>
           <button class="copy-button" type="button" data-copy="ci-example">Copy</button>
         </div>

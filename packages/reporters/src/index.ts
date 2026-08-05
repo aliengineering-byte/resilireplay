@@ -41,7 +41,7 @@ export function terminalReport(metrics: RecoveryMetrics, color = true): string {
   const reset = color ? "\u001b[0m" : "";
   const mark = metrics.passed ? `${green}PASS${reset}` : `${red}FAIL${reset}`;
   const lines = [
-    `${cyan}ResiliReplay v0.3.0${reset}  ${mark}`,
+    `${cyan}ResiliReplay v0.3.1${reset}  ${mark}`,
     `Recovery score  ${metrics.deterministicScore}/100`,
     `Completion      ${metrics.taskCompletion ? "yes" : "no"}`,
     `Recovery        ${metrics.recoverySuccess ? "safe" : "unrecovered"}`,
@@ -57,7 +57,7 @@ export function terminalReport(metrics: RecoveryMetrics, color = true): string {
 function reportJson(events: readonly TraceEvent[], metrics: RecoveryMetrics): string {
   return `${stableStringify({
     schemaVersion: "1.0",
-    product: { name: "ResiliReplay", version: "0.3.0" },
+    product: { name: "ResiliReplay", version: "0.3.1" },
     runId: events[0]?.runId ?? "unknown",
     metrics,
     eventCount: events.length,
@@ -105,7 +105,7 @@ table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{text-align:left;
 </section>
 <section class="card"><h2>Why</h2><ul>${reasons}</ul></section>
 <section class="card"><h2>Trace</h2><table><thead><tr><th>#</th><th>Event</th><th>Actor</th><th>Target</th><th>Fault</th><th>Step</th></tr></thead><tbody>${rows}</tbody></table></section>
-<footer>Generated locally by ResiliReplay v0.3.0. No telemetry was sent.</footer>
+<footer>Generated locally by ResiliReplay v0.3.1. No telemetry was sent.</footer>
 </body></html>
 `;
 }
@@ -154,7 +154,7 @@ function sarif(metrics: RecoveryMetrics, events: readonly TraceEvent[]): string 
         tool: {
           driver: {
             name: "ResiliReplay",
-            version: "0.3.0",
+            version: "0.3.1",
             informationUri: "https://github.com",
             rules: results.map((result) => ({
               id: result.ruleId,
@@ -170,7 +170,7 @@ function sarif(metrics: RecoveryMetrics, events: readonly TraceEvent[]): string 
 
 function badge(metrics: RecoveryMetrics): string {
   const label = "Agent Reliability Tested";
-  const value = metrics.passed ? "passing v0.3.0" : "failing v0.3.0";
+  const value = metrics.passed ? "passing v0.3.1" : "failing v0.3.1";
   const color = metrics.passed ? "#159957" : "#c0392b";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="292" height="20" role="img" aria-label="${label}: ${value}">
 <title>${label}: ${value}</title><linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".1" stop-color="#aaa" stop-opacity=".1"/><stop offset=".9" stop-opacity=".3"/><stop offset="1" stop-opacity=".5"/></linearGradient>
@@ -206,7 +206,7 @@ export async function writeReportBundle(
   const manifest = `${stableStringify({
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    productVersion: "0.3.0",
+    productVersion: "0.3.1",
     runId,
     startedAt: events.find((event) => event.type === "run_started")?.timestamp ?? null,
     eventCount: events.length,

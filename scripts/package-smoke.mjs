@@ -96,7 +96,7 @@ if (npmCli) {
   );
 } else {
   runInvokingPackageManager(
-    ["add", "--ignore-scripts", "--save-exact", join(artifacts, tarballName)],
+    ["add", "--ignore-scripts", "--save-exact", "--lockfile=false", join(artifacts, tarballName)],
     project,
   );
 }
