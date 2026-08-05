@@ -8,7 +8,7 @@ browser artifact is recorded here.
 - **Applicable rules:** public repository; one root `action.yml`/`action.yaml`; unique Action name;
   valid metadata and branding; release publication with a primary and optional secondary category;
   Marketplace terms accepted by the repository owner; 2FA for publication.
-- **Intended name:** ResiliReplay — Agent and MCP Reliability Tests
+- **Action name:** ResiliReplay — Agent and MCP Reliability Tests
 - **Release:** `v0.3.1` is required. The existing `v0.3.0` tag is unchanged.
 - **Reason for patch:** a clean external repository proved that `v0.3.0` ran `pnpm install` in the
   caller workspace on Ubuntu and Windows with Node.js 22 and 24. The corrected Action builds in
@@ -16,16 +16,18 @@ browser artifact is recorded here.
 - **External smoke repository:** https://github.com/aliengineering-byte/resilireplay-action-smoke
 - **Initial failing run:** https://github.com/aliengineering-byte/resilireplay-action-smoke/actions/runs/30962409218
 - **Successful `v0.3.1` run:** https://github.com/aliengineering-byte/resilireplay-action-smoke/actions/runs/30963916108
-- **Final public URL:** pending publication immediately after this PR places the unique `v0.3.1`
-  metadata on the default branch.
-- **Publication time:** pending.
+- **Final public URL:** https://github.com/marketplace/actions/resilireplay-agent-and-mcp-reliability-tests
+- **Publication time:** `2026-08-05T01:09:38Z`.
 - **Categories:** Continuous integration (primary) and Testing (secondary), selected from the current
   Marketplace category list.
+- **Installation snippet:** `uses: aliengineering-byte/resilireplay@v0.3.1` with
+  `permissions: contents: read`; no credential is required for the deterministic scenario quick start.
+- **Displayed owner and license:** `aliengineering-byte`; Apache-2.0, linked from the public repository.
 - **Manual user steps:** accepted the GitHub Marketplace Developer Agreement and enabled GitHub 2FA.
-- **Visibility:** not yet listed. GitHub enabled the Marketplace form after both manual steps, but its
-  pre-merge preview still reads the old Action metadata from `main`; publishing that stale preview
-  would use the wrong name and description.
-- **Feedback/status:** no Marketplace review or rejection.
+- **Visibility:** public. The signed-out listing returned HTTP 200 and exposed the exact name, owner,
+  `v0.3.1`, immutable install reference, Apache-2.0 declaration, repository, release, npm, product-site,
+  field-evidence, security, and contribution links.
+- **Feedback/status:** published without Marketplace review, rejection, or metadata warning.
 - **Objective lesson:** test a composite Action from a caller repository; an in-repository smoke test
   does not expose caller/action working-directory confusion.
 
