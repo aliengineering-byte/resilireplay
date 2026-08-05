@@ -84,7 +84,7 @@ await execFileAsync(process.execPath, [packageManagerCli, "pack", "--pack-destin
   windowsHide: true,
   maxBuffer: 5 * 1024 * 1024,
 });
-const tarballPath = join(output, "resilireplay-0.3.1.tgz");
+const tarballPath = join(output, "resilireplay-0.4.0.tgz");
 const packedBytes = (await stat(tarballPath)).size;
 const packageFiles = [
   "LICENSE",

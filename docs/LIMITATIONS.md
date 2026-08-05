@@ -1,6 +1,6 @@
 # Known limitations
 
-ResiliReplay v0.3.0 has these explicit boundaries:
+ResiliReplay v0.4.0 has these explicit boundaries:
 
 - **Execution isolation:** reviewed commands execute directly without a shell, but ResiliReplay is not
   an OS sandbox.
@@ -8,7 +8,8 @@ ResiliReplay v0.3.0 has these explicit boundaries:
   change server state.
 - **Studio exposure:** Studio is loopback-only and assumes the local browser/user account is trusted.
   It is not a hosted multi-user service or a boundary against same-user malware.
-- **Remote campaigns:** the CLI can authorize declared remote MCP targets; Studio v0.3.0 cannot.
+- **Remote campaigns:** the CLI and Action can explicitly authorize declared remote MCP targets;
+  Studio cannot. Authorization is asserted by the user and is not independently proven.
 - **Resumability:** tool-calling campaigns cannot resume after interruption because replaying side
   effects is unsafe. Rerun trace-only campaigns from deterministic inputs.
 - **Causal minimization:** explicit `parentId` and `causeId` links produce the strongest minimal slice.
@@ -21,6 +22,11 @@ ResiliReplay v0.3.0 has these explicit boundaries:
   producer. Manifests are unsigned.
 - **Redaction:** patterns are defense in depth, not proof that every application-specific secret was
   removed. Omit secrets at the source.
+- **Metadata-only evidence:** adoption omits raw MCP request/result bodies, so it cannot make semantic
+  assertions about private output content. It preserves failure/recovery metadata and integrity
+  hashes, not a recoverable copy of the body.
+- **Adoption safety:** annotations are untrusted hints. A user must still determine that the exact
+  operation and arguments are safe and suitable for one duplicate attempt.
 - **Metrics:** deterministic scoring evaluates declared evidence, not open-ended semantic quality.
   Latency, tokens, cost, side effects, and coverage remain unavailable unless measured.
 - **Trace scale:** one trace is capped at 100,000 events and 32 MiB to bound memory use. Split larger

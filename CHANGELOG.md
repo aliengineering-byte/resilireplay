@@ -2,6 +2,34 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.4.0] - 2026-08-05
+
+### Added
+
+- Zero-configuration `resilireplay demo` with deterministic clean, recovered-failure, and expected
+  negative controls plus a generated and executed regression in under 30 seconds.
+- Reviewed `resilireplay adopt` flow for repository-local Inspector-compatible configurations,
+  including side-effect-free dry-run, explicit tool/argument/retry boundaries, stdio and Streamable
+  HTTP fixtures, metadata-only evidence, and 14 commit-ready campaign/regression/Action artifacts.
+- Optional campaign `toolArguments` and `evidenceMode`, with project-root expansion, allowlist
+  alignment, credential rejection, and v0.3.x-compatible omission semantics.
+- GitHub Action `allow-remote` input, defaulting to false, for explicitly authorized non-loopback MCP
+  campaigns.
+
+### Security
+
+- Pre-connection artifact realpath checks reject output symlink escape; project-only configuration
+  discovery rejects external links and performs no home, browser, credential, or unrelated-repository
+  scanning.
+- `--yes` cannot authorize a tool call or duplicate attempt. Credential-shaped/encoded arguments,
+  sensitive keys, home/outside paths, raw private tool bodies, environment values, and authorization
+  headers fail closed or are omitted from persisted adoption evidence.
+
+### Changed
+
+- All shipped product/report/package version labels are aligned at 0.4.0 while existing v0.3.x
+  commands, campaign defaults, and historical evidence remain compatible.
+
 ## [0.3.1] - 2026-08-04
 
 ### Fixed

@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged release. v0.3.0 is the current supported line;
+Security fixes are provided for the latest tagged release. v0.4.0 is the current supported line;
 older releases remain immutable historical artifacts.
 
 ## Reporting a vulnerability
@@ -21,9 +21,24 @@ the project to scan arbitrary systems, bypass controls, exfiltrate data, or dama
 a shell. This is intentional code execution, not an OS sandbox. Isolate untrusted programs with an
 OS/container boundary outside ResiliReplay.
 
+## Adoption boundary
+
+- Default discovery checks only `mcp.json`, `.mcp.json`, and `.vscode/mcp.json` in the current
+  project. It does not search home directories, other repositories, browser storage, or keychains.
+- `adopt --dry-run` parses the selected repository-local configuration but starts no process, opens no
+  network connection, calls no tool, and writes no project file.
+- The exact process/arguments or HTTP origin is displayed with environment/header values redacted
+  before connection. Tool annotations are untrusted hints and never authorize execution.
+- Tool name, exact arguments, safety classification, and suitability for one duplicate attempt are
+  explicit boundaries. `--yes` cannot confirm tool execution or retry suitability.
+- Arguments reject sensitive keys, credential-shaped or encoded values, home/outside paths, and
+  symlink escapes. Artifact destinations are realpath-preflighted before any MCP connection.
+- Generated evidence uses metadata-only MCP projection. Raw request/result bodies, environment
+  values, and authorization headers are not persisted.
+
 ## Studio boundary
 
-- v0.3.0 binds only to `127.0.0.1` and validates the exact listener Host to limit DNS-rebinding and
+- Studio binds only to `127.0.0.1` and validates the exact listener Host to limit DNS-rebinding and
   confused-deputy paths.
 - Each start creates an ephemeral in-memory session. The identifier is set in an HttpOnly, SameSite
   cookie and never placed in a URL, log, or evidence artifact.
@@ -44,8 +59,7 @@ OS/container boundary outside ResiliReplay.
   paths, transport conflicts, URL credentials, CR/LF header injection, Inspector auth-bypass fields,
   and proxy session-token declarations fail closed.
 - Imported environment/header values stay in memory. Plans show names and sources, never values.
-- Remote HTTP requires explicit CLI authorization; Studio does not authorize remote targets in
-  v0.3.0.
+- Remote HTTP requires explicit CLI/Action authorization; Studio does not authorize remote targets.
 - Retry, concurrency, scenario timeout, and total timeout budgets have strict upper bounds.
 - Missing, malformed, cancelled, mismatched, incomplete, or hash-invalid evidence cannot pass a
   baseline comparison.

@@ -1,6 +1,6 @@
 # Campaign and baseline schemas
 
-ResiliReplay v0.3.0 accepts JSON or YAML campaign documents with the same strict runtime model. The normative machine-readable definition is [`schemas/campaign.schema.json`](../schemas/campaign.schema.json); runtime parsing additionally enforces unique target/scenario identifiers and valid target references.
+ResiliReplay v0.4.0 accepts JSON or YAML campaign documents with the same strict runtime model. The normative machine-readable definition is [`schemas/campaign.schema.json`](../schemas/campaign.schema.json); runtime parsing additionally enforces unique target/scenario identifiers, valid target references, argument allowlist alignment, and credential-safe arguments.
 
 ## Minimal workflow
 
@@ -37,7 +37,18 @@ Unknown fields and unsupported versions are rejected. Identifiers are lowercase,
 - `kind: trace` references an existing sanitized JSONL trace.
 - `kind: mcp` references one named server in a reviewed Inspector-shaped `mcp.json`.
 
-MCP targets declare `allowTools`. An empty list is discovery-only. A non-empty list is the complete callable set; a returned tool outside it is never invoked. Studio additionally requires a single-use confirmation after displaying the redacted execution plan. `allowRemote` defaults to false and Studio v0.3.0 rejects remote targets entirely.
+MCP targets declare `allowTools`. An empty list is discovery-only. A non-empty list is the complete callable set; a returned tool outside it is never invoked. Studio additionally requires a single-use confirmation after displaying the redacted execution plan. `allowRemote` defaults to false and Studio rejects remote targets.
+
+`toolArguments` is an optional object keyed by tool name. Every key must also appear in `allowTools`,
+and each value must be an object containing the exact reviewed arguments. Sensitive keys,
+credential-shaped values, and out-of-project paths fail validation. `resilireplay adopt` may persist
+contained paths with a `{{PROJECT_ROOT}}/` prefix, which the campaign runner expands inside the
+current repository.
+
+`evidenceMode` is optional. `full` preserves the prior sanitized evidence behavior.
+`metadata-only` removes raw MCP tool request/result bodies and retains tool names, deterministic
+faults, causal links, recovery/validation events, and hashes. Omission preserves v0.3.x behavior and
+campaign hashes.
 
 ### Scenarios and controls
 

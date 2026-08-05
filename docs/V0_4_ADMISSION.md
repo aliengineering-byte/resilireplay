@@ -47,3 +47,20 @@ These are hypotheses, not admitted scope.
 Signed attestations, incremental streaming, cloud mode, accounts, telemetry, hosted backends,
 framework adapters, fake adopter records, and a universal cross-project score remain outside this
 mission. No `v0.4.0` work or tag is created.
+
+## 2026-08-05 authorized amendment: adoption-friction experiment
+
+The original gate and its evidence above remain an accurate historical record. A leadership override
+authorizes one bounded v0.4 experiment to test a different product hypothesis:
+
+> Adoption is being blocked primarily by setup friction and unclear time-to-value.
+
+The admitted scope is limited to a zero-configuration deterministic `demo`, a reviewed `adopt` path
+from an existing repository-local Inspector-compatible MCP configuration to sanitized evidence,
+executable regression, and pinned GitHub Action, plus the exact argument/evidence-mode schema support
+needed by that path. Success is measured by a genuine demo under 30 seconds and fixture adoption
+under five minutes with all security, compatibility, package, and cross-platform gates intact.
+
+This amendment does not reinterpret the founder-run case studies as demand and does not admit cloud,
+accounts, telemetry, billing, autonomous unreviewed tool execution, generic evaluation, or an MCP
+Inspector replacement. If the bounded workflow cannot pass its gates, v0.4.0 is not released.

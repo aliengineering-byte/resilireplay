@@ -1,9 +1,9 @@
 {
   "name": "resilireplay",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "type": "module",
   "license": "Apache-2.0",
-  "description": "Deterministic chaos testing and trace-to-regression tooling for AI agents and MCP servers.",
+  "description": "Turn reviewed MCP failures into deterministic recovery evidence and executable regression tests.",
   "author": "Ali <268342250+aliengineering-byte@users.noreply.github.com>",
   "bin": {
     "resilireplay": "./bin/resilireplay.mjs"

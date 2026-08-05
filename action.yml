@@ -1,6 +1,6 @@
 name: ResiliReplay — Agent and MCP Reliability Tests
 author: Ali
-description: Run deterministic fault campaigns, verify recovery, compare reliability baselines, and generate AI-agent and MCP regressions.
+description: Turn reviewed MCP failures into deterministic recovery regressions in CI; also run existing agent scenarios.
 inputs:
   scenarios:
     description: Scenario directory
@@ -14,6 +14,10 @@ inputs:
     description: Exact reviewed hash required only when the campaign allowlists tool calls
     required: false
     default: ""
+  allow-remote:
+    description: Explicitly confirm that declared non-loopback MCP targets are user-owned
+    required: false
+    default: "false"
 runs:
   using: composite
   steps:
@@ -28,11 +32,15 @@ runs:
         RESILIREPLAY_ACTION_SCENARIOS: ${{ inputs.scenarios }}
         RESILIREPLAY_ACTION_CAMPAIGN: ${{ inputs.campaign }}
         RESILIREPLAY_ACTION_CONFIRMATION: ${{ inputs.campaign-confirmation-hash }}
+        RESILIREPLAY_ACTION_ALLOW_REMOTE: ${{ inputs.allow-remote }}
       run: |
         if [[ -n "$RESILIREPLAY_ACTION_CAMPAIGN" ]]; then
           arguments=(campaign run "$RESILIREPLAY_ACTION_CAMPAIGN")
           if [[ -n "$RESILIREPLAY_ACTION_CONFIRMATION" ]]; then
             arguments+=(--confirm-tools "$RESILIREPLAY_ACTION_CONFIRMATION")
+          fi
+          if [[ "$RESILIREPLAY_ACTION_ALLOW_REMOTE" == "true" ]]; then
+            arguments+=(--allow-remote)
           fi
           node "$RESILIREPLAY_ACTION_ROOT/packages/cli/dist/bin.js" "${arguments[@]}"
         else

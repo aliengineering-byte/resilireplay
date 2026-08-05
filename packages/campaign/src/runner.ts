@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { parseDocument, stringify } from "yaml";
 import {
@@ -16,6 +16,7 @@ import {
 import {
   auditMcp,
   loadInspectorConfig,
+  metadataOnlyMcpEvidence,
   MCP_FAULT_TYPES,
   type McpAuditOptions,
 } from "@resilireplay/mcp-chaos";
@@ -479,6 +480,7 @@ async function runMcpScenario(
     requestTimeoutMs: Math.min(imported.requestTimeoutMs, timeoutMs),
     callTools: target.allowTools.length > 0,
     allowedTools: target.allowTools,
+    toolArguments: await expandToolArguments(target.toolArguments ?? {}, root),
     allowRemote: target.allowRemote && allowRemoteTargets,
     ...(scenario.fault !== "none" && MCP_FAULT_TYPES.includes(scenario.fault as never)
       ? { fault: scenario.fault as (typeof MCP_FAULT_TYPES)[number] }
@@ -493,11 +495,56 @@ async function runMcpScenario(
   }
   const result = await auditMcp(options);
   return {
-    events: result.events,
+    events:
+      target.evidenceMode === "metadata-only"
+        ? metadataOnlyMcpEvidence(result.events)
+        : result.events,
     observedPassed: result.passed,
     faultApplied: result.events.some((event) => event.fault !== undefined),
     sourceHash: imported.configSha256,
   };
+}
+
+async function expandToolArguments(
+  value: Record<string, Record<string, unknown>>,
+  root: string,
+): Promise<Record<string, Record<string, unknown>>> {
+  const expand = async (entry: unknown): Promise<unknown> => {
+    if (typeof entry === "string" && entry.startsWith("{{PROJECT_ROOT}}/")) {
+      const candidate = safeOutputPath(root, entry.slice("{{PROJECT_ROOT}}/".length));
+      let ancestor = candidate;
+      while (
+        !(await access(ancestor).then(
+          () => true,
+          () => false,
+        ))
+      ) {
+        const parent = dirname(ancestor);
+        if (parent === ancestor) break;
+        ancestor = parent;
+      }
+      if (!isContained(root, await realpath(ancestor))) {
+        throw new CampaignError(
+          "Tool argument path resolves outside the repository root",
+          CAMPAIGN_EXIT_CODES.AUTHORIZATION,
+        );
+      }
+      return candidate;
+    }
+    if (Array.isArray(entry)) return Promise.all(entry.map(expand));
+    if (entry && typeof entry === "object") {
+      return Object.fromEntries(
+        await Promise.all(
+          Object.entries(entry as Record<string, unknown>).map(async ([key, item]) => [
+            key,
+            await expand(item),
+          ]),
+        ),
+      );
+    }
+    return entry;
+  };
+  return (await expand(value)) as Record<string, Record<string, unknown>>;
 }
 
 async function runOneScenario(
@@ -724,7 +771,7 @@ export async function runCampaign(
     const withoutHash: Omit<CampaignRun, "runHash"> = {
       schemaVersion: "1.0",
       kind: "resilireplay-campaign-run",
-      productVersion: "0.3.1",
+      productVersion: "0.4.0",
       campaignId: campaign.id,
       campaignHash: hash,
       runId,
