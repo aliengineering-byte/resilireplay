@@ -386,6 +386,17 @@ pre code {
 .comparison-grid .accent-card {
   border-color: var(--lime);
 }
+.contrast .case-grid article {
+  padding: clamp(26px, 4vw, 48px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.contrast .case-grid article p:last-child {
+  margin-bottom: 0;
+  color: #c4d8d4;
+}
+.contrast .case-grid .accent-card {
+  border-color: var(--lime);
+}
 .step-number {
   color: var(--lime);
   font:

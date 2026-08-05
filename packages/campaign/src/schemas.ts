@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FaultTypeSchema } from "@resilireplay/core";
+import { FaultTypeSchema, containsLikelySecret } from "@resilireplay/core";
 
 const IDENTIFIER = /^[a-z0-9][a-z0-9._-]{0,63}$/u;
 const SHA256 = /^[a-f0-9]{64}$/u;
@@ -22,6 +22,24 @@ export const CampaignRelativePathSchema = z
     "Persisted campaign paths cannot contain parent traversal segments",
   );
 
+const hasUnsafeToolArgumentPath = (value: unknown): boolean => {
+  if (typeof value === "string") {
+    if (value.startsWith("{{PROJECT_ROOT}}/")) {
+      return !CampaignRelativePathSchema.safeParse(value.slice("{{PROJECT_ROOT}}/".length)).success;
+    }
+    return (
+      ABSOLUTE_PATH.test(value) ||
+      /^(?:~[\\/]|%USERPROFILE%|\$HOME)/iu.test(value) ||
+      value.split(/[\\/]/u).includes("..")
+    );
+  }
+  if (Array.isArray(value)) return value.some(hasUnsafeToolArgumentPath);
+  if (value && typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).some(hasUnsafeToolArgumentPath);
+  }
+  return false;
+};
+
 export const CampaignFaultSchema = z.union([z.literal("none"), FaultTypeSchema]);
 
 export const CampaignTraceTargetSchema = z
@@ -39,6 +57,8 @@ export const CampaignMcpTargetSchema = z
     inspectorConfig: CampaignRelativePathSchema,
     server: z.string().min(1).max(128),
     allowTools: z.array(z.string().min(1).max(128)).max(32).default([]),
+    toolArguments: z.record(z.record(z.unknown())).optional(),
+    evidenceMode: z.enum(["full", "metadata-only"]).optional(),
     allowRemote: z.boolean().default(false),
   })
   .strict();
@@ -144,6 +164,32 @@ export const CampaignSchema = z
         });
       }
       targetIds.add(target.id);
+      if (target.kind === "mcp") {
+        for (const toolName of Object.keys(target.toolArguments ?? {})) {
+          if (!target.allowTools.includes(toolName)) {
+            context.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ["targets", index, "toolArguments", toolName],
+              message: "Tool arguments require a matching explicit allowTools entry",
+            });
+          }
+        }
+        if (containsLikelySecret(target.toolArguments ?? {})) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["targets", index, "toolArguments"],
+            message: "Credential-shaped tool arguments are not permitted in campaign files",
+          });
+        }
+        if (hasUnsafeToolArgumentPath(target.toolArguments ?? {})) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["targets", index, "toolArguments"],
+            message:
+              "Tool argument paths must be repository-relative or a contained {{PROJECT_ROOT}} path",
+          });
+        }
+      }
     }
     const scenarioIds = new Set<string>();
     for (const [index, scenario] of campaign.scenarios.entries()) {
@@ -230,7 +276,7 @@ export const CampaignRunSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-campaign-run"),
-    productVersion: z.enum(["0.3.0", "0.3.1"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     runId: z.string().min(1).max(128),
@@ -276,7 +322,7 @@ export const CampaignBaselineSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-baseline"),
-    productVersion: z.enum(["0.3.0", "0.3.1"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     approvedAt: z.string().datetime({ offset: true }),
@@ -306,7 +352,7 @@ export const CampaignComparisonSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-comparison"),
-    productVersion: z.enum(["0.3.0", "0.3.1"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     baselineHash: z.string().regex(SHA256),

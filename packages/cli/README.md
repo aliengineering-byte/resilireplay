@@ -1,8 +1,7 @@
 # resilireplay
 
-The self-contained ResiliReplay CLI. Run the loopback Studio, execute deterministic reliability
-campaigns, compare approved baselines, record/mutate/replay traces, generate regression tests, and
-audit authorized MCP servers.
+The self-contained ResiliReplay CLI. Turn a reviewed MCP server into deterministic recovery evidence,
+an executable regression, and a pinned GitHub Action without an account or hosted service.
 
 Requires Node.js 22 or 24.
 
@@ -14,10 +13,19 @@ resilireplay --help
 Or run a pinned version without installing globally:
 
 ```console
-npx --yes resilireplay@0.3.1 --version
+npx --yes resilireplay@0.4.0 demo
 ```
 
-Start Studio or inspect campaign commands:
+Review an existing repository-local Inspector-compatible MCP configuration without side effects,
+then create commit-ready recovery CI:
+
+```console
+npx --yes resilireplay@0.4.0 adopt --config ./mcp.json --dry-run
+npx --yes resilireplay@0.4.0 adopt --config ./mcp.json
+git add .resilireplay tests/resilireplay .github/workflows/resilireplay.yml
+```
+
+Or start Studio and inspect campaign commands:
 
 ```console
 resilireplay studio --open
@@ -31,8 +39,10 @@ allowing any tool calls:
 resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
 ```
 
-Studio binds only to loopback. Campaign tool calls require an explicit allowlist and confirmation of
-the exact reviewed campaign hash. Audit only local or user-owned targets.
+`adopt` searches only the current project allowlist and never trusts MCP tool annotations as
+authorization. The exact tool, arguments, and one-duplicate safety boundary require review;
+`--yes` cannot bypass them. Generated evidence is metadata-only and omits raw MCP bodies, headers,
+and environment values. Studio binds only to loopback. ResiliReplay is not an OS sandbox.
 
 Documentation, source, and deterministic demos:
 [github.com/aliengineering-byte/resilireplay](https://github.com/aliengineering-byte/resilireplay)

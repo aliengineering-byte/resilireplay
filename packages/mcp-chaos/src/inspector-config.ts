@@ -93,6 +93,12 @@ export interface LoadInspectorConfigOptions {
   environment?: NodeJS.ProcessEnv;
 }
 
+export interface InspectorConfigSummary {
+  path: string;
+  configSha256: string;
+  serverNames: string[];
+}
+
 const DEFAULT_TIMEOUT_MS = 5_000;
 const SAFE_ENV_NAME = /^[A-Za-z_][A-Za-z0-9_]*$/u;
 const HEADER_NAME = /^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/u;
@@ -513,6 +519,68 @@ function parseUrl(value: unknown): URL {
 export function isLoopbackMcpUrl(url: URL): boolean {
   const hostname = url.hostname.toLowerCase();
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
+
+export async function listInspectorServers(
+  fileInput: string,
+  options: Pick<LoadInspectorConfigOptions, "allowedRoot"> = {},
+): Promise<InspectorConfigSummary> {
+  const unresolvedFile = resolve(fileInput);
+  const allowedRoot = resolve(options.allowedRoot ?? dirname(unresolvedFile));
+  if (!isContained(allowedRoot, unresolvedFile)) {
+    configError(
+      "RR_MCP_CONFIG_PATH_ESCAPE",
+      "Inspector configuration path escapes the allowed repository root",
+    );
+  }
+  let file: string;
+  try {
+    file = await realpath(unresolvedFile);
+    if (!isContained(allowedRoot, file)) {
+      configError(
+        "RR_MCP_CONFIG_PATH_ESCAPE",
+        "Inspector configuration resolves through a link outside the allowed repository root",
+      );
+    }
+    const information = await stat(file);
+    if (!information.isFile()) {
+      configError("RR_MCP_CONFIG_NOT_FILE", "Inspector configuration path is not a file");
+    }
+  } catch (error) {
+    if (error instanceof McpInspectorConfigError) throw error;
+    configError("RR_MCP_CONFIG_MISSING", "Inspector configuration file was not found", error);
+  }
+  const raw = await readFile(file, "utf8");
+  const parsed = parseJson(raw);
+  if (!Object.hasOwn(parsed, "mcpServers") || !isRecord(parsed.mcpServers)) {
+    configError("RR_MCP_CONFIG_MISSING_SERVERS", "Inspector configuration must contain mcpServers");
+  }
+  if (Object.keys(parsed).some((field) => field !== "mcpServers")) {
+    configError(
+      "RR_MCP_CONFIG_TOP_LEVEL_FIELD",
+      `Unsupported top-level Inspector field: ${Object.keys(parsed).find((field) => field !== "mcpServers")}`,
+    );
+  }
+  const serverNames = Object.keys(parsed.mcpServers);
+  if (serverNames.length === 0) {
+    configError("RR_MCP_CONFIG_ZERO_SERVERS", "Inspector configuration contains zero servers");
+  }
+  for (const name of serverNames) {
+    if (name.trim() === "" || name.length > 128 || containsAsciiControl(name)) {
+      configError("RR_MCP_CONFIG_SERVER_NAME", "Inspector server names must be non-empty text");
+    }
+    if (containsLikelySecret(name)) {
+      configError(
+        "RR_MCP_CONFIG_SERVER_NAME_SECRET",
+        "Inspector server names must not contain credential-shaped values",
+      );
+    }
+  }
+  return {
+    path: file,
+    configSha256: createHash("sha256").update(raw).digest("hex"),
+    serverNames,
+  };
 }
 
 export async function loadInspectorConfig(

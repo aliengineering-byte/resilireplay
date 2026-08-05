@@ -6,6 +6,7 @@ import { parse } from "yaml";
 import {
   BUILTIN_SCENARIOS,
   FAULT_TYPES,
+  PRODUCT_VERSION,
   FaultScenarioSchema,
   calculateMetrics,
   injectFaults,
@@ -48,6 +49,8 @@ import {
   writeCampaignRunReports,
 } from "@resilireplay/campaign";
 import { startStudio } from "@resilireplay/studio";
+import { demoTerminalReport, runDemo } from "./demo.js";
+import { adoptTerminalReport, runAdopt, type AdoptOptions } from "./adopt.js";
 
 async function exists(path: string): Promise<boolean> {
   return access(path).then(
@@ -151,7 +154,84 @@ export function createProgram(): Command {
     .description(
       "Crash-test AI agents and MCP servers, replay failures, and generate regression tests.",
     )
-    .version("0.3.1");
+    .version(PRODUCT_VERSION);
+
+  program
+    .command("demo")
+    .description("Run a zero-configuration deterministic recovery demo.")
+    .option("--json", "Print one machine-readable JSON result")
+    .option("-o, --output <directory>", "Keep generated evidence and regression artifacts")
+    .option("--no-color", "Disable ANSI color")
+    .option("--seed <number>", "Deterministic seed", "42")
+    .action(async (options: { json?: boolean; output?: string; color: boolean; seed: string }) => {
+      const result = await runDemo({
+        seed: Number(options.seed),
+        ...(options.output ? { outputDirectory: options.output } : {}),
+      });
+      console.log(
+        options.json
+          ? stableStringify(result)
+          : demoTerminalReport(result, options.color && process.env.NO_COLOR === undefined),
+      );
+    });
+
+  program
+    .command("adopt")
+    .description("Turn an existing MCP configuration into reviewed recovery CI.")
+    .option("--config <path>", "Repository-local Inspector-compatible MCP configuration")
+    .option("--server <name>", "Exact mcpServers entry")
+    .option("--dry-run", "Parse and print a side-effect-free sanitized execution plan")
+    .option("--non-interactive", "Require every safety-critical choice as a flag")
+    .option("--json", "Print one machine-readable JSON result")
+    .option("-o, --output <directory>", "Primary artifact directory", ".resilireplay")
+    .option("--tool <name>", "Exact reviewed MCP tool")
+    .option("--arguments <json-object>", "Exact reviewed tool arguments")
+    .option("--safety <classification>", "read-only-idempotent or reviewed-idempotent")
+    .option("--confirm-target", "Confirm the exact displayed process or HTTP target")
+    .option("--confirm-tool-execution", "Confirm the exact tool and arguments")
+    .option("--confirm-retry-safe", "Confirm idempotence and one duplicate attempt")
+    .option("--allow-remote", "Confirm ownership of the declared remote HTTP target")
+    .option("--yes", "Confirm non-tool setup choices; never bypasses tool review")
+    .option("--seed <number>", "Deterministic campaign seed", "42")
+    .action(
+      async (options: {
+        config?: string;
+        server?: string;
+        dryRun?: boolean;
+        nonInteractive?: boolean;
+        json?: boolean;
+        output: string;
+        tool?: string;
+        arguments?: string;
+        safety?: string;
+        confirmTarget?: boolean;
+        confirmToolExecution?: boolean;
+        confirmRetrySafe?: boolean;
+        allowRemote?: boolean;
+        yes?: boolean;
+        seed: string;
+      }) => {
+        const adoptOptions: AdoptOptions = {
+          ...(options.config ? { config: options.config } : {}),
+          ...(options.server ? { server: options.server } : {}),
+          dryRun: options.dryRun ?? false,
+          nonInteractive: options.nonInteractive ?? false,
+          json: options.json ?? false,
+          outputDirectory: options.output,
+          ...(options.tool ? { tool: options.tool } : {}),
+          ...(options.arguments ? { argumentsJson: options.arguments } : {}),
+          ...(options.safety ? { safety: options.safety } : {}),
+          confirmTarget: options.confirmTarget ?? false,
+          confirmToolExecution: options.confirmToolExecution ?? false,
+          confirmRetrySafe: options.confirmRetrySafe ?? false,
+          allowRemote: options.allowRemote ?? false,
+          yes: options.yes ?? false,
+          seed: Number(options.seed),
+        };
+        const result = await runAdopt(adoptOptions);
+        console.log(options.json ? stableStringify(result) : adoptTerminalReport(result));
+      },
+    );
 
   program
     .command("studio")
@@ -166,7 +246,7 @@ export function createProgram(): Command {
         });
       }
       const studio = await startStudio({ rootDirectory: process.cwd(), port });
-      console.log(`ResiliReplay Studio v0.3.1 ready in ${studio.startupMs}ms`);
+      console.log(`ResiliReplay Studio v${PRODUCT_VERSION} ready in ${studio.startupMs}ms`);
       console.log(studio.url);
       console.log("Loopback only · ephemeral session · no telemetry · Ctrl+C to stop");
       if (options.open) openBrowser(studio.url);
@@ -212,6 +292,8 @@ export function createProgram(): Command {
                   inspectorConfig: target.inspectorConfig,
                   server: target.server,
                   allowTools: target.allowTools,
+                  toolArguments: target.toolArguments,
+                  evidenceMode: target.evidenceMode,
                   allowRemote: target.allowRemote,
                 },
           ),

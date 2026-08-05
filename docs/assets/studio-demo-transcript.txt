@@ -1,4 +1,4 @@
-ResiliReplay v0.3.1 verified local fixture demo
+ResiliReplay v0.4.0 verified local fixture demo
 Fixture disclosure: resilient/vulnerable stdio and Streamable HTTP are repository-owned local processes; no external provider is used.
 
 1/7 Inspector-shaped config -> reviewed deterministic campaign
@@ -9,16 +9,16 @@ PASSED resilient-negative-control observed=passed fault=none recovery=true regre
 PASSED resilient-bounded-retry observed=passed fault=mcp-tool-error recovery=true regression=not-applicable
 PASSED vulnerable-negative-control observed=failed fault=none recovery=true regression=generated
 PASSED unsafe-content-regression observed=failed fault=mcp-malicious-canary-instruction recovery=false regression=generated
-stdio evidence=e9a9c6a7ac9ad89bdf1af552f0828b5012c7f56843739d3640596244cf61e426
+stdio evidence=81ad5f6fbde132a50371bfa7ea4257fbb2d0eaa55748f5aad3d7b4aa3e227c8d
 3/7 Approving and comparing a reliability baseline
-comparison=pass differences=0 baseline=c26b7d2d34b4376edf4707439a9012aec459074527fa3eb12575fd56f19c4899
+comparison=pass differences=0 baseline=3b87f75322d38edb4b3452abb082ac13c60ff9897399fc68ba1ce137b33c4b1a
 4/7 Verifying generated causal regression tests
 generated=2 verified=true
 5/7 Running the real local Streamable HTTP negative control and bounded retry
-http=PASS scenarios=2/2 hash=c66de4a37c572979f95ab43f2e19bde5ca267da594e27f07a021a8d9f4d7da25
+http=PASS scenarios=2/2 hash=3d8d6b8c25ca738a9d1aed5cc81b8208d9fb81fc13e89a3486498c0192b8f3c5
 6/7 Measuring Studio startup and graceful shutdown
-studio startup=21ms bind=127.0.0.1 session=ephemeral url-secret=false
+studio startup=15ms bind=127.0.0.1 session=ephemeral url-secret=false
 studio listener closed=true
 7/7 Final result
-workflow=PASS wall=3370ms under-60s=true
+workflow=PASS wall=3331ms under-60s=true
 telemetry=false api-keys=false external-provider=false fixture-backed=true

@@ -90,6 +90,28 @@ describe("campaign schema, runner, and baselines", () => {
       }).success,
     ).toBe(false);
 
+    const mcpCampaign = (argumentPath: string) => ({
+      ...duplicate,
+      targets: [
+        {
+          id: "agent",
+          kind: "mcp",
+          inspectorConfig: "mcp.json",
+          server: "fixture",
+          allowTools: ["read_fixture"],
+          toolArguments: { read_fixture: { path: argumentPath } },
+          evidenceMode: "metadata-only",
+        },
+      ],
+    });
+    for (const unsafe of ["../secret", "C:\\secret", "/etc/passwd", "$HOME/secret"]) {
+      expect(CampaignSchema.safeParse(mcpCampaign(unsafe)).success).toBe(false);
+    }
+    expect(
+      CampaignSchema.safeParse(mcpCampaign("{{PROJECT_ROOT}}/fixtures/public.json")).success,
+    ).toBe(true);
+    expect(CampaignSchema.safeParse(mcpCampaign("{{PROJECT_ROOT}}/../secret")).success).toBe(false);
+
     const directory = await tempDirectory("campaign-hostile-");
     try {
       const aliasPath = join(directory, "alias.yml");

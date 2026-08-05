@@ -3,6 +3,28 @@
 ResiliReplay demos execute repository-owned local fixtures. They use no API key, paid model, external
 account, telemetry, or prerecorded pass result. Fixture output is not presented as a live provider.
 
+## Zero-configuration v0.4 demo
+
+From an empty directory:
+
+```console
+npx --yes resilireplay@0.4.0 demo
+```
+
+The packaged deterministic fixture runs a clean control, injects one MCP-shaped tool-result error,
+recovers with one bounded retry, verifies an expected malicious-canary negative control, generates an
+executable regression, and executes that regression. Without `--output`, its temporary workspace is
+removed. The same seed produces the same canonical evidence hash.
+
+The public GIF, static fallback, and transcript are generated from the packed v0.4.0 package rather
+than typed output:
+
+![Genuine packed-package demo](assets/adopt-demo.gif)
+
+[Static fallback](assets/adopt-demo.png) - [captured transcript](assets/adopt-demo-transcript.txt)
+
+See [ADOPT.md](ADOPT.md) for the next step against an existing MCP configuration.
+
 ## Studio & Campaigns
 
 From a fresh clone:

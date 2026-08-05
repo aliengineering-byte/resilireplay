@@ -5,6 +5,10 @@ const root = resolve(import.meta.dirname, "..");
 const docs = join(root, "docs");
 const htmlPath = join(docs, "index.html");
 const html = await readFile(htmlPath, "utf8");
+const readme = await readFile(join(root, "README.md"), "utf8");
+const packageReadme = await readFile(join(root, "packages", "cli", "README.md"), "utf8");
+const adoptGuide = await readFile(join(docs, "ADOPT.md"), "utf8");
+const demoTranscript = await readFile(join(docs, "assets", "adopt-demo-transcript.txt"), "utf8");
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -19,6 +23,32 @@ invariant(!/<style(?:\s|>)/iu.test(html), "Inline styles are not allowed");
 invariant(
   !/(google-analytics|googletagmanager|segment\.com|posthog|mixpanel)/iu.test(html),
   "Analytics are not allowed",
+);
+for (const [name, content] of [
+  ["README", readme],
+  ["npm README", packageReadme],
+  ["adoption guide", adoptGuide],
+  ["landing page", html],
+]) {
+  invariant(
+    content.includes("resilireplay@0.4.0 demo"),
+    `${name} must include the shipped v0.4.0 demo command`,
+  );
+  invariant(
+    content.includes("resilireplay@0.4.0 adopt"),
+    `${name} must include the shipped v0.4.0 adopt command`,
+  );
+}
+invariant(html.includes("assets/adopt-demo.gif"), "Landing page must use the genuine demo GIF");
+invariant(
+  html.includes("assets/adopt-demo.png"),
+  "Landing page must link the static demo fallback",
+);
+invariant(
+  demoTranscript.includes("PASS ResiliReplay demo completed in ") &&
+    demoTranscript.includes("Generated regression executed successfully") &&
+    demoTranscript.includes("captureWallMs="),
+  "Genuine packed-package demo transcript is incomplete",
 );
 
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]));

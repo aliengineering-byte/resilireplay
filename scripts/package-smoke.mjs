@@ -153,4 +153,151 @@ for (const [arguments_, expectation] of [
   }
 }
 
-console.log(`Single-package npm installation smoke passed: resilireplay ${sourceManifest.version}`);
+const demoProject = join(artifacts, "demo-empty");
+await mkdir(demoProject, { recursive: true });
+const demo = spawnSync(process.execPath, [cli, "demo", "--json", "--no-color"], {
+  cwd: demoProject,
+  encoding: "utf8",
+  windowsHide: true,
+  timeout: 30_000,
+});
+if (demo.status !== 0) {
+  throw new Error(`Packed demo failed: ${demo.stdout ?? ""}${demo.stderr ?? ""}`);
+}
+const demoResult = JSON.parse(demo.stdout);
+if (
+  demoResult.status !== "passed" ||
+  demoResult.durationMs >= 30_000 ||
+  demoResult.outputDirectory !== null ||
+  (await readdir(demoProject)).length !== 0
+) {
+  throw new Error(`Packed demo acceptance failed: ${demo.stdout}`);
+}
+
+const adoptProject = join(artifacts, "adopt-dry-run");
+await mkdir(adoptProject, { recursive: true });
+await writeFile(
+  join(adoptProject, "mcp.json"),
+  `${JSON.stringify({ mcpServers: { fixture: { command: "node", args: ["never-started.mjs"] } } })}\n`,
+  "utf8",
+);
+const adopt = spawnSync(
+  process.execPath,
+  [cli, "adopt", "--config", "mcp.json", "--server", "fixture", "--dry-run", "--json"],
+  { cwd: adoptProject, encoding: "utf8", windowsHide: true, timeout: 10_000 },
+);
+if (adopt.status !== 0) {
+  throw new Error(`Packed adopt dry-run failed: ${adopt.stdout ?? ""}${adopt.stderr ?? ""}`);
+}
+const adoptResult = JSON.parse(adopt.stdout);
+if (
+  adoptResult.status !== "dry-run" ||
+  Object.values(adoptResult.plan.sideEffects).some(Boolean) ||
+  JSON.stringify(await readdir(adoptProject)) !== JSON.stringify(["mcp.json"])
+) {
+  throw new Error(`Packed adopt dry-run acceptance failed: ${adopt.stdout}`);
+}
+
+const fullAdoptProject = join(artifacts, "adopt-full");
+await mkdir(fullAdoptProject, { recursive: true });
+await writeFile(
+  join(fullAdoptProject, "server.mjs"),
+  `import { createInterface } from "node:readline";
+const lines = createInterface({ input: process.stdin, crlfDelay: Infinity });
+for await (const line of lines) {
+  const message = JSON.parse(line);
+  if (message.id === undefined) continue;
+  let result;
+  if (message.method === "initialize") result = { protocolVersion: "2025-06-18", capabilities: { tools: {} }, serverInfo: { name: "packed-adopt-fixture", version: "1.0.0" } };
+  else if (message.method === "tools/list") result = { tools: [{ name: "read_fixture", description: "Read an inert fixture.", inputSchema: { type: "object", properties: { message: { type: "string" } }, required: ["message"] }, annotations: { readOnlyHint: true } }] };
+  else if (message.method === "tools/call") result = { content: [{ type: "text", text: "PACKED_PRIVATE_BODY_MUST_NOT_PERSIST" }] };
+  else { console.log(JSON.stringify({ jsonrpc: "2.0", id: message.id, error: { code: -32601, message: "not found" } })); continue; }
+  console.log(JSON.stringify({ jsonrpc: "2.0", id: message.id, result }));
+}
+`,
+  "utf8",
+);
+await writeFile(
+  join(fullAdoptProject, "mcp.json"),
+  `${JSON.stringify({ mcpServers: { fixture: { command: "node", args: ["server.mjs"] } } })}\n`,
+  "utf8",
+);
+const fullAdopt = spawnSync(
+  process.execPath,
+  [
+    cli,
+    "adopt",
+    "--config",
+    "mcp.json",
+    "--server",
+    "fixture",
+    "--tool",
+    "read_fixture",
+    "--arguments",
+    JSON.stringify({ message: "reviewed-packed-fixture" }),
+    "--safety",
+    "read-only-idempotent",
+    "--confirm-target",
+    "--confirm-tool-execution",
+    "--confirm-retry-safe",
+    "--non-interactive",
+    "--json",
+  ],
+  { cwd: fullAdoptProject, encoding: "utf8", windowsHide: true, timeout: 300_000 },
+);
+if (fullAdopt.status !== 0) {
+  throw new Error(
+    `Packed full adoption failed: ${fullAdopt.stdout ?? ""}${fullAdopt.stderr ?? ""}`,
+  );
+}
+const fullAdoptResult = JSON.parse(fullAdopt.stdout);
+if (
+  fullAdoptResult.status !== "adopted" ||
+  fullAdoptResult.durationMs >= 300_000 ||
+  fullAdoptResult.createdFiles.length !== 14
+) {
+  throw new Error(`Packed full adoption acceptance failed: ${fullAdopt.stdout}`);
+}
+const persistedAdoption = (
+  await Promise.all(
+    fullAdoptResult.createdFiles.map((path) => readFile(join(fullAdoptProject, path), "utf8")),
+  )
+).join("\n");
+if (
+  persistedAdoption.includes("PACKED_PRIVATE_BODY_MUST_NOT_PERSIST") ||
+  /[A-Za-z]:\\Users\\|\/home\//u.test(persistedAdoption)
+) {
+  throw new Error("Packed adoption persisted a private body or personal path");
+}
+for (const arguments_ of [
+  ["--test", join(fullAdoptProject, "tests", "resilireplay", "regression.test.mjs")],
+  [
+    cli,
+    "campaign",
+    "run",
+    ".resilireplay/campaign.yml",
+    "--confirm-tools",
+    fullAdoptResult.campaignHash,
+    "--output",
+    ".resilireplay/runs/package-verification",
+  ],
+]) {
+  const verification = spawnSync(process.execPath, arguments_, {
+    cwd: fullAdoptProject,
+    encoding: "utf8",
+    windowsHide: true,
+    timeout: 60_000,
+  });
+  if (verification.status !== 0) {
+    throw new Error(
+      `Packed adoption verification failed: ${verification.stdout ?? ""}${verification.stderr ?? ""}`,
+    );
+  }
+}
+
+console.log(
+  `Single-package npm installation, demo, and adopt dry-run smoke passed: resilireplay ${sourceManifest.version}`,
+);
+console.log(
+  `Packed full adoption passed: ${fullAdoptResult.durationMs}ms, ${fullAdoptResult.createdFiles.length} artifacts, campaign ${fullAdoptResult.campaignHash}`,
+);

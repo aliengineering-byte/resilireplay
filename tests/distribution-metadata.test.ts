@@ -16,6 +16,7 @@ describe("distribution metadata", () => {
     expect(metadata).toContain("author: Ali\n");
     const description = /^description: (.+)$/mu.exec(metadata)?.[1];
     expect(description?.length).toBeLessThanOrEqual(125);
+    expect(description).toContain("deterministic recovery regressions");
     expect(metadata).toContain("branding:\n  icon: activity\n  color: purple\n");
     expect(metadata).not.toMatch(/^outputs:/mu);
     expect(metadata).toContain(
@@ -26,6 +27,9 @@ describe("distribution metadata", () => {
     );
     expect(metadata).toContain(
       'campaign-confirmation-hash:\n    description: Exact reviewed hash required only when the campaign allowlists tool calls\n    required: false\n    default: ""',
+    );
+    expect(metadata).toContain(
+      'allow-remote:\n    description: Explicitly confirm that declared non-loopback MCP targets are user-owned\n    required: false\n    default: "false"',
     );
   });
 

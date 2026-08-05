@@ -1,9 +1,9 @@
 {
   "name": "resilireplay-monorepo",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Crash-test AI agents and MCP servers, replay failures, and turn broken traces into deterministic regression tests.",
+  "description": "Turn reviewed MCP failures into deterministic recovery evidence and executable regression tests.",
   "author": "Ali <268342250+aliengineering-byte@users.noreply.github.com>",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.14.0",

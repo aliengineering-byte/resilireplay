@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
@@ -86,6 +87,7 @@ export interface McpAuditOptions {
   requestTimeoutMs?: number;
   callTools?: boolean;
   allowedTools?: string[];
+  toolArguments?: Record<string, Record<string, unknown>>;
   allowRemote?: boolean;
   fault?: (typeof MCP_FAULT_TYPES)[number];
   seed?: number;
@@ -99,7 +101,12 @@ export interface McpAuditOptions {
 export interface McpAuditResult {
   target: string;
   transport: "stdio" | "streamable-http" | "sse";
-  tools: Array<{ name: string; description?: string; inputSchema: unknown }>;
+  tools: Array<{
+    name: string;
+    description?: string;
+    inputSchema: unknown;
+    annotations?: Record<string, unknown>;
+  }>;
   findings: McpFinding[];
   events: TraceEvent[];
   passed: boolean;
@@ -117,6 +124,51 @@ export class McpConnectionError extends Error {
     super(message, options);
     this.name = "McpConnectionError";
   }
+}
+
+export function metadataOnlyMcpEvidence(events: readonly TraceEvent[]): TraceEvent[] {
+  return events.map((event) => {
+    let payload = event.payload;
+    if (event.type === "tool_requested") {
+      payload = {
+        reviewed: true,
+        argumentsSha256: createHash("sha256").update(stableStringify(event.payload)).digest("hex"),
+      };
+    } else if (event.type === "tool_result") {
+      payload = {
+        bodyPersisted: false,
+        outcome: event.fault ? "fault-injected" : "received",
+      };
+    } else if (event.type === "tool_discovered") {
+      const rawTools =
+        typeof event.payload === "object" &&
+        event.payload !== null &&
+        Array.isArray((event.payload as Record<string, unknown>).tools)
+          ? ((event.payload as Record<string, unknown>).tools as Array<Record<string, unknown>>)
+          : [];
+      payload = {
+        count: rawTools.length,
+        names: rawTools
+          .map((tool) => (typeof tool.name === "string" ? sanitize(tool.name) : undefined))
+          .filter((name): name is string => name !== undefined),
+      };
+    }
+    return createEvent({
+      runId: event.runId,
+      stepId: event.stepId,
+      ...(event.parentId ? { parentId: event.parentId } : {}),
+      ...(event.causeId ? { causeId: event.causeId } : {}),
+      sequence: event.sequence,
+      timestamp: event.timestamp,
+      type: event.type,
+      actor: event.actor,
+      ...(event.tool ? { tool: event.tool } : {}),
+      ...(event.model ? { model: event.model } : {}),
+      metadata: event.metadata,
+      payload,
+      ...(event.fault ? { fault: event.fault } : {}),
+    });
+  });
 }
 
 export function splitCommandLine(commandLine: string): string[] {
@@ -315,6 +367,23 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       "RR_MCP_TIMEOUT",
     );
   }
+  if (options.toolArguments && containsLikelySecret(options.toolArguments)) {
+    throw new McpInspectorConfigError(
+      "Credential-shaped tool arguments are not accepted; replace them with a safe fixture value",
+      "RR_MCP_TOOL_ARGUMENT_SECRET",
+    );
+  }
+  if (
+    options.toolArguments &&
+    Object.keys(options.toolArguments).some(
+      (name) => options.allowedTools === undefined || !options.allowedTools.includes(name),
+    )
+  ) {
+    throw new McpInspectorConfigError(
+      "Every tool argument entry must match the explicit tool allowlist",
+      "RR_MCP_TOOL_ARGUMENT_ALLOWLIST",
+    );
+  }
   const runId = `mcp-${Date.now().toString(36)}`;
   const events: TraceEvent[] = [
     createEvent({
@@ -421,7 +490,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       "RR_MCP_TOOL_ALLOWLIST",
     );
   }
-  const client = new Client({ name: "resilireplay", version: "0.3.1" }, { capabilities: {} });
+  const client = new Client({ name: "resilireplay", version: "0.4.0" }, { capabilities: {} });
   let secretOutputDetected = false;
   let recoveryAttempted = false;
   let recoveredFaultCount = 0;
@@ -455,6 +524,9 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       name: sanitize(tool.name),
       ...(tool.description ? { description: sanitize(tool.description) } : {}),
       inputSchema: sanitize(tool.inputSchema),
+      ...(tool.annotations
+        ? { annotations: sanitize(tool.annotations as Record<string, unknown>) }
+        : {}),
     }));
     if (tools.length === 0) {
       findings.push({
@@ -486,7 +558,8 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
           ? options.callTools || listedTool.name === "reliability_probe"
           : options.callTools === true && options.allowedTools.includes(listedTool.name);
       if (!shouldCall) continue;
-      const argumentsValue = exampleForSchema(listedTool.inputSchema);
+      const argumentsValue =
+        options.toolArguments?.[listedTool.name] ?? exampleForSchema(listedTool.inputSchema);
       events.push(
         createEvent({
           runId,
@@ -674,7 +747,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
 }
 
 function certificationBadge(passed: boolean): string {
-  const value = passed ? "passing v0.3.1" : "findings v0.3.1";
+  const value = passed ? "passing v0.4.0" : "findings v0.4.0";
   const color = passed ? "#159957" : "#c0392b";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="276" height="20" role="img" aria-label="MCP Chaos Tested: ${value}"><rect width="164" height="20" rx="3" fill="#555"/><rect x="164" width="112" height="20" rx="3" fill="${color}"/><g fill="#fff" text-anchor="middle" font-family="Verdana,sans-serif" font-size="11"><text x="82" y="15">MCP Chaos Tested</text><text x="220" y="15">${value}</text></g></svg>\n`;
 }
@@ -691,7 +764,7 @@ export async function writeMcpCertification(
   const json = `${stableStringify({
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    version: "0.3.1",
+    version: "0.4.0",
     scope:
       "Evidence for this declared local suite and version; not a universal security certification.",
     ...result,

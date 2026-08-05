@@ -1,0 +1,9 @@
+# Genuine v0.4.0 release-candidate tarball capture
+$ node ./node_modules/resilireplay/bin/resilireplay.mjs demo --no-color
+PASS ResiliReplay demo completed in 262ms
+Clean control passed · injected tool-result failure recovered once · negative control failed as expected
+Generated regression executed successfully
+Evidence 8d96b2198e8cb038b7386bdd7ceebe7a02ec4e3904c375828631f2be3a17d08f
+Next: npx --yes resilireplay@0.4.0 adopt --config ./mcp.json --dry-run
+captureWallMs=490
+networkTarget=local-tarball telemetry=false externalMcp=false apiKeys=false
