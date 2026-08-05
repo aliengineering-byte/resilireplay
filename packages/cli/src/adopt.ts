@@ -248,12 +248,6 @@ async function normalizePersistedValue(value: unknown, root: string): Promise<un
     }
     if (!isAbsolute(value)) return value;
     const resolved = resolve(value);
-    if (!isContained(root, resolved)) {
-      throw new AdoptError(
-        "Absolute tool-argument paths must stay inside the current project",
-        ADOPT_EXIT_CODES.SANITIZATION,
-      );
-    }
     let ancestor = resolved;
     while (
       !(await access(ancestor).then(
@@ -265,13 +259,15 @@ async function normalizePersistedValue(value: unknown, root: string): Promise<un
       if (parent === ancestor) break;
       ancestor = parent;
     }
-    if (!isContained(root, await realpath(ancestor))) {
+    const actualAncestor = await realpath(ancestor);
+    const canonicalCandidate = resolve(actualAncestor, relative(ancestor, resolved));
+    if (!isContained(root, canonicalCandidate)) {
       throw new AdoptError(
         "Tool-argument path resolves through a link outside the current project",
         ADOPT_EXIT_CODES.SANITIZATION,
       );
     }
-    return `{{PROJECT_ROOT}}/${repositoryPath(root, resolved)}`;
+    return `{{PROJECT_ROOT}}/${repositoryPath(root, canonicalCandidate)}`;
   }
   if (Array.isArray(value)) {
     return Promise.all(value.map((entry) => normalizePersistedValue(entry, root)));
