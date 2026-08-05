@@ -2,6 +2,37 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.5.0] - 2026-08-05
+
+### Added
+
+- One bounded, sanitized agent-event core with versioned capture-session, failure-evidence, and
+  adapter-manifest schemas.
+- Opt-in passive capture, evidence inspection, regression generation, safe repository-local agent
+  connection with dry-run/backup/rollback, and adapter init/verification commands.
+- A nine-tool annotated stdio MCP server and a validated portable Agent Skill shipped inside the
+  npm package.
+- Installable Claude Code and Codex plugins backed by one shared hook runtime, plus documented and
+  isolated Hermes Agent skill/MCP integration.
+- A conformance-tested minimal adapter, compatibility badge rules, synthetic Hugging Face dataset,
+  and no-key static demonstration Space source.
+- A genuine controlled-failure-to-passing-regression demo with transcript, PNG, GIF, and standalone
+  artifacts.
+
+### Security
+
+- Capture remains off by default and excludes raw prompts, transcripts, credentials, environment
+  values, personal paths, and unrestricted tool bodies.
+- Bounded stdin, events, summaries, journals, and generated artifacts; deterministic deduplication;
+  atomic writes; corruption recovery; and symlink/junction containment.
+- Passive hooks never retry operations, and MCP execution paths require exact reviewed hashes before
+  running a target or writing a regression.
+
+### Changed
+
+- All current product, package, Action, Studio, campaign, and report versions are aligned at 0.5.0
+  while v0.4 campaign inputs and CLI workflows remain backward compatible.
+
 ## [0.4.0] - 2026-08-05
 
 ### Added

@@ -8,7 +8,10 @@ const html = await readFile(htmlPath, "utf8");
 const readme = await readFile(join(root, "README.md"), "utf8");
 const packageReadme = await readFile(join(root, "packages", "cli", "README.md"), "utf8");
 const adoptGuide = await readFile(join(docs, "ADOPT.md"), "utf8");
-const demoTranscript = await readFile(join(docs, "assets", "adopt-demo-transcript.txt"), "utf8");
+const demoTranscript = await readFile(
+  join(docs, "assets", "everywhere-demo-transcript.txt"),
+  "utf8",
+);
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -27,28 +30,38 @@ invariant(
 for (const [name, content] of [
   ["README", readme],
   ["npm README", packageReadme],
-  ["adoption guide", adoptGuide],
   ["landing page", html],
 ]) {
   invariant(
-    content.includes("resilireplay@0.4.0 demo"),
-    `${name} must include the shipped v0.4.0 demo command`,
+    content.includes("resilireplay@0.5.0 demo"),
+    `${name} must include the shipped v0.5.0 demo command`,
   );
   invariant(
-    content.includes("resilireplay@0.4.0 adopt"),
-    `${name} must include the shipped v0.4.0 adopt command`,
+    content.includes("resilireplay@0.5.0 connect"),
+    `${name} must include the shipped v0.5.0 connect command`,
+  );
+  invariant(
+    content.includes("resilireplay@0.5.0 mcp serve"),
+    `${name} must include the shipped v0.5.0 MCP server command`,
   );
 }
-invariant(html.includes("assets/adopt-demo.gif"), "Landing page must use the genuine demo GIF");
 invariant(
-  html.includes("assets/adopt-demo.png"),
+  adoptGuide.includes("resilireplay@0.4.0 adopt"),
+  "Historical v0.4 adoption guide lost its pinned command",
+);
+invariant(
+  html.includes("assets/everywhere-demo.gif"),
+  "Landing page must use the genuine demo GIF",
+);
+invariant(
+  html.includes("assets/everywhere-demo.png"),
   "Landing page must link the static demo fallback",
 );
 invariant(
-  demoTranscript.includes("PASS ResiliReplay demo completed in ") &&
-    demoTranscript.includes("Generated regression executed successfully") &&
-    demoTranscript.includes("captureWallMs="),
-  "Genuine packed-package demo transcript is incomplete",
+  demoTranscript.includes("PASS 1 executable regression") &&
+    demoTranscript.includes("original command was not retried") &&
+    demoTranscript.includes("under-60s=true"),
+  "Genuine agent demo transcript is incomplete",
 );
 
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]));

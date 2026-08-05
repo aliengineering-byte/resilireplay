@@ -410,8 +410,12 @@ pre code {
 }
 .disclaimer {
   margin: 30px 0 0;
-  color: #b7cbc7;
+  color: var(--muted);
   font-size: 0.85rem;
+}
+.contrast .disclaimer,
+.contrast .disclaimer a {
+  color: #b7cbc7;
 }
 
 .workflow-list {

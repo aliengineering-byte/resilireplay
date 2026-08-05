@@ -1,0 +1,4 @@
+interface:
+  display_name: "ResiliReplay"
+  short_description: "Capture tool failures as regression evidence"
+  default_prompt: "Use $resilireplay to capture the last supported tool failure and generate a safe regression test."

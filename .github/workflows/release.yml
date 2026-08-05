@@ -25,6 +25,7 @@ jobs:
       - run: pnpm demo:mcp
       - run: pnpm demo:studio
       - run: pnpm release:gates
+      - run: pnpm agent:gates
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v7
@@ -35,4 +36,5 @@ jobs:
             runs/mcp-inspector-demo
             .artifacts/studio-demo
             .artifacts/release-gates/report.json
+            .artifacts/agent-release-gates/report.json
           retention-days: 30

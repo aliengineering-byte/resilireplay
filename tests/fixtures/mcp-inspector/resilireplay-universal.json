@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "resilireplay": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["packages/cli/bin/resilireplay.mjs", "mcp", "serve"]
+    }
+  }
+}

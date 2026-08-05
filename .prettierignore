@@ -3,6 +3,7 @@ dist
 coverage
 runs
 .artifacts
+plugins/resilireplay/runtime/hook-runtime.mjs
 docs/case-studies
 pnpm-lock.yaml
 LICENSE

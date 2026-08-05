@@ -6,6 +6,7 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      "@resilireplay/agent": `${root}packages/agent/src/index.ts`,
       "@resilireplay/core": `${root}packages/core/src/index.ts`,
       "@resilireplay/trace": `${root}packages/trace/src/index.ts`,
       "@resilireplay/reporters": `${root}packages/reporters/src/index.ts`,

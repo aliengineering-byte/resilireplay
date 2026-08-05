@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ResiliReplay Everywhere</title>
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        font: 16px/1.55 system-ui;
+        background: #0d1117;
+        color: #f0f6fc;
+      }
+      body {
+        margin: 0;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: auto;
+        padding: clamp(20px, 5vw, 64px);
+      }
+      h1 {
+        font-size: clamp(2.2rem, 8vw, 5rem);
+        line-height: 0.95;
+        margin: 0.2em 0;
+      }
+      h1 span {
+        color: #7ee787;
+      }
+      .lede {
+        font-size: 1.2rem;
+        color: #b1bac4;
+        max-width: 700px;
+      }
+      .panel {
+        border: 1px solid #30363d;
+        border-radius: 16px;
+        background: #161b22;
+        padding: 20px;
+        margin: 24px 0;
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      .step {
+        border: 1px solid #30363d;
+        border-radius: 10px;
+        padding: 14px;
+        color: #8b949e;
+      }
+      .step.active {
+        border-color: #7ee787;
+        color: #f0f6fc;
+        background: #12251a;
+      }
+      button {
+        font: inherit;
+        font-weight: 700;
+        border: 0;
+        border-radius: 10px;
+        background: #238636;
+        color: white;
+        padding: 12px 18px;
+        cursor: pointer;
+      }
+      button:focus {
+        outline: 3px solid #79c0ff;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #d2a8ff;
+      }
+      .note {
+        color: #8b949e;
+        font-size: 0.9rem;
+      }
+      a {
+        color: #79c0ff;
+      }
+      @media (max-width: 520px) {
+        .wrap {
+          padding: 20px;
+        }
+        .panel {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <p>RESILIREPLAY v0.5.0 · SYNTHETIC FIXTURE</p>
+      <h1>Failure becomes<br /><span>regression.</span></h1>
+      <p class="lede">
+        Step through a deterministic, sanitized coding-agent failure boundary. This static Space
+        runs no command and needs no key.
+      </p>
+      <div class="steps" aria-label="Evidence sequence">
+        <div class="step active">1 · safe failure</div>
+        <div class="step">2 · redaction</div>
+        <div class="step">3 · evidence</div>
+        <div class="step">4 · regression</div>
+      </div>
+      <section class="panel" aria-live="polite">
+        <h2 id="title">Controlled tool result</h2>
+        <p id="body">A synthetic Bash result exits with code 7. No side effect is retried.</p>
+        <pre id="evidence">outcome=failed · errorClass=process-exit</pre>
+        <button id="next" type="button">Next: redact</button>
+      </section>
+      <p class="note">
+        Synthetic reliability fixture—not a vulnerability, benchmark, endorsement, or security
+        certification. Raw prompts, transcripts, credentials, bodies, and personal paths are absent.
+      </p>
+      <p>
+        <a href="https://github.com/aliengineering-byte/resilireplay">Source and executable test</a>
+      </p>
+    </main>
+    <script>
+      const data = [
+        [
+          "Controlled tool result",
+          "A synthetic Bash result exits with code 7. No side effect is retried.",
+          "outcome=failed · errorClass=process-exit",
+          "Next: redact",
+        ],
+        [
+          "Redact before persistence",
+          "The command body becomes a SHA-256. A bounded summary contains no token, transcript, environment value, or path.",
+          "inputSha256=d082…f499 · summary=controlled non-zero exit",
+          "Next: evidence",
+        ],
+        [
+          "Pin deterministic evidence",
+          "The schema, event identity, classification, and causal links form a reviewable local artifact.",
+          "schema=resilireplay.failure-evidence/v1 · deterministic=true",
+          "Next: regression",
+        ],
+        [
+          "Execute the regression",
+          "The generated Node test validates the pinned evidence contract and passes without rerunning the original command.",
+          "PASS 1 · original command was not retried",
+          "Restart",
+        ],
+      ];
+      let index = 0;
+      const steps = [...document.querySelectorAll(".step")];
+      document.querySelector("#next").addEventListener("click", () => {
+        index = (index + 1) % data.length;
+        document.querySelector("#title").textContent = data[index][0];
+        document.querySelector("#body").textContent = data[index][1];
+        document.querySelector("#evidence").textContent = data[index][2];
+        document.querySelector("#next").textContent = data[index][3];
+        steps.forEach((step, i) => step.classList.toggle("active", i === index));
+      });
+    </script>
+  </body>
+</html>

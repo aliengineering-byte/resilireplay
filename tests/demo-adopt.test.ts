@@ -304,7 +304,7 @@ describe("five-minute adopt flow", () => {
     expect(persisted).not.toContain("PRIVATE_TOOL_BODY_SHOULD_NOT_PERSIST");
     expect(persisted).not.toMatch(/[A-Z]:\\Users\\/iu);
     expect(persisted).toContain("evidenceMode: metadata-only");
-    expect(persisted).toContain("aliengineering-byte/resilireplay@v0.4.0");
+    expect(persisted).toContain("aliengineering-byte/resilireplay@v0.5.0");
     const regression = spawnSync(
       process.execPath,
       ["--test", join(directory, "tests", "resilireplay", "regression.test.mjs")],

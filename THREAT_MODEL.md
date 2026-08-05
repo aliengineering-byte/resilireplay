@@ -21,7 +21,13 @@ but is not sandboxed.
 | Accidental MCP side effects                  | Discovery-only default in campaigns; explicit allowlist; exact-hash, single-use confirmation                          |
 | Adoption of an unintended target             | Project-only allowlist; exact sanitized target review; pre-connection confirmation; remote ownership acknowledgement  |
 | Tool annotation over-trust                   | Annotations labeled untrusted; exact tool/arguments and retry suitability confirmed separately; `--yes` is bounded    |
-| Credential persistence                       | Recursive key/value redaction; imported headers/env remain memory-only; secret-output failure                         |
+| Credential persistence                       | Redaction before capture; bodies become hashes; imported headers/env remain memory-only; secret-output failure        |
+| Unarmed agent capture                        | Hooks check a repository-local armed session before creating any capture state; installation is inert                 |
+| Malicious hook payload                       | 1 MiB stdin cap; strict normalized schema; 32 KiB event cap; bounded summaries; unsupported hosted events ignored     |
+| Duplicate/concurrent hook delivery           | Cross-process lock, 256 exact dedupe shards, atomic state/evidence replacement, interrupted-tail repair               |
+| Untrusted plugin path                        | Installed launcher resolves and verifies the declared plugin root; runtime is immutable and bundled                   |
+| Configuration corruption                     | Side-effect-free plan; explicit confirmation; smallest JSON merge; private exact backup; deterministic rollback       |
+| Arbitrary regression overwrite               | Repository containment, symlink/junction rejection, and atomic exclusive-create output                                |
 | Path traversal or symlink escape             | Lexical containment plus realpath checks for input, output, executable/script, and downloads                          |
 | Shell/header/URL injection                   | Direct spawn arrays with `shell: false`; header grammar and CR/LF checks; URL userinfo rejection                      |
 | Runaway work or denial of service            | Body/content caps; concurrency/retry/time budgets; abort propagation; process-tree cleanup                            |
@@ -39,7 +45,11 @@ but is not sandboxed.
   environments.
 - `--allow-remote` is a user assertion, and a remote server can change behavior between requests.
 - Pattern redaction cannot recognize every application-specific secret format.
-- Hashes prove linkage and integrity, not signer identity; v0.4.0 evidence is unsigned.
+- Hashes prove linkage and integrity, not signer identity; v0.5.0 evidence is unsigned.
+- Hook metadata supplied by an agent is not independently attested. Evidence proves deterministic handling of the
+  captured projection, not that the vendor or original operation is authentic.
+- Exact connection backups may contain original configuration bytes. They are gitignored, not printed, and must be
+  protected like the source configuration.
 - Metadata-only adoption evidence cannot support later semantic inspection of omitted private tool
   bodies; rerun only after reviewing the same target and side-effect boundary.
 - Inspector interactive OAuth/keychain flows and explicit modern protocol-era settings are rejected,

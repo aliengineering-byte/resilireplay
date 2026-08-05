@@ -22,7 +22,7 @@ export function campaignTerminalReport(runInput: CampaignRun, color = true): str
   const cyan = color ? "\u001b[36m" : "";
   const reset = color ? "\u001b[0m" : "";
   const lines = [
-    `${cyan}ResiliReplay Campaign v0.4.0${reset}  ${passing ? `${green}PASS${reset}` : `${red}FAIL${reset}`}`,
+    `${cyan}ResiliReplay Campaign v0.5.0${reset}  ${passing ? `${green}PASS${reset}` : `${red}FAIL${reset}`}`,
     `Campaign        ${run.campaignId}`,
     `Run status      ${run.status}`,
     `Scenarios       ${run.summary.passedCount}/${run.summary.total} matched expectations`,
@@ -48,7 +48,7 @@ export function comparisonTerminalReport(
   const cyan = color ? "\u001b[36m" : "";
   const reset = color ? "\u001b[0m" : "";
   return [
-    `${cyan}ResiliReplay Baseline v0.4.0${reset}  ${passing ? `${green}PASS${reset}` : `${red}${comparison.status.toUpperCase()}${reset}`}`,
+    `${cyan}ResiliReplay Baseline v0.5.0${reset}  ${passing ? `${green}PASS${reset}` : `${red}${comparison.status.toUpperCase()}${reset}`}`,
     `Campaign        ${comparison.campaignId}`,
     `Differences     ${comparison.differences.length}`,
     `Baseline hash   ${comparison.baselineHash}`,
@@ -70,7 +70,7 @@ function runHtml(run: CampaignRun): string {
         `<tr><td>${escapeXml(result.id)}</td><td>${escapeXml(result.target)}</td><td>${escapeXml(result.fault)}</td><td>${escapeXml(result.status)}</td><td>${result.metrics?.deterministicScore ?? "n/a"}</td><td>${escapeXml(result.firstCriticalStep ?? "none")}</td></tr>`,
     )
     .join("");
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ResiliReplay campaign</title><style>body{font:16px system-ui;max-width:1100px;margin:32px auto;padding:0 20px;color:#18212f}header,section{border:1px solid #d8dee4;border-radius:12px;padding:20px;margin:16px 0}table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid #d8dee4;padding:8px}.pass{color:#067647}.fail{color:#b42318}</style></head><body><header><h1>Campaign ${escapeXml(run.campaignId)}</h1><p class="${run.summary.passed ? "pass" : "fail"}">${run.summary.passed ? "PASS" : "FAIL"} · ${escapeXml(run.status)} · evidence ${escapeXml(run.runHash)}</p></header><section><h2>Scenarios</h2><table><thead><tr><th>Scenario</th><th>Target</th><th>Fault</th><th>Status</th><th>Score</th><th>Cause</th></tr></thead><tbody>${rows}</tbody></table></section><footer>Generated locally by ResiliReplay v0.4.0. No telemetry was sent.</footer></body></html>\n`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ResiliReplay campaign</title><style>body{font:16px system-ui;max-width:1100px;margin:32px auto;padding:0 20px;color:#18212f}header,section{border:1px solid #d8dee4;border-radius:12px;padding:20px;margin:16px 0}table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid #d8dee4;padding:8px}.pass{color:#067647}.fail{color:#b42318}</style></head><body><header><h1>Campaign ${escapeXml(run.campaignId)}</h1><p class="${run.summary.passed ? "pass" : "fail"}">${run.summary.passed ? "PASS" : "FAIL"} · ${escapeXml(run.status)} · evidence ${escapeXml(run.runHash)}</p></header><section><h2>Scenarios</h2><table><thead><tr><th>Scenario</th><th>Target</th><th>Fault</th><th>Status</th><th>Score</th><th>Cause</th></tr></thead><tbody>${rows}</tbody></table></section><footer>Generated locally by ResiliReplay v0.5.0. No telemetry was sent.</footer></body></html>\n`;
 }
 
 function runJunit(run: CampaignRun): string {
@@ -118,7 +118,7 @@ function runSarif(run: CampaignRun): string {
         tool: {
           driver: {
             name: "ResiliReplay",
-            version: "0.4.0",
+            version: "0.5.0",
             informationUri: "https://github.com/aliengineering-byte/resilireplay",
             rules: [...new Set(results.map((result) => result.ruleId))].map((id) => ({
               id,
@@ -172,7 +172,7 @@ function comparisonSarif(comparison: CampaignComparison): string {
         tool: {
           driver: {
             name: "ResiliReplay",
-            version: "0.4.0",
+            version: "0.5.0",
             informationUri: "https://github.com/aliengineering-byte/resilireplay",
             rules: [
               {

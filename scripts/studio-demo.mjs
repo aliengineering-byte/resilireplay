@@ -80,7 +80,7 @@ const started = performance.now();
 await rm(artifacts, { recursive: true, force: true });
 await mkdir(artifacts, { recursive: true });
 
-log("ResiliReplay v0.4.0 verified local fixture demo");
+log("ResiliReplay v0.5.0 verified local fixture demo");
 log(
   "Fixture disclosure: resilient/vulnerable stdio and Streamable HTTP are repository-owned local processes; no external provider is used.",
 );

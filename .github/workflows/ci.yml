@@ -27,10 +27,20 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      - run: pnpm agent:validate
+      - name: Official Claude Code plugin validation
+        run: pnpm dlx @anthropic-ai/claude-code@2.1.222 plugin validate plugins/resilireplay
+      - name: Official Agent Skills reference validation
+        run: |
+          python -m venv .artifacts/skills-ref-venv
+          .artifacts/skills-ref-venv/bin/pip install "git+https://github.com/agentskills/agentskills.git@217be548739f21d6008915c29aefe320ea1a90af#subdirectory=skills-ref"
+          PYTHONUTF8=1 .artifacts/skills-ref-venv/bin/skills-ref validate plugins/resilireplay/skills/resilireplay
       - run: pnpm field:verify
       - run: pnpm site:check
       - name: MCP Inspector config and real HTTP integration
         run: pnpm exec vitest run tests/mcp-inspector.test.ts
+      - name: Current official MCP Inspector validation
+        run: pnpm mcp:inspector:verify
       - run: pnpm package:smoke
       - run: pnpm secret:scan
       - run: pnpm hygiene:scan
@@ -44,6 +54,8 @@ jobs:
         run: pnpm demo:studio
       - name: Lifecycle, stress, and package-size gates
         run: pnpm release:gates
+      - name: Agent hooks, capture limits, and performance gates
+        run: pnpm agent:gates
       - uses: github/codeql-action/upload-sarif@v4
         if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
         with:

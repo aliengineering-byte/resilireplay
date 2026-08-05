@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged release. v0.4.0 is the current supported line;
+Security fixes are provided for the latest tagged release. v0.5.0 is the current supported line;
 older releases remain immutable historical artifacts.
 
 ## Reporting a vulnerability
@@ -35,6 +35,20 @@ OS/container boundary outside ResiliReplay.
   symlink escapes. Artifact destinations are realpath-preflighted before any MCP connection.
 - Generated evidence uses metadata-only MCP projection. Raw request/result bodies, environment
   values, and authorization headers are not persisted.
+
+## Coding-agent capture boundary
+
+- Plugin installation is inert. Hooks create no capture state until `capture start` arms the current repository.
+- Hooks are passive observers: they never inject a fault, execute a target, or retry a failed operation.
+- Hook stdin is capped at 1 MiB. Canonical events are strictly validated and capped at 32 KiB; summaries are
+  redacted before persistence and capped at 512 characters.
+- Raw prompts, full transcripts, unrestricted request/result bodies, authorization headers, token values,
+  environment values, and personal paths are excluded by default. Identifiers and bodies become SHA-256 projections.
+- Capture is capped at 20,000 events. Concurrent writers use a repository-local lock and exact dedupe shards;
+  interrupted trailing journal records are discarded before the next append.
+- Generated capture regressions stay inside the repository, reject symlink/junction escapes, and refuse overwrite.
+- Direct connection changes require a displayed plan and explicit confirmation. Exact originals are stored in a
+  gitignored recovery backup and are never printed; protect that backup like the source configuration.
 
 ## Studio boundary
 

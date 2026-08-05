@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
 import { performance } from "node:perf_hooks";
 import { promisify } from "node:util";
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { join, relative, resolve } from "node:path";
 import { createEvent, calculateMetrics } from "../packages/core/dist/index.js";
 import { readTrace, writeTrace } from "../packages/trace/dist/index.js";
 import { loadCampaignFile, runCampaign } from "../packages/campaign/dist/index.js";
@@ -84,14 +84,25 @@ await execFileAsync(process.execPath, [packageManagerCli, "pack", "--pack-destin
   windowsHide: true,
   maxBuffer: 5 * 1024 * 1024,
 });
-const tarballPath = join(output, "resilireplay-0.4.0.tgz");
+const tarballPath = join(output, "resilireplay-0.5.0.tgz");
 const packedBytes = (await stat(tarballPath)).size;
+async function listPackageFiles(directory) {
+  const files = [];
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await listPackageFiles(path)));
+    else files.push(relative(join(root, "packages", "cli"), path));
+  }
+  return files;
+}
+
 const packageFiles = [
   "LICENSE",
   "README.md",
   join("bin", "resilireplay.mjs"),
   join("dist", "resilireplay.js"),
   "package.json",
+  ...(await listPackageFiles(join(root, "packages", "cli", "portable-skill"))),
 ];
 const unpackedBytes = (
   await Promise.all(packageFiles.map((path) => stat(join(root, "packages", "cli", path))))

@@ -1,0 +1,14 @@
+{
+  "causalEventIds": [],
+  "deterministic": true,
+  "errorClass": "process-exit",
+  "evidenceId": "f3e175f2f2490ad9dde0d8230787613dc189652b1ca9f00f9d20191edc946928",
+  "failureEventId": "7339bfef430b4a8956c4ee1a7c2cbe1310eca1b398473ea54be36fdc6c9b842f",
+  "inputSha256": "d082a03bf9e3657814f1928c33fa5baa7d01156f39549fda33bd0280a8d5f499",
+  "outputSha256": "ddb0fd3464114550f94b9ae1544705c5c109e7bf6fb7c8465155f5dfbaaf3018",
+  "schemaVersion": "resilireplay.failure-evidence/v1",
+  "sessionId": "9b3bb6984f15e13b804831c2c85b4c25639e86fa29ce0017f4209ce8d8e30a97",
+  "source": "codex",
+  "summary": "controlled non-zero exit",
+  "toolName": "Bash"
+}

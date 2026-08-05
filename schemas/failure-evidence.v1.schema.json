@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.5.0/schemas/failure-evidence.v1.schema.json",
+  "title": "ResiliReplay Failure Evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "source",
+    "sessionId",
+    "failureEventId",
+    "errorClass",
+    "causalEventIds",
+    "deterministic"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "resilireplay.failure-evidence/v1" },
+    "evidenceId": { "$ref": "#/$defs/sha256" },
+    "source": { "enum": ["claude-code", "codex", "hermes", "generic"] },
+    "sessionId": { "$ref": "#/$defs/sha256" },
+    "failureEventId": { "$ref": "#/$defs/sha256" },
+    "toolName": { "type": "string", "maxLength": 512 },
+    "errorClass": { "type": "string", "maxLength": 512 },
+    "summary": { "type": "string", "maxLength": 512 },
+    "inputSha256": { "$ref": "#/$defs/sha256" },
+    "outputSha256": { "$ref": "#/$defs/sha256" },
+    "causalEventIds": { "type": "array", "maxItems": 16, "items": { "$ref": "#/$defs/sha256" } },
+    "deterministic": { "const": true }
+  },
+  "$defs": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}
