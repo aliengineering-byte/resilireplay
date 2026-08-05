@@ -1,0 +1,12 @@
+{
+  "name": "resilireplay",
+  "owner": { "name": "Ali" },
+  "plugins": [
+    {
+      "name": "resilireplay",
+      "source": "./plugins/resilireplay",
+      "description": "Passive, opt-in agent failure capture and deterministic regression evidence.",
+      "version": "0.5.0"
+    }
+  ]
+}

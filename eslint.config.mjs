@@ -11,6 +11,7 @@ export default [
       "**/coverage/**",
       "**/runs/**",
       "**/.artifacts/**",
+      "plugins/resilireplay/runtime/hook-runtime.mjs",
       "docs/case-studies/**/browsers/**",
     ],
   },

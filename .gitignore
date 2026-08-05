@@ -1,7 +1,9 @@
 node_modules/
 dist/
+packages/cli/portable-skill/
 coverage/
 .artifacts/
+.resilireplay/
 runs/
 playwright-report/
 test-results/

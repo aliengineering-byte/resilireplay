@@ -1,5 +1,7 @@
 import { access, mkdir, readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { createInterface } from "node:readline/promises";
 import { spawn } from "node:child_process";
 import { Command } from "commander";
 import { parse } from "yaml";
@@ -51,6 +53,21 @@ import {
 import { startStudio } from "@resilireplay/studio";
 import { demoTerminalReport, runDemo } from "./demo.js";
 import { adoptTerminalReport, runAdopt, type AdoptOptions } from "./adopt.js";
+import {
+  captureLast,
+  captureStart,
+  captureStatus,
+  captureStop,
+  connectAgent,
+  generateCapturedRegression,
+  initAdapter,
+  planConnection,
+  rollbackConnection,
+  runPluginHook,
+  verifyAdapter,
+  type ConnectAgent,
+} from "@resilireplay/agent";
+import { serveResiliReplayMcp } from "./agent-mcp.js";
 
 async function exists(path: string): Promise<boolean> {
   return access(path).then(
@@ -232,6 +249,138 @@ export function createProgram(): Command {
         console.log(options.json ? stableStringify(result) : adoptTerminalReport(result));
       },
     );
+
+  program
+    .command("connect")
+    .description("Safely connect passive ResiliReplay capture to a supported coding agent.")
+    .option("--agent <agent>", "auto, claude-code, codex, or hermes", "auto")
+    .option("--dry-run", "Show the exact repository-local changes without writing files")
+    .option("--yes", "Apply the displayed changes without an interactive prompt")
+    .option("--rollback [backup-id]", "Restore a previous recoverable connection backup")
+    .option("--json", "Print one machine-readable result")
+    .action(
+      async (options: {
+        agent: string;
+        dryRun?: boolean;
+        yes?: boolean;
+        rollback?: string | boolean;
+        json?: boolean;
+      }) => {
+        if (options.rollback !== undefined) {
+          const result = await rollbackConnection(
+            process.cwd(),
+            typeof options.rollback === "string" ? options.rollback : undefined,
+          );
+          console.log(
+            options.json
+              ? stableStringify(result)
+              : `Restored ${result.restored.length} file(s) from ${result.backupId}`,
+          );
+          return;
+        }
+        if (!["auto", "claude-code", "codex", "hermes"].includes(options.agent)) {
+          throw Object.assign(new Error("--agent must be auto, claude-code, codex, or hermes"), {
+            exitCode: 2,
+          });
+        }
+        const agent = options.agent as ConnectAgent;
+        const skillSource = fileURLToPath(new URL("../portable-skill", import.meta.url));
+        const preview = await planConnection(
+          { agent, dryRun: options.dryRun ?? false, skillSource },
+          process.cwd(),
+        );
+        if (options.dryRun) {
+          console.log(stableStringify(preview.plan));
+          return;
+        }
+        if (preview.files.length === 0) {
+          console.log(stableStringify(preview.plan));
+          return;
+        }
+        console.log(stableStringify(preview.plan));
+        let confirmed = options.yes ?? false;
+        if (!confirmed && process.stdin.isTTY && process.stdout.isTTY) {
+          const prompt = createInterface({ input: process.stdin, output: process.stdout });
+          try {
+            confirmed = /^y(?:es)?$/iu.test(
+              (await prompt.question("Apply these repository-local changes? [y/N] ")).trim(),
+            );
+          } finally {
+            prompt.close();
+          }
+        }
+        if (!confirmed)
+          throw Object.assign(new Error("Connection changes were not confirmed"), { exitCode: 2 });
+        const result = await connectAgent({ agent, yes: true, skillSource }, process.cwd());
+        console.log(
+          options.json
+            ? stableStringify(result)
+            : `Connected ${agent}; backup ${result.backupId}. Capture remains off.`,
+        );
+      },
+    );
+
+  const adapter = program
+    .command("adapter")
+    .description("Create and verify integrations against the ResiliReplay adapter contract.");
+  adapter
+    .command("init")
+    .argument("<name>", "Lowercase adapter name")
+    .description("Create a minimal Apache-2.0 adapter and canonical failure fixture.")
+    .action(async (name: string) => console.log(`Created ${await initAdapter(name)}`));
+  adapter
+    .command("verify")
+    .argument("<adapter-path>", "Adapter directory")
+    .description(
+      "Run manifest, classification, determinism, bounds, and privacy conformance checks.",
+    )
+    .action(async (path: string) => console.log(stableStringify(await verifyAdapter(path))));
+
+  const capture = program
+    .command("capture")
+    .description("Control opt-in, bounded, sanitized passive agent failure capture.");
+  capture
+    .command("start")
+    .description("Arm capture for this repository.")
+    .action(async () => console.log(stableStringify(await captureStart())));
+  capture
+    .command("status")
+    .description("Show capture state.")
+    .action(async () => console.log(stableStringify((await captureStatus()) ?? { status: "off" })));
+  capture
+    .command("stop")
+    .description("Stop capture without deleting evidence.")
+    .action(async () => console.log(stableStringify((await captureStop()) ?? { status: "off" })));
+  capture
+    .command("last")
+    .description("Show the last supported sanitized failure.")
+    .action(async () =>
+      console.log(stableStringify((await captureLast()) ?? { available: false })),
+    );
+  capture
+    .command("generate-test")
+    .description("Turn the last supported failure into an executable deterministic regression.")
+    .option(
+      "-o, --output <path>",
+      "Generated Node test path",
+      "scenarios/generated/agent-failure.test.mjs",
+    )
+    .action(async (options: { output: string }) => {
+      const generated = await generateCapturedRegression(options.output);
+      await executeGeneratedTest(generated.testPath);
+      console.log(`Generated and verified ${generated.testPath}`);
+      console.log(`Evidence ${generated.evidence.evidenceId}`);
+    });
+
+  program
+    .command("hook", { hidden: true })
+    .description("Internal passive hook adapter.")
+    .command("ingest", { hidden: true })
+    .requiredOption("--agent <agent>")
+    .action(async (options: { agent: string }) => {
+      if (!["claude-code", "codex", "hermes", "generic"].includes(options.agent)) return;
+      await runPluginHook(options.agent);
+    });
 
   program
     .command("studio")
@@ -521,6 +670,10 @@ export function createProgram(): Command {
   const mcp = program
     .command("mcp")
     .description("Controlled reliability testing for authorized MCP servers.");
+  mcp
+    .command("serve")
+    .description("Serve ResiliReplay itself as a local stdio MCP server.")
+    .action(async () => serveResiliReplayMcp());
   mcp
     .command("audit")
     .description("Audit a reviewed MCP Inspector config, stdio command, or HTTP endpoint.")

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.5.0/schemas/agent-event.v1.schema.json",
+  "title": "ResiliReplay Agent Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "source",
+    "sessionId",
+    "eventType",
+    "outcome",
+    "capturedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "resilireplay.agent-event/v1" },
+    "eventId": { "$ref": "#/$defs/sha256" },
+    "source": { "enum": ["claude-code", "codex", "hermes", "generic"] },
+    "sessionId": { "$ref": "#/$defs/sha256" },
+    "eventType": { "enum": ["tool-result", "session-end", "turn-end"] },
+    "toolName": { "$ref": "#/$defs/text" },
+    "toolCallId": { "$ref": "#/$defs/sha256" },
+    "parentId": { "$ref": "#/$defs/sha256" },
+    "outcome": { "enum": ["succeeded", "failed", "interrupted", "unknown"] },
+    "durationMs": { "type": "integer", "minimum": 0, "maximum": 86400000 },
+    "errorClass": {
+      "enum": [
+        "none",
+        "process-exit",
+        "timeout",
+        "permission",
+        "not-found",
+        "protocol",
+        "validation",
+        "interrupted",
+        "unknown"
+      ]
+    },
+    "inputSha256": { "$ref": "#/$defs/sha256" },
+    "outputSha256": { "$ref": "#/$defs/sha256" },
+    "summary": { "$ref": "#/$defs/text" },
+    "capturedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "text": { "type": "string", "maxLength": 512 }
+  }
+}

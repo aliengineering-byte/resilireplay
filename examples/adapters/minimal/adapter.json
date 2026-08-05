@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "resilireplay.adapter-manifest/v1",
+  "name": "minimal-adapter",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "source": "generic",
+  "entrypoint": "adapter.mjs",
+  "events": ["tool-result", "session-end"],
+  "privacy": {
+    "rawPromptsPersisted": false,
+    "rawTranscriptsPersisted": false,
+    "environmentValuesPersisted": false
+  }
+}

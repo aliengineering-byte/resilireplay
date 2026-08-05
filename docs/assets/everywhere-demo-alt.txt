@@ -1,0 +1,1 @@
+Terminal demonstration of ResiliReplay v0.5.0: passive capture is armed, a safe Node command exits with code 7, the Bash failure is classified as a process-exit boundary, capture is stopped, and a deterministic executable regression passes without retrying the original command.

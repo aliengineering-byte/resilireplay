@@ -57,4 +57,11 @@ describe("distribution metadata", () => {
       expect(parsed.license, manifest).toBe("Apache-2.0");
     }
   });
+
+  it("publishes npm only after the immutable GitHub Release is published", async () => {
+    const workflow = await readFile(join(root, ".github", "workflows", "npm-publish.yml"), "utf8");
+    expect(workflow).toContain("release:\n    types: [published]");
+    expect(workflow).toContain("github.event.release.tag_name");
+    expect(workflow).not.toContain('push:\n    tags: ["v*.*.*"]');
+  });
 });

@@ -2,109 +2,119 @@
 
 [![CI](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml)
 [![Secret scan](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/secret-scan.yml)
-[![Field validation](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/field-validation.yml)
 [![Pages](https://github.com/aliengineering-byte/resilireplay/actions/workflows/pages.yml/badge.svg)](https://aliengineering-byte.github.io/resilireplay/)
 [![npm](https://img.shields.io/npm/v/resilireplay)](https://www.npmjs.com/package/resilireplay)
-[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.4.0)
+[![Release](https://img.shields.io/github/v/release/aliengineering-byte/resilireplay?display_name=tag&sort=semver)](https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.5.0)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
 
-**Turn an MCP server into a reviewed deterministic recovery test suite and GitHub Action in under five minutes.**
+**Turn a failed tool call from a supported coding agent into sanitized, deterministic, executable regression evidence.**
 
-MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails, preserves the
-recovery evidence, and turns it into an executable regression. The local path needs no API key,
-Docker, account, telemetry, external MCP server, or LLM judge.
+MCP Inspector shows what a server does. ResiliReplay proves what happens when it fails—and keeps that recovery fixed. It is a local-first reliability layer, not another agent, observability dashboard, LLM evaluator, sandbox, or security certification.
 
 ```console
-npx --yes resilireplay@0.4.0 demo
-npx --yes resilireplay@0.4.0 adopt --config ./mcp.json --dry-run
-npx --yes resilireplay@0.4.0 adopt --config ./mcp.json
-git add .resilireplay tests/resilireplay .github/workflows/resilireplay.yml
+npx --yes resilireplay@0.5.0 demo
+npx --yes resilireplay@0.5.0 connect --agent auto --dry-run
+npx --yes resilireplay@0.5.0 mcp serve
 ```
 
-[![Genuine ResiliReplay v0.4.0 demo showing a recovered tool-result failure and generated regression](docs/assets/adopt-demo.gif)](docs/assets/adopt-demo.png)
+[![Terminal demo showing a safe non-zero tool result become sanitized evidence and a passing executable regression](docs/assets/everywhere-demo.gif)](docs/assets/everywhere-demo.png)
 
-[Static fallback](docs/assets/adopt-demo.png) - [genuine packed-package transcript](docs/assets/adopt-demo-transcript.txt) - [adoption guide](docs/ADOPT.md) - [product page](https://aliengineering-byte.github.io/resilireplay/)
+[Static PNG](docs/assets/everywhere-demo.png) · [genuine transcript](docs/assets/everywhere-demo-transcript.txt) · [self-contained regression](examples/everywhere/everywhere.test.mjs) · [product site](https://aliengineering-byte.github.io/resilireplay/)
 
-| Tool category      | Primary function                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| MCP Inspector      | Interactive MCP exploration and debugging.                                                   |
-| General eval tools | Output quality, security evaluation, or model comparison.                                    |
-| ResiliReplay       | Deterministic failure injection, causal recovery evidence, and executable regressions in CI. |
+## Try it in under five minutes
 
-> ResiliReplay is defensive testing software, not an OS sandbox or security certification. Audit only
-> local or user-owned targets. MCP tool calls may have server-side effects; review the exact target,
-> tool, arguments, and retry suitability before confirming them. Tool annotations are untrusted hints.
-
-## Five-minute adoption workflow
-
-Requirements: Node.js 22 or 24 and an Inspector-compatible `mcp.json`. With no server available, the
-packaged demo gives the complete failure-to-regression path in under 30 seconds:
+Requirements: Node.js 22 or 24. Previewing is side-effect free; applying requires confirmation, backs up existing files, and leaves capture off.
 
 ```console
-npx --yes resilireplay@0.4.0 demo
-npx --yes resilireplay@0.4.0 adopt --config ./mcp.json --dry-run
-npx --yes resilireplay@0.4.0 adopt --config ./mcp.json
+npx --yes resilireplay@0.5.0 connect --agent auto --dry-run
+npx --yes resilireplay@0.5.0 connect --agent claude-code
+npx --yes resilireplay@0.5.0 connect --agent codex
+npx --yes resilireplay@0.5.0 connect --agent hermes
+
+npx --yes resilireplay@0.5.0 capture start
+# reproduce one safe supported tool failure in the agent
+npx --yes resilireplay@0.5.0 capture last
+npx --yes resilireplay@0.5.0 capture stop
+npx --yes resilireplay@0.5.0 capture generate-test
 ```
 
-`adopt --dry-run` validates and displays the exact sanitized process/arguments or HTTP origin while
-starting no process, opening no connection, calling no tool, and writing no project file. Real
-adoption calls only the explicitly reviewed tool and arguments after confirmation, requires a
-separate one-duplicate safety confirmation, runs bounded clean/recovery/negative scenarios, verifies
-the generated regression, and writes 14 documented artifacts. `--yes` cannot bypass the tool or
-retry boundaries.
+`connect --dry-run` prints the exact repository-local file operations and hashes without writing files or starting a process. Apply preserves unrelated settings, installs the portable skill, and records a recoverable backup. Use `resilireplay connect --rollback` to restore the latest backup. Capture is opt-in and passive: hooks never inject a fault or retry a failed operation. Hermes intentionally stages reviewable repository files and prints the official `hermes mcp add` follow-up instead of silently editing the global Hermes profile.
 
-Install the self-contained CLI if preferred:
+The in-agent request is:
+
+> Use ResiliReplay to capture this session’s tool failures, explain the recovery boundary, and turn the last supported failure into a regression test.
+
+## What is genuinely supported?
+
+| Surface                                      | v0.5.0 evidence                          | Result                                                                                                                                                                  |
+| -------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code 2.1.222                          | INSTALLATION VERIFIED + FIXTURE VERIFIED | Official manifest validation, isolated marketplace install, installed `PostToolUseFailure` runtime, and passing generated regression. No isolated model authentication. |
+| OpenAI Codex CLI 0.146.1                     | INSTALLATION VERIFIED + FIXTURE VERIFIED | Isolated local-marketplace install, installed `PostToolUse` runtime, and passing generated regression. No isolated model authentication.                                |
+| Hermes Agent 0.20.0                          | INSTALLATION VERIFIED                    | Portable local skill discovered; ResiliReplay stdio MCP registered, connected in 578 ms, and exposed nine tools. No safe local model was available.                     |
+| MCP SDK/stdio                                | LIVE VERIFIED                            | Real SDK client discovery/calls and ResiliReplay self-audit pass without recursive tool execution.                                                                      |
+| Generic adapter contract                     | FIXTURE VERIFIED                         | Golden output, privacy, bounds, entrypoint containment, and concurrent determinism pass.                                                                                |
+| `.agents/skills` clients                     | DOCUMENTED ONLY                          | Portable package validates against the official Agent Skills reference, but no client-specific runtime claim is made.                                                   |
+| Cursor, Gemini CLI, OpenCode, Goose, VS Code | DOCUMENTED ONLY                          | Candidate adapter surfaces only; not runtime-verified in v0.5.0.                                                                                                        |
+
+Evidence labels are defined in the [compatibility matrix](docs/COMPATIBILITY.md). Vendor names describe factual interoperability and do not imply endorsement.
+
+## Claude Code plugin
+
+The repository is a Claude Code marketplace, so the public install path is:
+
+```text
+/plugin marketplace add aliengineering-byte/resilireplay
+/plugin install resilireplay@resilireplay
+```
+
+The plugin contains `.claude-plugin/plugin.json`, stable `PostToolUse`, `PostToolUseFailure`, and `Stop` hooks, the portable skill, and the stdio MCP registration. The installed hook accepts stdin only, writes no stdout, validates `CLAUDE_PLUGIN_ROOT`, uses `CLAUDE_PLUGIN_DATA` only as vendor-owned writable state, and remains inert until capture is armed. See [plugin operations and rollback](docs/PLUGINS.md).
+
+## Codex plugin
+
+Codex discovers the repo marketplace at `.agents/plugins/marketplace.json`; the CLI test path is:
 
 ```console
-npm install --global resilireplay@0.4.0
-resilireplay --version
-resilireplay --help
+codex plugin marketplace add aliengineering-byte/resilireplay
+codex plugin add resilireplay@resilireplay
 ```
 
-Read the full [adoption guide](docs/ADOPT.md), including non-interactive flags, stable exit codes,
-generated files, cleanup, and safety boundaries.
+The plugin contains `.codex-plugin/plugin.json`, the same skill and MCP server, and a bundled `PostToolUse`/`Stop` hook runtime. It distinguishes non-zero shell results, MCP errors/success, file edits, interruptions, duplicates, oversized payloads, secret-shaped input, and unsupported hosted-tool fixtures without assuming every delivered event succeeded. `PLUGIN_ROOT` is immutable; `PLUGIN_DATA` is vendor-owned writable state. See [plugin trust boundaries](docs/PLUGINS.md).
 
-## Generated recovery CI
-
-The adoption workflow generates a campaign pinned to the selected server, exact allowlisted tool and
-arguments, deterministic seed, one-retry maximum, metadata-only evidence, baseline approval
-instructions, an executable regression, and this minimal workflow:
-
-```yaml
-permissions:
-  contents: read
-
-steps:
-  - uses: actions/checkout@v6
-  - uses: aliengineering-byte/resilireplay@v0.4.0
-    with:
-      campaign: .resilireplay/campaign.yml
-      campaign-confirmation-hash: <reviewed-campaign-sha256>
-```
-
-| Action input                 | Required | Default     | Purpose                                                      |
-| ---------------------------- | -------- | ----------- | ------------------------------------------------------------ |
-| `scenarios`                  | No       | `scenarios` | Directory of deterministic YAML scenarios.                   |
-| `campaign`                   | No       | empty       | Campaign path; skips the scenario directory when set.        |
-| `campaign-confirmation-hash` | No       | empty       | Exact reviewed hash required for allowlisted tool calls.     |
-| `allow-remote`               | No       | `false`     | Explicit acknowledgement for a declared non-loopback target. |
-
-The Action makes no GitHub API calls, requires no credential, and works with read-only repository
-permissions. It defines no outputs; reports and the GitHub step summary come from the selected CLI
-workflow.
-
-## Studio, campaigns, and existing workflows
-
-The v0.3.x product remains supported and backward compatible:
+## Universal ResiliReplay MCP server
 
 ```console
+npx --yes resilireplay@0.5.0 mcp serve
+```
+
+The default transport is stdio. Nine annotated tools cover status/version, fault discovery, sanitized target inspection, campaign validation, passive capture start/stop, last-failure evidence, regression generation, and explicitly confirmed campaign execution. Read-only, destructive, idempotent, and open-world annotations are declared. Regression writes require the exact evidence SHA-256; campaign execution requires the exact reviewed campaign SHA-256 and retains the existing allowlists and remote-target boundary.
+
+## Stable schemas and adapter contract
+
+The canonical integration engine is `@resilireplay/agent`; vendor hooks are thin adapters. Public v1 schemas are:
+
+- [`resilireplay.agent-event/v1`](schemas/agent-event.v1.schema.json)
+- [`resilireplay.capture-session/v1`](schemas/capture-session.v1.schema.json)
+- [`resilireplay.failure-evidence/v1`](schemas/failure-evidence.v1.schema.json)
+- [`resilireplay.adapter-manifest/v1`](schemas/adapter-manifest.v1.schema.json)
+
+Create and verify an adapter without changing the engine:
+
+```console
+npx --yes resilireplay@0.5.0 adapter init my-agent-adapter
+npx --yes resilireplay@0.5.0 adapter verify ./my-agent-adapter
+```
+
+“ResiliReplay Compatible” means only that the published conformance suite passed. Read the [adapter contract](docs/ADAPTER_CONTRACT.md), [minimal adapter](examples/adapters/minimal/adapter.json), and [badge rules](docs/ADAPTER_CONTRACT.md#compatibility-badge).
+
+## Existing v0.4 workflows remain supported
+
+```console
+resilireplay adopt --config ./mcp.json --dry-run
 resilireplay studio --open
-resilireplay campaign init campaign.yml
 resilireplay campaign validate campaign.yml
 resilireplay campaign run campaign.yml --confirm-tools <reviewed-sha256>
 resilireplay campaign approve runs/candidate --output baselines/main.json
 resilireplay campaign compare runs/current --baseline baselines/main.json
-
 resilireplay record --output runs/agent/trace.jsonl -- node agent.js
 resilireplay inject --trace runs/agent/trace.jsonl --scenario malformed-json --seed 42 --output runs/agent/failed.jsonl
 resilireplay replay --trace runs/agent/failed.jsonl --report-dir runs/agent/report
@@ -112,68 +122,33 @@ resilireplay generate-test --trace runs/agent/failed.jsonl --output runs/agent/r
 resilireplay mcp audit --inspector-config ./mcp.json --server my-server --dry-run
 ```
 
-Campaign exit codes remain `0` pass, `1` reliability failure/regression, `2` CLI usage, `20` invalid
-schema, `21` target/authorization, `22` execution, `23` cancelled/incomplete, and `24` integrity
-failure. Read the [campaign schema](docs/CAMPAIGN_SCHEMA.md),
-[formal JSON Schema](schemas/campaign.schema.json), [v0.4 migration notes](docs/MIGRATION_V0_4.md),
-[MCP Inspector integration](docs/MCP_INSPECTOR.md), and [report schema](docs/REPORT_SCHEMA.md).
+Campaign exit codes remain `0` pass, `1` reliability failure/regression, `2` usage, `20` invalid schema, `21` target/authorization, `22` execution, `23` cancelled/incomplete, and `24` integrity failure. See the [v0.5 migration guide](docs/MIGRATION_V0_5.md), [campaign schema](docs/CAMPAIGN_SCHEMA.md), and [MCP Inspector integration](docs/MCP_INSPECTOR.md).
 
-## Reproducible field evidence
+## Privacy, security, and measured bounds
 
-Three founder-run case studies used the immutable public v0.3.0 package against documented local
-stdio paths in independently maintained MCP projects:
+- Capture is off by default. No telemetry, cloud account, billing, background upload, raw prompt, full transcript, environment value, authorization header, token, unrestricted tool body, or personal path is persisted by default.
+- Session and tool-call identifiers are one-way SHA-256 projections. Bodies become hashes; summaries are redacted and capped at 512 characters.
+- Capture is capped at 20,000 events and 32 KiB per normalized event. State and evidence use atomic replacement; the locked append-only journal repairs an interrupted trailing record.
+- Hook writers are serialized, duplicate tool-call outcomes are ignored, symlink/junction escapes fail closed, and generated regressions refuse overwrite.
+- Hooks never execute a target, retry a call, or inject a failure. Explicit campaigns retain their review, allowlist, hash confirmation, retry, and cleanup controls.
 
-| Project                  | Reviewed operation            | Declared result                                          | Evidence                                                 |
-| ------------------------ | ----------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
-| MCP Everything Server    | `echo`                        | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/mcp-everything/README.md) |
-| Microsoft Playwright MCP | blank-page `browser_snapshot` | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/playwright-mcp/README.md) |
-| UI5 MCP Server           | `get_guidelines`              | 3/3 expectations; one bounded retry; regression verified | [case study](docs/case-studies/ui5-mcp/README.md)        |
+On the recorded Windows Node 24 release workload, 20,000 synthetic normalized events took 898 ms, produced 13,414,112 bytes, and used a measured 100,171,776-byte RSS delta including the 20,000-event input array. In-process single-event capture measured 14.94 ms median and 18.43 ms p95 across 100 samples; startup was 20.48 ms and cleanup 31.55 ms. These workloads are not equivalent to end-to-end agent latency and are not comparative claims. CI regenerates the report with `pnpm agent:gates`.
 
-These are bounded maintainer-run results, not upstream endorsements, independent adopters, rankings,
-or security certifications. Each record pins public package and upstream revisions, declares the
-side-effect boundary, and includes sanitized hash-linked evidence. See the
-[selection record](docs/field-validation/SERVER_SELECTION.md) and
-[complete results](docs/field-validation/FIELD_RESULTS.md).
+Read [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), [limitations](docs/LIMITATIONS.md), and [release evidence](docs/RELEASE_EVIDENCE_V0_5.md).
 
 ## Architecture
 
-| Package                   | Responsibility                                                             |
-| ------------------------- | -------------------------------------------------------------------------- |
-| `@resilireplay/core`      | Versioned events, redaction, deterministic faults/scoring, path safety.    |
-| `@resilireplay/trace`     | Canonical JSONL and failed-trace-to-regression compilation.                |
-| `@resilireplay/reporters` | Terminal, JSON, HTML, JUnit, SARIF, manifests, and badges.                 |
-| `@resilireplay/mcp-chaos` | Authorized MCP discovery, allowlisted calling, mutation, and evidence.     |
-| `@resilireplay/campaign`  | Strict campaigns, bounded runner, baselines, comparisons, and CI evidence. |
-| `@resilireplay/studio`    | Loopback browser workflow over the same campaign APIs.                     |
-| `@resilireplay/proxy`     | Loopback provider/transport mutation proxy.                                |
-| `resilireplay`            | Self-contained cross-platform CLI.                                         |
+| Package                   | Responsibility                                                                        |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| `@resilireplay/agent`     | Canonical schemas, hook normalization, capture, evidence, adapters, connect/rollback. |
+| `@resilireplay/core`      | Versioned traces, redaction, deterministic faults/scoring, path safety.               |
+| `@resilireplay/trace`     | Canonical JSONL and failed-trace-to-regression compilation.                           |
+| `@resilireplay/mcp-chaos` | Authorized MCP discovery, allowlisted calling, mutation, and evidence.                |
+| `@resilireplay/campaign`  | Strict campaigns, bounded runner, baselines, comparisons, and CI evidence.            |
+| `@resilireplay/studio`    | Loopback browser workflow over the same campaign APIs.                                |
+| `resilireplay`            | Self-contained cross-platform CLI and universal stdio MCP server.                     |
 
-The stable provider-neutral boundary is `TraceEvent`; Studio, campaigns, `demo`, and `adopt` reuse
-the same fault, evidence, MCP, and regression primitives. Read the [architecture](docs/ARCHITECTURE.md)
-and [product strategy](docs/PRODUCT_STRATEGY.md).
-
-## Security, privacy, and limitations
-
-- No telemetry is implemented. The packaged demo makes no network or provider call.
-- Default adoption discovery checks only `mcp.json`, `.mcp.json`, and `.vscode/mcp.json` in the
-  current project. Home directories, unrelated repositories, browser storage, and credentials are
-  not scanned.
-- Imported headers/environment values stay in memory. Adoption evidence is metadata-only and omits
-  raw tool bodies; credential-shaped arguments and outside/symlinked paths fail closed.
-- Commands and reviewed stdio servers execute with the current OS account and are not sandboxed.
-- Pattern redaction cannot prove removal of every application-specific secret; omit secrets at the
-  source and treat evidence as potentially sensitive.
-- SHA-256 proves artifact linkage and integrity, not signer identity.
-- Inspector interactive OAuth/modern protocol-era settings, incremental streaming semantics,
-  resumable side-effecting campaigns, hosted dashboards, and arbitrary browser commands are not
-  supported in v0.4.0.
-- The supported npm distribution is the self-contained `resilireplay` CLI. Internal workspace
-  packages are not separately published APIs.
-
-Read [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md),
-[Studio security](docs/STUDIO_SECURITY.md), and [known limitations](docs/LIMITATIONS.md).
-
-## Development and release evidence
+## Development
 
 ```console
 corepack enable
@@ -182,11 +157,9 @@ pnpm quality
 pnpm test:e2e
 pnpm site:test
 pnpm release:gates
+pnpm agent:gates
 ```
 
-ResiliReplay is Apache-2.0 licensed. Contributions must remain deterministic, bounded, secure by
-default, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md),
-[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [adopter policy](ADOPTERS.md),
-[verified demos](docs/DEMO.md), and [v0.4.0 release evidence](docs/RELEASE_EVIDENCE_V0_4.md).
+ResiliReplay is Apache-2.0 licensed. Contributions must remain deterministic, bounded, secure by default, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [public adoption policy](ADOPTERS.md), and the [ecosystem page](docs/ECOSYSTEM.md).
 
 Built and maintained by **Ali**.

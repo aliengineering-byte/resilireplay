@@ -1,0 +1,14 @@
+ResiliReplay v0.5.0 Everywhere — genuine local fixture demo
+$ npx --yes resilireplay@0.5.0 capture start
+Capture armed · project-local · bounded · no telemetry
+$ node -e "process.exit(7)"
+Controlled tool result: exit 7
+$ npx --yes resilireplay@0.5.0 capture last
+Failure: Bash · process-exit · controlled non-zero exit
+Evidence: f3e175f2f2490ad9dde0d8230787613dc189652b1ca9f00f9d20191edc946928
+$ npx --yes resilireplay@0.5.0 capture stop
+$ npx --yes resilireplay@0.5.0 capture generate-test
+Generated and verified [PROJECT]\regression\everywhere.test.mjs
+PASS 1 executable regression · original command was not retried
+wall=1392ms under-60s=true
+capture=off telemetry=false raw-transcript=false

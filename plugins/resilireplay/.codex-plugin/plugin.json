@@ -1,0 +1,23 @@
+{
+  "name": "resilireplay",
+  "version": "0.5.0",
+  "description": "Turn supported coding-agent tool failures into sanitized, deterministic regression evidence.",
+  "author": {
+    "name": "Ali",
+    "url": "https://github.com/aliengineering-byte"
+  },
+  "homepage": "https://aliengineering-byte.github.io/resilireplay/",
+  "repository": "https://github.com/aliengineering-byte/resilireplay",
+  "license": "Apache-2.0",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ResiliReplay",
+    "shortDescription": "Capture tool failures as regression evidence.",
+    "longDescription": "Passive, opt-in coding-agent hooks and a local stdio MCP server turn supported failures into bounded evidence and executable regression tests.",
+    "developerName": "Ali",
+    "category": "Developer Tools",
+    "capabilities": ["Agent Skills", "MCP", "Hooks"],
+    "defaultPrompt": "Use ResiliReplay to capture this session's tool failures, explain the recovery boundary, and turn the last supported failure into a regression test."
+  },
+  "mcpServers": "./.mcp.json"
+}

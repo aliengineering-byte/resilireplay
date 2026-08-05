@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.5.0/schemas/adapter-manifest.v1.schema.json",
+  "title": "ResiliReplay Adapter Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "name",
+    "version",
+    "license",
+    "source",
+    "entrypoint",
+    "events",
+    "privacy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "resilireplay.adapter-manifest/v1" },
+    "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$" },
+    "license": { "const": "Apache-2.0" },
+    "source": { "enum": ["claude-code", "codex", "hermes", "generic"] },
+    "entrypoint": { "type": "string", "maxLength": 240 },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["tool-result", "session-end", "turn-end"] }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rawPromptsPersisted", "rawTranscriptsPersisted", "environmentValuesPersisted"],
+      "properties": {
+        "rawPromptsPersisted": { "const": false },
+        "rawTranscriptsPersisted": { "const": false },
+        "environmentValuesPersisted": { "const": false }
+      }
+    }
+  }
+}

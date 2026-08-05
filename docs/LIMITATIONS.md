@@ -1,6 +1,21 @@
 # Known limitations
 
-ResiliReplay v0.4.0 has these explicit boundaries:
+ResiliReplay v0.5.0 has these explicit boundaries:
+
+- **Agent evidence scope:** agent hooks preserve normalized outcomes, classifications, summaries, and hashes. They
+  cannot reconstruct prompts, transcripts, tool bodies, environment values, or personal paths.
+- **Hook authenticity:** vendor hook payloads are trusted as local observations, not cryptographically attested facts.
+- **Live verification:** Claude Code and Codex have official installation plus installed-runtime fixture evidence, not
+  model-authenticated live turns. Hermes has installation, skill, and MCP evidence without a model flow.
+- **Hermes capture:** Hermes uses the portable skill and ResiliReplay MCP server. Native passive hook capture is not
+  claimed for Hermes v0.5.0.
+- **Hosted tools:** Codex hosted tools do not emit the supported local PostToolUse surface and are ignored.
+- **Connection scope:** Claude and Codex direct hooks use repository-local configuration. Hermes’ official MCP command
+  writes its configured `HERMES_HOME`; review and back that configuration up before using the documented command.
+- **Public MCP directory:** the shipped default is local stdio. ResiliReplay does not operate a public HTTPS MCP
+  service, so the OpenAI directory submission is skills-only where the portal permits it.
+- **Hugging Face MCP:** the public static demo has no arbitrary command execution and is not advertised as an MCP
+  endpoint. Community MCP Spaces can require a user HF token.
 
 - **Execution isolation:** reviewed commands execute directly without a shell, but ResiliReplay is not
   an OS sandbox.

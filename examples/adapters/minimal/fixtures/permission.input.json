@@ -1,0 +1,8 @@
+{
+  "hook_event_name": "PostToolUseFailure",
+  "session_id": "synthetic-session",
+  "tool_name": "fixture-tool",
+  "tool_use_id": "fixture-call",
+  "tool_input": { "target": "synthetic" },
+  "error": "permission denied authorization=Bearer fixture-only"
+}
