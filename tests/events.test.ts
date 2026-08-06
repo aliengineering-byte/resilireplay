@@ -5,6 +5,11 @@ import {
   stableStringify,
   validateEvent,
   validateTrace,
+  EventEnvelopeV1Schema,
+  createV1Event,
+  migrateLegacyTrace,
+  validateV1Event,
+  stripUnstableValues,
 } from "@resilireplay/core";
 import { event, passingTrace } from "./helpers.js";
 
@@ -38,5 +43,174 @@ describe("versioned event model", () => {
   it("uses canonical object ordering", () => {
     expect(stableStringify({ z: 1, a: { y: 2, b: 3 } })).toBe('{"a":{"b":3,"y":2},"z":1}');
     expect(validateTrace(passingTrace())).toHaveLength(5);
+  });
+});
+
+describe("v1 event contract", () => {
+  it("creates a valid v1 event with canonical digest", () => {
+    const value = createV1Event({
+      runId: "run-v1",
+      traceId: "trace-v1",
+      spanId: "span-v1",
+      sequence: 0,
+      turnId: "turn-1",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "run",
+      boundary: "framework",
+      phase: "start",
+      eventKind: "run.start",
+      attempt: 0,
+      eventClass: "run",
+      safetyClass: "safe",
+      payload: { alpha: 1, beta: "value" },
+    });
+    const validated = validateV1Event(value);
+    expect(validated.schemaVersion).toBe("1.0.0");
+    expect(EventEnvelopeV1Schema.parse(validated)).toStrictEqual(validated);
+  });
+
+  it("keeps canonical digests stable across wall-clock changes", () => {
+    const first = createV1Event({
+      runId: "run-v1-stable",
+      traceId: "trace-v1-stable",
+      spanId: "span-v1",
+      sequence: 0,
+      turnId: "turn-stable",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "run",
+      boundary: "framework",
+      phase: "start",
+      eventKind: "run.start",
+      attempt: 0,
+      eventClass: "run",
+      safetyClass: "safe",
+      payload: { value: 1 },
+      wallClock: "1970-01-01T00:00:00.000Z",
+    });
+    const second = createV1Event({
+      runId: "run-v1-stable",
+      traceId: "trace-v1-stable",
+      spanId: "span-v1",
+      sequence: 0,
+      turnId: "turn-stable",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "run",
+      boundary: "framework",
+      phase: "start",
+      eventKind: "run.start",
+      attempt: 0,
+      eventClass: "run",
+      safetyClass: "safe",
+      payload: { value: 1 },
+      wallClock: "2070-01-01T00:00:00.000Z",
+    });
+    expect(first.payloadDigest).toBe(second.payloadDigest);
+  });
+
+  it("rejects malformed payload digests and unsupported schema versions", () => {
+    const value = createV1Event({
+      runId: "run-v1",
+      traceId: "trace-v1",
+      spanId: "span-v1",
+      sequence: 3,
+      turnId: "turn-1",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "run",
+      boundary: "framework",
+      phase: "running",
+      eventKind: "run.end",
+      attempt: 0,
+      eventClass: "run",
+      safetyClass: "safe",
+      payload: { result: "ok" },
+    });
+    expect(() =>
+      validateV1Event({ ...value, payloadDigest: "0".repeat(64) } as typeof value),
+    ).toThrow("Payload digest mismatch");
+    expect(() =>
+      validateV1Event({ ...value, schemaVersion: "2.0.0" as "1.0.0" } as typeof value),
+    ).toThrow();
+  });
+
+  it("rejects malformed v1 payload hash", () => {
+    const value = createV1Event({
+      runId: "run-v1",
+      traceId: "trace-v1",
+      spanId: "span-v1",
+      sequence: 1,
+      turnId: "turn-1",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "run",
+      boundary: "framework",
+      phase: "running",
+      eventKind: "run.end",
+      attempt: 0,
+      eventClass: "run",
+      safetyClass: "safe",
+      payload: { result: "ok" },
+    });
+    expect(() =>
+      validateV1Event({
+        ...value,
+        payload: { result: "bad" },
+      }),
+    ).toThrow("Payload digest mismatch");
+  });
+
+  it("strips unstable paths from canonical digest", () => {
+    const event = createV1Event({
+      runId: "run-v1",
+      traceId: "trace-v1",
+      spanId: "span-v1",
+      sequence: 2,
+      turnId: "turn-2",
+      actorId: "agent-1",
+      framework: "unit-test",
+      frameworkVersion: "0.0.1",
+      adapter: "resili-unit",
+      adapterVersion: "0.6.0",
+      operation: "tool",
+      boundary: "tool",
+      phase: "running",
+      eventKind: "tool.result",
+      attempt: 0,
+      eventClass: "tool",
+      safetyClass: "safe",
+      payload: { path: "C:/tmp/reli/test.txt", temp: "/tmp/agent/path" },
+    });
+    const replay = stripUnstableValues({
+      payload: event.payload,
+      metadata: {},
+      wallClock: event.wallClock,
+      eventId: event.eventId,
+    });
+    expect((replay as Record<string, unknown>).payload).toMatchObject({ path: "[redacted-path]" });
+  });
+
+  it("migrates legacy traces to v1 shape", () => {
+    const migrated = migrateLegacyTrace(passingTrace());
+    expect(migrated).toHaveLength(5);
+    expect(migrated[0].eventKind).toBe("run.start");
+    expect(migrated.at(-1)?.eventKind).toBe("run.end");
   });
 });

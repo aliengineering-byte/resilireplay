@@ -4231,6 +4231,181 @@ var BUILTIN_SCENARIOS = {
   })
 };
 
+// ../core/dist/contracts/v1.js
+var EventClassSchema = external_exports.enum([
+  "run",
+  "agent",
+  "turn",
+  "model",
+  "tool",
+  "stream",
+  "handoff",
+  "guardrail",
+  "checkpoint",
+  "state",
+  "interrupt",
+  "retry",
+  "side_effect",
+  "recovery",
+  "custom"
+]);
+var BoundarySchema = external_exports.enum([
+  "framework",
+  "model",
+  "tool",
+  "transport",
+  "stream",
+  "checkpoint",
+  "state",
+  "side_effect",
+  "unknown"
+]);
+var PhaseSchema = external_exports.enum([
+  "start",
+  "running",
+  "error",
+  "retry",
+  "succeeded",
+  "cancelled",
+  "skipped",
+  "abort",
+  "unknown"
+]);
+var SafetyClassSchema = external_exports.enum(["safe", "unsafe", "unknown"]);
+var SideEffectStateSchema = external_exports.enum(["pending", "applied", "rolled-back", "blocked", "failed"]);
+var SideEffectSchema = external_exports.object({
+  id: external_exports.string().min(1),
+  kind: external_exports.string().min(1),
+  status: SideEffectStateSchema,
+  classification: external_exports.string().min(1),
+  deterministic: external_exports.boolean().default(true),
+  reversible: external_exports.boolean().default(false)
+}).strict();
+var RedactionSchema = external_exports.object({
+  strategy: external_exports.enum(["redacted", "masked", "none"]),
+  fieldsRemoved: external_exports.array(external_exports.string()),
+  fieldsMasked: external_exports.array(external_exports.string()),
+  version: external_exports.string().default("1")
+}).strict();
+var EventV1IdSchema = external_exports.string().min(1);
+var FrameworkSchema = external_exports.string().min(1);
+var FrameworkVersionSchema = external_exports.string().min(1);
+var AdapterSchema = external_exports.string().min(1);
+var AdapterVersionSchema = external_exports.string().min(1);
+var OperationSchema = external_exports.string().min(1);
+var ActorIdSchema = external_exports.string().min(1);
+var EventKindSchema = external_exports.enum([
+  "run.start",
+  "run.end",
+  "run.error",
+  "agent.start",
+  "agent.end",
+  "agent.error",
+  "turn.start",
+  "turn.end",
+  "model.request",
+  "model.response",
+  "model.error",
+  "model.retry",
+  "tool.start",
+  "tool.result",
+  "tool.error",
+  "tool.timeout",
+  "tool.cancelled",
+  "tool.retry",
+  "stream.chunk",
+  "stream.truncated",
+  "stream.completed",
+  "stream.cancelled",
+  "stream.outOfOrder",
+  "stream.duplicate",
+  "stream.missing",
+  "handoff.requested",
+  "handoff.accepted",
+  "handoff.rejected",
+  "handoff.failed",
+  "handoff.completed",
+  "guardrail.start",
+  "guardrail.pass",
+  "guardrail.fail",
+  "guardrail.error",
+  "checkpoint.write",
+  "checkpoint.read",
+  "checkpoint.resume",
+  "interrupt",
+  "resume",
+  "partial.completion",
+  "state.read",
+  "state.write",
+  "state.update",
+  "state.rollback",
+  "recovery.decision",
+  "recovery.result",
+  "custom"
+]);
+var EventEnvelopeV1Schema = external_exports.object({
+  schemaVersion: external_exports.literal("1.0.0"),
+  envelopeVersion: external_exports.literal(1),
+  eventId: EventV1IdSchema,
+  runId: EventV1IdSchema,
+  traceId: external_exports.string().min(1),
+  spanId: external_exports.string().min(1),
+  parentSpanId: external_exports.string().min(1).optional(),
+  sequence: external_exports.number().int().nonnegative(),
+  turnId: external_exports.string().min(1),
+  actorId: ActorIdSchema,
+  framework: FrameworkSchema,
+  frameworkVersion: FrameworkVersionSchema,
+  adapter: AdapterSchema,
+  adapterVersion: AdapterVersionSchema,
+  operation: OperationSchema,
+  boundary: BoundarySchema,
+  phase: PhaseSchema,
+  eventKind: EventKindSchema,
+  attempt: external_exports.number().int().nonnegative(),
+  eventClass: EventClassSchema,
+  safetyClass: SafetyClassSchema,
+  payloadDigest: external_exports.string().regex(/^[a-f0-9]{64}$/),
+  redaction: RedactionSchema,
+  wallClock: external_exports.string().datetime({ offset: true }),
+  payload: external_exports.unknown(),
+  sideEffect: SideEffectSchema.optional(),
+  metadata: external_exports.record(external_exports.unknown()).default({}),
+  deterministicSeed: external_exports.number().int().optional(),
+  causeId: EventV1IdSchema.optional(),
+  parentEventId: EventV1IdSchema.optional()
+}).strict();
+var MigrationValidationResultSchema = external_exports.object({
+  from: external_exports.string(),
+  to: external_exports.literal("1.0.0"),
+  eventId: EventV1IdSchema,
+  redacted: external_exports.boolean()
+}).strict();
+var AdapterManifestSchema = external_exports.object({
+  schemaVersion: external_exports.literal("adapter-manifest/1.0"),
+  adapterName: external_exports.string().min(1),
+  adapterVersion: external_exports.string().min(1),
+  framework: external_exports.string().min(1),
+  frameworkVersionRange: external_exports.string().min(1),
+  capabilities: external_exports.array(external_exports.object({
+    name: external_exports.string().min(1),
+    level: external_exports.enum(["verified", "supported", "experimental", "documented", "unsupported"]),
+    reason: external_exports.string().default(""),
+    required: external_exports.boolean().default(false)
+  }).strict()).default([]),
+  limitations: external_exports.array(external_exports.string()),
+  createdAt: external_exports.string().datetime({ offset: true }),
+  evidence: external_exports.array(external_exports.string()).default([]),
+  limitationsHash: external_exports.string().regex(/^[a-f0-9]{64}$/)
+}).strict();
+var FaultBoundarySchema = external_exports.object({
+  name: external_exports.string().min(1),
+  recoverable: external_exports.boolean(),
+  retryable: external_exports.boolean(),
+  idempotentRequired: external_exports.boolean(),
+  supportsManualCleanup: external_exports.boolean().default(false)
+}).strict();
+
 // ../agent/src/normalize.ts
 import { createHash } from "node:crypto";
 
@@ -4293,7 +4468,7 @@ var FailureEvidenceSchema = external_exports.object({
   causalEventIds: external_exports.array(Sha256).max(16),
   deterministic: external_exports.literal(true)
 }).strict();
-var AdapterManifestSchema = external_exports.object({
+var AdapterManifestSchema2 = external_exports.object({
   schemaVersion: external_exports.literal(ADAPTER_MANIFEST_SCHEMA),
   name: external_exports.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/u),
   version: external_exports.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u),

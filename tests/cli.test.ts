@@ -24,6 +24,35 @@ describe("CLI end to end and subprocess safety", () => {
     expect(faults.stdout).toContain("mcp-malformed-tools-list");
   });
 
+  it("manages deterministic template artifacts", async () => {
+    const list = spawnSync(process.execPath, [cli, "template", "list"], { encoding: "utf8", windowsHide: true });
+    expect(list.status).toBe(0);
+    const entries = JSON.parse(list.stdout) as Array<{ id: string; compatibility: string }>;
+    expect(entries.length).toBeGreaterThanOrEqual(1);
+    const show = spawnSync(process.execPath, [cli, "template", "show", "tool-timeout"], { encoding: "utf8", windowsHide: true });
+    expect(show.status).toBe(0);
+    const template = JSON.parse(show.stdout) as { id: string; expectedEvidence: string[] };
+    expect(template.id).toBe("tool-timeout");
+    expect(template.expectedEvidence.length).toBeGreaterThan(0);
+
+    const directory = await mkdtemp(join(tmpdir(), "resilireplay-template-"));
+    const outputFile = join(directory, "tool-timeout.template.json");
+    try {
+      const copy = spawnSync(
+        process.execPath,
+        [cli, "template", "copy", "tool-timeout", "--output", outputFile],
+        { encoding: "utf8", windowsHide: true },
+      );
+      expect(copy.status).toBe(0);
+      expect(copy.stdout.trim()).toContain("Wrote template");
+      const written = await readFile(outputFile, "utf8");
+      const parsed = JSON.parse(written) as { id?: string };
+      expect(parsed.id).toBe("tool-timeout");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("records a real local agent command", async () => {
     const directory = await mkdtemp(join(tmpdir(), "resilireplay-record-"));
     try {

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.6.0/schemas/framework-event-v1.schema.json",
+  "title": "ResiliReplay Framework Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "envelopeVersion",
+    "eventId",
+    "runId",
+    "traceId",
+    "spanId",
+    "sequence",
+    "turnId",
+    "actorId",
+    "framework",
+    "frameworkVersion",
+    "adapter",
+    "adapterVersion",
+    "operation",
+    "boundary",
+    "phase",
+    "eventKind",
+    "attempt",
+    "eventClass",
+    "safetyClass",
+    "payloadDigest",
+    "redaction",
+    "wallClock",
+    "payload"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "envelopeVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "eventId": {
+      "$ref": "#/$defs/id"
+    },
+    "runId": {
+      "$ref": "#/$defs/id"
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "spanId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parentSpanId": {
+      "$ref": "#/$defs/id"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "turnId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actorId": {
+      "$ref": "#/$defs/id"
+    },
+    "framework": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frameworkVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapterVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "boundary": {
+      "type": "string",
+      "enum": ["framework", "model", "tool", "transport", "stream", "checkpoint", "state", "side_effect", "unknown"]
+    },
+    "phase": {
+      "type": "string",
+      "enum": ["start", "running", "error", "retry", "succeeded", "cancelled", "skipped", "abort", "unknown"]
+    },
+    "eventKind": {
+      "$ref": "#/$defs/eventKind"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "eventClass": {
+      "$ref": "#/$defs/eventClass"
+    },
+    "safetyClass": {
+      "type": "string",
+      "enum": ["safe", "unsafe", "unknown"]
+    },
+    "payloadDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "redaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "fieldsRemoved", "fieldsMasked"],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": ["redacted", "masked", "none"]
+        },
+        "fieldsRemoved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fieldsMasked": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "string",
+          "default": "1"
+        }
+      }
+    },
+    "wallClock": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payload": true,
+    "sideEffect": {
+      "type": "object",
+      "required": ["id", "kind", "status", "classification", "deterministic", "reversible"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "applied", "rolled-back", "blocked", "failed"]
+        },
+        "classification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deterministic": {
+          "type": "boolean"
+        },
+        "reversible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "deterministicSeed": {
+      "type": "integer"
+    },
+    "causeId": {
+      "$ref": "#/$defs/id"
+    },
+    "parentEventId": {
+      "$ref": "#/$defs/id"
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "eventClass": {
+      "type": "string",
+      "enum": ["run", "agent", "turn", "model", "tool", "stream", "handoff", "guardrail", "checkpoint", "state", "interrupt", "retry", "side_effect", "recovery", "custom"]
+    },
+    "eventKind": {
+      "type": "string",
+      "enum": [
+        "run.start",
+        "run.end",
+        "run.error",
+        "agent.start",
+        "agent.end",
+        "agent.error",
+        "turn.start",
+        "turn.end",
+        "model.request",
+        "model.response",
+        "model.error",
+        "model.retry",
+        "tool.start",
+        "tool.result",
+        "tool.error",
+        "tool.timeout",
+        "tool.cancelled",
+        "tool.retry",
+        "stream.chunk",
+        "stream.truncated",
+        "stream.completed",
+        "stream.cancelled",
+        "stream.outOfOrder",
+        "stream.duplicate",
+        "stream.missing",
+        "handoff.requested",
+        "handoff.accepted",
+        "handoff.rejected",
+        "handoff.failed",
+        "handoff.completed",
+        "guardrail.start",
+        "guardrail.pass",
+        "guardrail.fail",
+        "guardrail.error",
+        "checkpoint.write",
+        "checkpoint.read",
+        "checkpoint.resume",
+        "interrupt",
+        "resume",
+        "partial.completion",
+        "state.read",
+        "state.write",
+        "state.update",
+        "state.rollback",
+        "recovery.decision",
+        "recovery.result",
+        "custom"
+      ]
+    }
+  }
+}
+

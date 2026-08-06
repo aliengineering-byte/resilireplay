@@ -44,6 +44,7 @@
     "@modelcontextprotocol/sdk": "1.30.0",
     "@playwright/test": "1.62.1",
     "@resilireplay/agent": "workspace:*",
+    "@resilireplay/adapter-sdk": "workspace:*",
     "@resilireplay/campaign": "workspace:*",
     "@resilireplay/core": "workspace:*",
     "@resilireplay/mcp-chaos": "workspace:*",

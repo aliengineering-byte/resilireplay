@@ -96,6 +96,8 @@ The canonical integration engine is `@resilireplay/agent`; vendor hooks are thin
 - [`resilireplay.capture-session/v1`](schemas/capture-session.v1.schema.json)
 - [`resilireplay.failure-evidence/v1`](schemas/failure-evidence.v1.schema.json)
 - [`resilireplay.adapter-manifest/v1`](schemas/adapter-manifest.v1.schema.json)
+- [`resilireplay.framework-event/v1`](schemas/framework-event-v1.schema.json)
+- [`resilireplay.adapter-template/v1`](schemas/adapter-template-v1.schema.json)
 
 Create and verify an adapter without changing the engine:
 
@@ -163,3 +165,5 @@ pnpm agent:gates
 ResiliReplay is Apache-2.0 licensed. Contributions must remain deterministic, bounded, secure by default, and covered by tests. See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), [public adoption policy](ADOPTERS.md), and the [ecosystem page](docs/ECOSYSTEM.md).
 
 Built and maintained by **Ali**.
+
+

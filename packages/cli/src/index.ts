@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile, stat } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
@@ -51,6 +51,11 @@ import {
   writeCampaignRunReports,
 } from "@resilireplay/campaign";
 import { startStudio } from "@resilireplay/studio";
+import {
+  adapterTemplates,
+  renderTemplateArtifact,
+  templateById,
+} from "@resilireplay/adapter-sdk";
 import { demoTerminalReport, runDemo } from "./demo.js";
 import { adoptTerminalReport, runAdopt, type AdoptOptions } from "./adopt.js";
 import {
@@ -335,6 +340,52 @@ export function createProgram(): Command {
       "Run manifest, classification, determinism, bounds, and privacy conformance checks.",
     )
     .action(async (path: string) => console.log(stableStringify(await verifyAdapter(path))));
+
+  const template = program
+    .command("template")
+    .description("Manage deterministic reliability scenario templates.");
+
+  template
+    .command("list")
+    .description("List available starter templates.")
+    .action(() => {
+      console.log(
+        stableStringify(
+          adapterTemplates().map((entry) => ({
+            id: entry.id,
+            compatibility: entry.compatibility,
+            framework: entry.framework,
+            safetyClass: entry.safetyClass,
+            mode: entry.mode,
+            expectedEvidence: entry.expectedEvidence,
+          })),
+        ),
+      );
+    });
+
+  template
+    .command("show")
+    .description("Show an exact template descriptor.")
+    .argument("<id>", "Template identifier")
+    .action((id: string) => {
+      const selected = templateById(id);
+      if (!selected) throw new Error(`Unknown template ${id}`);
+      console.log(stableStringify(selected));
+    });
+
+  template
+    .command("copy")
+    .description("Copy one template fixture to a local path.")
+    .argument("<id>", "Template identifier")
+    .option("-o, --output <path>", "Template output path")
+    .action(async (id: string, options: { output?: string }) => {
+      const selected = templateById(id);
+      if (!selected) throw new Error(`Unknown template ${id}`);
+      const output = boundedPath(options.output ?? `${id}.template.json`);
+      const rendered = renderTemplateArtifact(selected, `${id}.template.json`);
+      await writeFile(output, `${rendered}\n`, "utf8");
+      console.log(`Wrote template ${output}`);
+    });
 
   const capture = program
     .command("capture")

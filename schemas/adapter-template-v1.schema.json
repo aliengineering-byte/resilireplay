@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.6.0/schemas/adapter-template-v1.schema.json",
+  "title": "ResiliReplay Adapter Template v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "templateVersion",
+    "id",
+    "name",
+    "description",
+    "framework",
+    "frameworkVersionRange",
+    "compatibility",
+    "safetyClass",
+    "mode",
+    "source",
+    "license",
+    "expectedEvidence",
+    "scenarioFixture",
+    "schemaValidation",
+    "limitations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "resilireplay.adapter-template/v1.0.0"
+    },
+    "templateVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 180
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "framework": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frameworkVersionRange": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compatibility": {
+      "type": "string",
+      "enum": ["verified", "supported", "experimental", "documented", "unsupported"]
+    },
+    "safetyClass": {
+      "type": "string",
+      "enum": ["safe", "unsafe", "unknown"]
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["campaign", "fixture", "scenario"]
+    },
+    "source": {
+      "type": "object",
+      "required": ["repository", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "license": {
+      "type": "string",
+      "const": "Apache-2.0"
+    },
+    "expectedEvidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scenarioFixture": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "campaignFixture": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "schemaValidation": {
+      "type": "object",
+      "required": ["requiredEvidenceFields"],
+      "additionalProperties": false,
+      "properties": {
+        "requiredEvidenceFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 1000
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+    }
+  }
+}

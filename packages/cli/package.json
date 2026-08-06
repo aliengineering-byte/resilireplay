@@ -32,6 +32,7 @@
   "devDependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
     "@resilireplay/agent": "workspace:*",
+    "@resilireplay/adapter-sdk": "workspace:*",
     "@resilireplay/core": "workspace:*",
     "@resilireplay/campaign": "workspace:*",
     "@resilireplay/mcp-chaos": "workspace:*",
