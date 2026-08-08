@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { containsLikelySecret, safeOutputPath, sanitize } from "@resilireplay/core";
 
@@ -41,6 +42,13 @@ describe("security boundaries", () => {
     const base = resolve("safe-output");
     expect(() => safeOutputPath(base, "../escape.json")).toThrow("escapes");
     expect(() => safeOutputPath(base, resolve("elsewhere.json"))).toThrow("escapes");
+    expect(() => safeOutputPath(base, join(tmpdir(), "resilireplay-outside.json"))).toThrow(
+      "escapes",
+    );
+    if (process.platform === "win32") {
+      const alternateDrive = base.toUpperCase().startsWith("C:") ? "D:" : "C:";
+      expect(() => safeOutputPath(base, `${alternateDrive}\\escape.json`)).toThrow("escapes");
+    }
     expect(safeOutputPath(base, "nested/report.json")).toContain("nested");
   });
 

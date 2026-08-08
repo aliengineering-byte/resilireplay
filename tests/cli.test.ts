@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -41,7 +41,9 @@ describe("CLI end to end and subprocess safety", () => {
     expect(template.id).toBe("tool-timeout");
     expect(template.expectedEvidence.length).toBeGreaterThan(0);
 
-    const directory = await mkdtemp(join(tmpdir(), "resilireplay-template-"));
+    const artifactRoot = resolve(".artifacts");
+    await mkdir(artifactRoot, { recursive: true });
+    const directory = await mkdtemp(join(artifactRoot, "resilireplay-template-"));
     const outputFile = join(directory, "tool-timeout.template.json");
     try {
       const copy = spawnSync(
