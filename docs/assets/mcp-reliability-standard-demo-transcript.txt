@@ -1,0 +1,28 @@
+$ pnpm dlx resilireplay@0.6.0 campaign run examples/mcp-reliability/stdio.campaign.yml --confirm-tools 84b64fd60ced0089603e2e66efeff2cf00cf8577756a70b6e816ee3ba4849b06 --output .artifacts/mcp-category-leadership/stdio-run-3
+Reviewed campaign mcp-reliability-stdio
+Campaign hash 84b64fd60ced0089603e2e66efeff2cf00cf8577756a70b6e816ee3ba4849b06
+PASSED clean-control (1/3)
+PASSED bounded-tool-error-recovery (2/3)
+PASSED canary-expected-failure (3/3)
+ResiliReplay Campaign v0.6.0  PASS
+Campaign        mcp-reliability-stdio
+Run status      complete
+Scenarios       3/3 matched expectations
+Fault coverage  100%
+Evidence hash   8a20705b06ebdd9c649af9a5e4cbc84c9eea6a44c31bec520fcca9c6f0e9bc09
+
+PASSED    clean-control (fixture; none)
+PASSED    bounded-tool-error-recovery (fixture; mcp-tool-error)
+PASSED    canary-expected-failure (fixture; mcp-malicious-canary-instruction)
+Campaign evidence <repository>/.artifacts/mcp-category-leadership/stdio-run-3/campaign-run.json
+
+$ node --test examples/mcp-reliability/generated-regression/regression.test.mjs
+PASS reproduces the captured ResiliReplay failure (12.5697ms)
+INFO tests 1
+INFO suites 0
+INFO pass 1
+INFO fail 0
+INFO cancelled 0
+INFO skipped 0
+INFO todo 0
+INFO duration_ms 122.5174

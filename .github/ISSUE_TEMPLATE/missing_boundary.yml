@@ -1,0 +1,43 @@
+name: Missing MCP reliability boundary
+description: Propose a failure or recovery boundary the standard does not cover
+title: "[MCP boundary]: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: Propose the minimum reproducible evidence, not a product feature wishlist or unverified vulnerability claim.
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Missing boundary
+      description: Name the MCP lifecycle, transport, capability, tool, or recovery transition and why existing campaigns do not cover it.
+    validations:
+      required: true
+  - type: textarea
+    id: minimum
+    attributes:
+      label: Minimum evidence and negative control
+      description: Define the clean control, deterministic fault, expected outcome, fail-closed negative control, metrics, and hashes needed.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and execution boundary
+      description: Identify a local fixture or owned sandbox, operation class, data, credentials, side effects, budgets, and cleanup.
+    validations:
+      required: true
+  - type: textarea
+    id: portability
+    attributes:
+      label: Portability and limitations
+      description: Explain which fields other harnesses could emit and what this evidence would not establish.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have not tested or proposed testing a third-party remote target without explicit authorization.
+          required: true

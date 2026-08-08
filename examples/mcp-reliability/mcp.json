@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "resilient-stdio": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["../resilient-mcp-server/dist/index.js"],
+      "cwd": ".",
+      "env": {
+        "PATH": "${env:PATH}"
+      },
+      "connectionTimeout": 5000,
+      "requestTimeout": 5000
+    }
+  }
+}

@@ -1,0 +1,1 @@
+Synthetic, public, non-sensitive fixture for a read-only directory listing.

@@ -1,16 +1,16 @@
-name: Field-test submission
-description: Share a sanitized, reproducible ResiliReplay result
-title: "[Field test]: "
+name: Sanitized MCP field case
+description: Share a bounded, reproducible MCP reliability result
+title: "[MCP field case]: "
 labels: [field-test]
 body:
   - type: markdown
     attributes:
-      value: A field test is bounded reliability evidence, not a security certification or adopter claim.
+      value: A field case is bounded reliability evidence, not a security certification, endorsement, or adoption claim. Follow docs/mcp-reliability/CONTRIBUTING_CASES.md.
   - type: input
     id: source
     attributes:
       label: Public target and pinned revision
-      placeholder: Repository URL, package@version, and gitHead or commit
+      placeholder: Repository URL, package@version, gitHead/commit, registry integrity, and license
     validations:
       required: true
   - type: textarea
@@ -31,7 +31,7 @@ body:
     id: evidence
     attributes:
       label: Reproducible public evidence URL
-      description: Link to sanitized config, campaign, hashes, compact report, and executable regression when generated.
+      description: Link to sanitized config, campaign, result summary, hashes, exact commands, and executable regression when generated.
     validations:
       required: true
   - type: checkboxes
@@ -40,4 +40,6 @@ body:
       label: Safety confirmation
       options:
         - label: I was authorized to run this test and removed credentials, private paths, personal data, and production traces.
+          required: true
+        - label: I labeled injected failures as synthetic conditions and included limitations and cleanup evidence.
           required: true

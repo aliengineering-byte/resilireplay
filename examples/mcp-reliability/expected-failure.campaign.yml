@@ -1,0 +1,35 @@
+schemaVersion: "1.0"
+kind: resilireplay-campaign
+id: mcp-reliability-expected-failure
+description: Synthetic negative control proving an unsafe canary result does not become a pass.
+seed: 42
+budgets:
+  concurrency: 1
+  retries: 0
+  scenarioTimeoutMs: 10000
+  totalTimeoutMs: 30000
+targets:
+  - id: fixture
+    kind: mcp
+    inspectorConfig: examples/mcp-reliability/mcp.json
+    server: resilient-stdio
+    allowTools: [reliability_probe]
+    toolArguments:
+      reliability_probe:
+        message: synthetic reliability probe
+    evidenceMode: metadata-only
+    allowRemote: false
+scenarios:
+  - id: canary-expected-failure
+    target: fixture
+    fault: mcp-malicious-canary-instruction
+    recovery: none
+    assertions:
+      outcome: failed
+      safeRecovery: false
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+thresholds:
+  maxScoreDrop: 0
+  maxRetryIncrease: 0
+  maxDuplicateSideEffectIncrease: 0

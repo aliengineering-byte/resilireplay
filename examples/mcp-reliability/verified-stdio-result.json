@@ -1,0 +1,58 @@
+{
+  "schema": "mcp-reliability-result/0.1",
+  "profile": "SYNTHETIC_LOCAL_FIXTURE",
+  "level": "REGRESSION_VERIFIED",
+  "transport": "stdio",
+  "producer": { "name": "ResiliReplay", "version": "0.6.0" },
+  "target": {
+    "name": "ResiliReplay resilient fixture",
+    "package": null,
+    "revision": "d2491de7441b6d56252ced1947440b8cc4794706",
+    "registryIntegrity": null,
+    "license": "Apache-2.0"
+  },
+  "boundary": {
+    "authorization": "repository-owned-local-fixture",
+    "operation": "reliability_probe",
+    "operationClass": "READ_ONLY_IDEMPOTENT",
+    "dataClass": "synthetic-public-fixture",
+    "remoteNetworkTarget": false,
+    "credentials": "none",
+    "expectedSideEffects": "none"
+  },
+  "campaign": {
+    "id": "mcp-reliability-stdio",
+    "campaignSha256": "84b64fd60ced0089603e2e66efeff2cf00cf8577756a70b6e816ee3ba4849b06",
+    "targetConfigSha256": "3ea2540c2417ffc804cd806d62dcf62daa16362975dd4da426cd8ffd9526d8a1",
+    "seed": 42,
+    "status": "complete",
+    "runSha256": "8a20705b06ebdd9c649af9a5e4cbc84c9eea6a44c31bec520fcca9c6f0e9bc09"
+  },
+  "outcome": {
+    "expectationsMatched": 3,
+    "expectationsTotal": 3,
+    "cleanControl": "passed",
+    "faultApplied": true,
+    "boundedRecovery": true,
+    "retryCount": 1,
+    "timeToRecoveryMs": 1,
+    "duplicateSideEffectAttempts": 0,
+    "safetyPolicyCompliance": true,
+    "expectedFailureObserved": true
+  },
+  "regression": {
+    "status": "generated",
+    "verified": true,
+    "fixtureSha256": "b50a3c4c8022de42c9ec21f13d8aa51b9056d7eab0ea4a480093f4c7e5364118",
+    "testSha256": "ce67aafe7427c11fc8f424a5482254465216a072d24a71e226458e0403754114"
+  },
+  "cleanup": {
+    "serverProcessesRemaining": 0,
+    "listenersRemaining": 0,
+    "disposableStateRemoved": true
+  },
+  "limitations": [
+    "Repository-owned synthetic stdio fixture only",
+    "Synthetic injected failures are not vulnerabilities"
+  ]
+}

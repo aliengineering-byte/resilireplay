@@ -1,0 +1,58 @@
+{
+  "schema": "mcp-reliability-result/0.1",
+  "profile": "PUBLIC_LOCAL_SERVER",
+  "level": "REGRESSION_VERIFIED",
+  "transport": "stdio",
+  "producer": { "name": "ResiliReplay", "version": "0.6.0" },
+  "target": {
+    "name": "MCP Memory",
+    "package": "@modelcontextprotocol/server-memory@2026.7.4",
+    "revision": "6dd0a683e198783e30feabf7abaf42f925bd18b1",
+    "registryIntegrity": "sha512-D+NNzChsOHN72y58ngDmO+TzjJijGi/sSY/gBydhB3TJCcm1XQEozVWwEpruHeXt/HSkMV3Z/BpHDhdt1MLD5w==",
+    "license": "Apache-2.0/MIT transition; documentation CC-BY-4.0"
+  },
+  "boundary": {
+    "authorization": "public-local-no-key",
+    "operation": "read_graph",
+    "operationClass": "READ_ONLY_IDEMPOTENT",
+    "dataClass": "empty-disposable-local-state",
+    "remoteNetworkTarget": false,
+    "credentials": "none",
+    "expectedSideEffects": "none"
+  },
+  "campaign": {
+    "id": "mcp-memory-field-test",
+    "campaignSha256": "64024d11804aac90cfd9a20bf142ddd77f87413a303250a1b0044eeac918493c",
+    "targetConfigSha256": "232dcfc4de0744b2c0250d3e3f9238c4bab17a0f7c718f12727e15657864f71f",
+    "seed": 1703,
+    "status": "complete",
+    "runSha256": "573e924c776bdda4d40f9f65d699bccd64bce8473a08c60ca25f5af242ae3ae0"
+  },
+  "outcome": {
+    "expectationsMatched": 3,
+    "expectationsTotal": 3,
+    "cleanControl": "passed",
+    "faultApplied": true,
+    "boundedRecovery": true,
+    "retryCount": 1,
+    "timeToRecoveryMs": 1,
+    "duplicateSideEffectAttempts": 0,
+    "safetyPolicyCompliance": true,
+    "expectedFailureObserved": true
+  },
+  "regression": {
+    "status": "generated",
+    "verified": true,
+    "fixtureSha256": "9f91de1398bb25b8eb96b2b581ec6dad0e85cff1e03ce85156e1a7dbd7bbabb7",
+    "testSha256": "39e4a903691f1540afdd6a976796ccfb603eee6eb983610b3ce5c2e5f690fe36"
+  },
+  "cleanup": {
+    "serverProcessesRemaining": 0,
+    "listenersRemaining": 0,
+    "disposableStateRemoved": true
+  },
+  "limitations": [
+    "One read-only call against an empty disposable graph",
+    "Synthetic injected failures are not vulnerabilities"
+  ]
+}

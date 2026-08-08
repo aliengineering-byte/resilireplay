@@ -1,0 +1,45 @@
+name: MCP regression contribution
+description: Contribute a sanitized, integrity-bound generated causal regression
+title: "[MCP regression]: "
+labels: [field-test]
+body:
+  - type: markdown
+    attributes:
+      value: Generated regressions must come from an authorized bounded run. Synthetic failures are not vulnerability claims.
+  - type: input
+    id: source
+    attributes:
+      label: Pinned source result
+      description: Link to the public field case or compatibility result and name ResiliReplay/server versions.
+    validations:
+      required: true
+  - type: textarea
+    id: hashes
+    attributes:
+      label: Integrity manifest
+      description: Provide source trace, minimized fixture, scenario, and executable test SHA-256 values.
+    validations:
+      required: true
+  - type: textarea
+    id: execution
+    attributes:
+      label: Exact execution result
+      description: Include the test command, pass/fail counts, runtime, and expected underlying failure.
+    validations:
+      required: true
+  - type: textarea
+    id: redaction
+    attributes:
+      label: Redaction, limitations, and cleanup
+      description: State evidence mode, removed data classes, known limits, process/listener cleanup, and disposable state removal.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I verified the hashes after sanitization and removed credentials, private paths, production traces, and personal data.
+          required: true
+        - label: I was authorized to run the source test and do not describe the injected condition as a discovered vulnerability.
+          required: true

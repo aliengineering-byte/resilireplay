@@ -12,6 +12,10 @@ const demoTranscript = await readFile(
   join(docs, "assets", "everywhere-demo-transcript.txt"),
   "utf8",
 );
+const mcpStandardTranscript = await readFile(
+  join(docs, "assets", "mcp-reliability-standard-demo-transcript.txt"),
+  "utf8",
+);
 
 function invariant(condition, message) {
   if (!condition) throw new Error(message);
@@ -58,10 +62,29 @@ invariant(
   "Landing page must link the static demo fallback",
 );
 invariant(
+  html.includes("mcp-reliability/MCP_RELIABILITY_STANDARD.md") &&
+    html.includes("assets/mcp-reliability-standard-demo.gif") &&
+    html.includes("assets/mcp-reliability-standard-demo.png"),
+  "Landing page must publish the MCP standard and verified demo assets",
+);
+invariant(
+  readme.includes("docs/mcp-reliability/MCP_RELIABILITY_STANDARD.md") &&
+    readme.includes("docs/assets/mcp-reliability-standard-demo.gif"),
+  "README must make the MCP standard and verified demo prominent",
+);
+invariant(
   demoTranscript.includes("PASS 1 executable regression") &&
     demoTranscript.includes("original command was not retried") &&
     demoTranscript.includes("under-60s=true"),
   "Genuine agent demo transcript is incomplete",
+);
+invariant(
+  mcpStandardTranscript.includes("Scenarios       3/3 matched expectations") &&
+    mcpStandardTranscript.includes("PASSED    canary-expected-failure") &&
+    mcpStandardTranscript.includes("INFO pass 1") &&
+    mcpStandardTranscript.includes("INFO fail 0") &&
+    !/[A-Z]:\\Users\\/u.test(mcpStandardTranscript),
+  "Verified MCP standard demo transcript is incomplete or unsanitized",
 );
 
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]));

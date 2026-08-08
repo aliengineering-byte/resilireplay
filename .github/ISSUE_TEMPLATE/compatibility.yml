@@ -1,6 +1,6 @@
-name: MCP compatibility report
-description: Report a reproducible server, transport, or schema mismatch
-title: "[Compatibility]: "
+name: MCP compatibility result
+description: Share a passing, failing, or blocked pinned compatibility result
+title: "[MCP compatibility]: "
 labels: [compatibility]
 body:
   - type: markdown
@@ -11,7 +11,7 @@ body:
     attributes:
       label: Exact versions
       description: ResiliReplay version plus server package version and source revision.
-      placeholder: resilireplay@0.3.0; @scope/server@1.2.3; gitHead abc123
+      placeholder: resilireplay@0.6.0; @scope/server@1.2.3; gitHead abc123; integrity sha512-...
     validations:
       required: true
   - type: dropdown
@@ -32,7 +32,7 @@ body:
     id: reproduction
     attributes:
       label: Minimal sanitized reproduction
-      description: Include the config, campaign, reviewed hash, exact commands, expected result, and actual result.
+      description: Include the evidence profile/level, config, campaign, reviewed hashes, exact commands, expected result, actual result, and limitations.
     validations:
       required: true
   - type: checkboxes
@@ -41,4 +41,6 @@ body:
       label: Safety confirmation
       options:
         - label: I was authorized to test this target and removed secrets, personal data, and unsafe payloads.
+          required: true
+        - label: I reported invalid, incomplete, and setup-blocked attempts without converting them into passes.
           required: true

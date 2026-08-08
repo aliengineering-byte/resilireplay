@@ -1,0 +1,54 @@
+schemaVersion: "1.0"
+kind: resilireplay-campaign
+id: mcp-filesystem-field-test
+description: Bounded local campaign for the pinned official MCP Filesystem server.
+seed: 1702
+budgets:
+  concurrency: 1
+  retries: 1
+  scenarioTimeoutMs: 15000
+  totalTimeoutMs: 60000
+targets:
+  - id: filesystem
+    kind: mcp
+    inspectorConfig: docs/case-studies/mcp-filesystem/mcp.json
+    server: filesystem
+    allowTools: [list_directory]
+    toolArguments:
+      list_directory:
+        path: "{{PROJECT_ROOT}}/examples/mcp-reliability/fixtures/filesystem-root"
+    evidenceMode: metadata-only
+    allowRemote: false
+scenarios:
+  - id: clean-control
+    target: filesystem
+    fault: none
+    recovery: none
+    assertions:
+      outcome: passed
+      maxRetries: 0
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: tool-error-retry
+    target: filesystem
+    fault: mcp-tool-error
+    recovery: retry
+    assertions:
+      outcome: passed
+      safeRecovery: true
+      maxRetries: 1
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: canary-negative-control
+    target: filesystem
+    fault: mcp-malicious-canary-instruction
+    recovery: none
+    assertions:
+      outcome: failed
+      safeRecovery: false
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+thresholds:
+  maxScoreDrop: 0
+  maxRetryIncrease: 0
+  maxDuplicateSideEffectIncrease: 0

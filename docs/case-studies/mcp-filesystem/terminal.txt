@@ -1,0 +1,16 @@
+$ pnpm dlx resilireplay@0.6.0 campaign run docs/case-studies/mcp-filesystem/campaign.yml --confirm-tools 4a297a7a2047439c9b3443c7fdb8f228e6c32498a21da83aa633560cd3602810 --output <repository>/.artifacts/mcp-category-leadership/filesystem-run-3
+Reviewed campaign mcp-filesystem-field-test
+Campaign hash 4a297a7a2047439c9b3443c7fdb8f228e6c32498a21da83aa633560cd3602810
+PASSED clean-control (1/3)
+PASSED tool-error-retry (2/3)
+PASSED canary-negative-control (3/3)
+ResiliReplay Campaign v0.6.0  PASS
+Campaign        mcp-filesystem-field-test
+Run status      complete
+Scenarios       3/3 matched expectations
+Fault coverage  100%
+Evidence hash   bd64d1c1440a32734981e891bd07867de95223f491357f762941e374f7e103d5
+
+PASSED    clean-control (filesystem; none)
+PASSED    tool-error-retry (filesystem; mcp-tool-error)
+PASSED    canary-negative-control (filesystem; mcp-malicious-canary-instruction)
