@@ -22,7 +22,7 @@
   "dependencies": {
     "@resilireplay/adapter-sdk": "workspace:*",
     "@resilireplay/core": "workspace:*",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   },
   "peerDependencies": {
     "@langchain/langgraph": "1.4.9"
