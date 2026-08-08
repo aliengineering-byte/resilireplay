@@ -13,6 +13,7 @@ export default [
       "**/.artifacts/**",
       "plugins/resilireplay/runtime/hook-runtime.mjs",
       "docs/case-studies/**/browsers/**",
+      "tmp-lg*.mjs",
     ],
   },
   eslint.configs.recommended,

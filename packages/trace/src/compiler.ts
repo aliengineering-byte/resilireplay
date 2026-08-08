@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 import {
   calculateMetrics,
+  PRODUCT_VERSION,
   safeOutputPath,
   sha256,
   stableStringify,
@@ -161,7 +162,7 @@ export async function compileRegression(
   const manifest = {
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    productVersion: "0.5.0",
+    productVersion: PRODUCT_VERSION,
     sourceTraceSha256: sourceTraceHash,
     fixtureSha256: fixtureHash,
     testSha256: testHash,

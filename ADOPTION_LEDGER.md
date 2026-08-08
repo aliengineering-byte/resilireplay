@@ -5,4 +5,5 @@ Append-only policy: record only public, independently verifiable external events
 | Date (UTC) | Event type | Public URL | External party | Evidence note |
 | ---------- | ---------- | ---------- | -------------- | ------------- |
 
-No qualifying external v0.5.0 events have been recorded yet.
+No qualifying external v0.6.0 events have been recorded yet. Historical release evidence remains in
+the release-scoped documentation.

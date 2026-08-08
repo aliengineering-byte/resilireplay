@@ -616,7 +616,7 @@ export async function runAdopt(options: AdoptOptions = {}): Promise<AdoptResult>
       plan,
       createdFiles: [],
       nextCommands: [
-        `npx --yes resilireplay@0.5.0 adopt --config ./${plan.config} --server ${server}`,
+        `npx --yes resilireplay@0.6.0 adopt --config ./${plan.config} --server ${server}`,
       ],
     };
   }
@@ -792,7 +792,7 @@ export async function runAdopt(options: AdoptOptions = {}): Promise<AdoptResult>
       })),
     );
     const remoteArgument = imported.plan.remoteAuthorizationRequired ? " --allow-remote" : "";
-    const localCommand = `npx --yes resilireplay@0.5.0 campaign run ${outputDirectory}/campaign.yml --confirm-tools ${reviewedCampaignHash}${remoteArgument}`;
+    const localCommand = `npx --yes resilireplay@0.6.0 campaign run ${outputDirectory}/campaign.yml --confirm-tools ${reviewedCampaignHash}${remoteArgument}`;
     const files: Array<{ path: string; content: string }> = [
       {
         path: `${outputDirectory}/campaign.yml`,
@@ -800,7 +800,7 @@ export async function runAdopt(options: AdoptOptions = {}): Promise<AdoptResult>
       },
       {
         path: `${outputDirectory}/baseline/README.md`,
-        content: `# Baseline approval\n\nRun the reviewed campaign, inspect its metadata-only evidence, then approve only a complete expectation-passing result:\n\n\`\`\`bash\n${localCommand} --output ${outputDirectory}/runs/candidate\nnpx --yes resilireplay@0.5.0 campaign approve ${outputDirectory}/runs/candidate --output ${outputDirectory}/baseline/approved.json\n\`\`\`\n\nNever approve a baseline you did not review. Tool annotations remain untrusted hints.\n`,
+        content: `# Baseline approval\n\nRun the reviewed campaign, inspect its metadata-only evidence, then approve only a complete expectation-passing result:\n\n\`\`\`bash\n${localCommand} --output ${outputDirectory}/runs/candidate\nnpx --yes resilireplay@0.6.0 campaign approve ${outputDirectory}/runs/candidate --output ${outputDirectory}/baseline/approved.json\n\`\`\`\n\nNever approve a baseline you did not review. Tool annotations remain untrusted hints.\n`,
       },
       {
         path: `${outputDirectory}/baseline/candidate.json`,
@@ -833,7 +833,7 @@ export async function runAdopt(options: AdoptOptions = {}): Promise<AdoptResult>
       ...regressionFiles,
       {
         path: ".github/workflows/resilireplay.yml",
-        content: `name: ResiliReplay\n\non:\n  pull_request:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  recovery:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v6\n      - uses: aliengineering-byte/resilireplay@v0.5.0\n        with:\n          campaign: ${outputDirectory}/campaign.yml\n          campaign-confirmation-hash: ${reviewedCampaignHash}\n${imported.plan.remoteAuthorizationRequired ? "          allow-remote: true\n" : ""}`,
+        content: `name: ResiliReplay\n\non:\n  pull_request:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n\njobs:\n  recovery:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v6\n      - uses: aliengineering-byte/resilireplay@v0.6.0\n        with:\n          campaign: ${outputDirectory}/campaign.yml\n          campaign-confirmation-hash: ${reviewedCampaignHash}\n${imported.plan.remoteAuthorizationRequired ? "          allow-remote: true\n" : ""}`,
       },
     ];
     const createdFiles = await writeTransaction(root, files);

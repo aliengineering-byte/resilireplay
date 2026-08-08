@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are provided for the latest tagged release. v0.5.0 is the current supported line;
+Security fixes are provided for the latest tagged release. v0.6.0 is the current supported line;
 older releases remain immutable historical artifacts.
 
 ## Reporting a vulnerability

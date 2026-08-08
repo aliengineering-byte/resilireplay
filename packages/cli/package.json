@@ -1,6 +1,6 @@
 {
   "name": "resilireplay",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "license": "Apache-2.0",
   "description": "Turn reviewed MCP failures into deterministic recovery evidence and executable regression tests.",
@@ -32,6 +32,7 @@
   "devDependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",
     "@resilireplay/agent": "workspace:*",
+    "@resilireplay/adapter-sdk": "workspace:*",
     "@resilireplay/core": "workspace:*",
     "@resilireplay/campaign": "workspace:*",
     "@resilireplay/mcp-chaos": "workspace:*",

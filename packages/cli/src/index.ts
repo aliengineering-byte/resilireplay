@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile, stat } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
@@ -51,6 +51,13 @@ import {
   writeCampaignRunReports,
 } from "@resilireplay/campaign";
 import { startStudio } from "@resilireplay/studio";
+import {
+  adapterTemplates,
+  createAdapterRegistry,
+  frameworkSupportProfiles,
+  renderTemplateArtifact,
+  templateById,
+} from "@resilireplay/adapter-sdk";
 import { demoTerminalReport, runDemo } from "./demo.js";
 import { adoptTerminalReport, runAdopt, type AdoptOptions } from "./adopt.js";
 import {
@@ -335,6 +342,96 @@ export function createProgram(): Command {
       "Run manifest, classification, determinism, bounds, and privacy conformance checks.",
     )
     .action(async (path: string) => console.log(stableStringify(await verifyAdapter(path))));
+  adapter
+    .command("list")
+    .description("List framework profiles and their honest evidence classifications.")
+    .action(() => console.log(stableStringify(frameworkSupportProfiles())));
+  adapter
+    .command("detect")
+    .description("Detect a framework profile, with an optional explicit override.")
+    .argument("[hint]", "Framework hint, package, or command text")
+    .option("--package <name>", "Exact installed package name")
+    .option("--command <command>", "Framework launch command")
+    .option("--framework <id>", "Explicit framework profile override")
+    .action(
+      (
+        hint: string | undefined,
+        options: { package?: string; command?: string; framework?: string },
+      ) => {
+        const resolution = createAdapterRegistry().resolve(
+          {
+            rootDirectory: process.cwd(),
+            ...(hint === undefined ? {} : { frameworkHint: hint }),
+            ...(options.package === undefined ? {} : { packageName: options.package }),
+            ...(options.command === undefined ? {} : { command: options.command }),
+          },
+          options.framework,
+        );
+        if (resolution === undefined) {
+          throw Object.assign(new Error("No supported framework profile detected"), {
+            exitCode: 2,
+          });
+        }
+        console.log(stableStringify(resolution));
+      },
+    );
+  adapter
+    .command("doctor")
+    .description("Report the registered evidence boundary for a framework profile.")
+    .argument("<framework>", "Framework profile identifier")
+    .action(async (framework: string) => {
+      console.log(
+        stableStringify(
+          await createAdapterRegistry().doctor(framework, { rootDirectory: process.cwd() }),
+        ),
+      );
+    });
+
+  const template = program
+    .command("template")
+    .description("Manage deterministic reliability scenario templates.");
+
+  template
+    .command("list")
+    .description("List available starter templates.")
+    .action(() => {
+      console.log(
+        stableStringify(
+          adapterTemplates().map((entry) => ({
+            id: entry.id,
+            compatibility: entry.compatibility,
+            framework: entry.framework,
+            safetyClass: entry.safetyClass,
+            mode: entry.mode,
+            expectedEvidence: entry.expectedEvidence,
+          })),
+        ),
+      );
+    });
+
+  template
+    .command("show")
+    .description("Show an exact template descriptor.")
+    .argument("<id>", "Template identifier")
+    .action((id: string) => {
+      const selected = templateById(id);
+      if (!selected) throw new Error(`Unknown template ${id}`);
+      console.log(stableStringify(selected));
+    });
+
+  template
+    .command("copy")
+    .description("Copy one template fixture to a local path.")
+    .argument("<id>", "Template identifier")
+    .option("-o, --output <path>", "Template output path")
+    .action(async (id: string, options: { output?: string }) => {
+      const selected = templateById(id);
+      if (!selected) throw new Error(`Unknown template ${id}`);
+      const output = boundedPath(options.output ?? `${id}.template.json`);
+      const rendered = renderTemplateArtifact(selected, `${id}.template.json`);
+      await writeFile(output, `${rendered}\n`, "utf8");
+      console.log(`Wrote template ${output}`);
+    });
 
   const capture = program
     .command("capture")

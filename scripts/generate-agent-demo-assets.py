@@ -21,7 +21,7 @@ def frame(visible: int) -> Image.Image:
     draw.ellipse((45, 43, 61, 59), fill="#ff5f56")
     draw.ellipse((70, 43, 86, 59), fill="#ffbd2e")
     draw.ellipse((95, 43, 111, 59), fill="#27c93f")
-    draw.text((WIDTH - 250, 38), "EVERYWHERE / v0.5.0", font=font, fill="#8b949e")
+    draw.text((WIDTH - 250, 38), "EVERYWHERE / v0.6.0", font=font, fill="#8b949e")
     y = 86
     for index, line in enumerate(lines[:visible]):
         color = "#f0f6fc"

@@ -45,7 +45,7 @@ but is not sandboxed.
   environments.
 - `--allow-remote` is a user assertion, and a remote server can change behavior between requests.
 - Pattern redaction cannot recognize every application-specific secret format.
-- Hashes prove linkage and integrity, not signer identity; v0.5.0 evidence is unsigned.
+- Hashes prove linkage and integrity, not signer identity; v0.6.0 evidence is unsigned.
 - Hook metadata supplied by an agent is not independently attested. Evidence proves deterministic handling of the
   captured projection, not that the vendor or original operation is authentic.
 - Exact connection backups may contain original configuration bytes. They are gitignored, not printed, and must be

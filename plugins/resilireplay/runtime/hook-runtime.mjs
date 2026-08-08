@@ -4,7 +4,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// ../agent/src/capture.ts
+// packages/agent/src/capture.ts
 import {
   access,
   lstat,
@@ -19,7 +19,7 @@ import {
 import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/external.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/external.js
 var external_exports = {};
 __export(external_exports, {
   BRAND: () => BRAND,
@@ -131,7 +131,7 @@ __export(external_exports, {
   void: () => voidType
 });
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/util.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/util.js
 var util;
 (function(util2) {
   util2.assertEqual = (_) => {
@@ -265,7 +265,7 @@ var getParsedType = (data) => {
   }
 };
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/ZodError.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/ZodError.js
 var ZodIssueCode = util.arrayToEnum([
   "invalid_type",
   "invalid_literal",
@@ -383,7 +383,7 @@ ZodError.create = (issues) => {
   return error;
 };
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.js
 var errorMap = (issue, _ctx) => {
   let message;
   switch (issue.code) {
@@ -486,7 +486,7 @@ var errorMap = (issue, _ctx) => {
 };
 var en_default = errorMap;
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/errors.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/errors.js
 var overrideErrorMap = en_default;
 function setErrorMap(map) {
   overrideErrorMap = map;
@@ -495,7 +495,7 @@ function getErrorMap() {
   return overrideErrorMap;
 }
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
   const { data, path, errorMaps, issueData } = params;
   const fullPath = [...path, ...issueData.path || []];
@@ -605,14 +605,14 @@ var isDirty = (x) => x.status === "dirty";
 var isValid = (x) => x.status === "valid";
 var isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/errorUtil.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/errorUtil.js
 var errorUtil;
 (function(errorUtil2) {
   errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
   errorUtil2.toString = (message) => typeof message === "string" ? message : message?.message;
 })(errorUtil || (errorUtil = {}));
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
   constructor(parent, value, path, key) {
     this._cachedPath = [];
@@ -4060,7 +4060,7 @@ var coerce = {
 };
 var NEVER = INVALID;
 
-// ../core/dist/stable.js
+// packages/core/dist/stable.js
 function normalize(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean")
     return value;
@@ -4081,7 +4081,7 @@ function stableStringify(value) {
   return JSON.stringify(normalize(value));
 }
 
-// ../core/dist/events.js
+// packages/core/dist/events.js
 var EVENT_TYPES = [
   "run_started",
   "model_request",
@@ -4126,7 +4126,7 @@ var TraceEventSchema = external_exports.object({
   fault: FaultMetadataSchema.optional()
 }).strict();
 
-// ../core/dist/faults.js
+// packages/core/dist/faults.js
 var FAULT_TYPES = [
   "latency",
   "timeout",
@@ -4231,10 +4231,191 @@ var BUILTIN_SCENARIOS = {
   })
 };
 
-// ../agent/src/normalize.ts
+// packages/core/dist/contracts/v1.js
+var EventClassSchema = external_exports.enum([
+  "run",
+  "agent",
+  "turn",
+  "model",
+  "tool",
+  "stream",
+  "handoff",
+  "guardrail",
+  "checkpoint",
+  "state",
+  "interrupt",
+  "retry",
+  "side_effect",
+  "recovery",
+  "custom"
+]);
+var BoundarySchema = external_exports.enum([
+  "framework",
+  "model",
+  "tool",
+  "transport",
+  "stream",
+  "checkpoint",
+  "state",
+  "side_effect",
+  "unknown"
+]);
+var PhaseSchema = external_exports.enum([
+  "start",
+  "running",
+  "error",
+  "retry",
+  "succeeded",
+  "cancelled",
+  "skipped",
+  "abort",
+  "unknown"
+]);
+var SafetyClassSchema = external_exports.enum(["safe", "unsafe", "unknown"]);
+var SideEffectStateSchema = external_exports.enum([
+  "pending",
+  "applied",
+  "rolled-back",
+  "blocked",
+  "failed"
+]);
+var SideEffectSchema = external_exports.object({
+  id: external_exports.string().min(1),
+  kind: external_exports.string().min(1),
+  status: SideEffectStateSchema,
+  classification: external_exports.string().min(1),
+  deterministic: external_exports.boolean().default(true),
+  reversible: external_exports.boolean().default(false)
+}).strict();
+var RedactionSchema = external_exports.object({
+  strategy: external_exports.enum(["redacted", "masked", "none"]),
+  fieldsRemoved: external_exports.array(external_exports.string()),
+  fieldsMasked: external_exports.array(external_exports.string()),
+  version: external_exports.string().default("1")
+}).strict();
+var EventV1IdSchema = external_exports.string().min(1);
+var FrameworkSchema = external_exports.string().min(1);
+var FrameworkVersionSchema = external_exports.string().min(1);
+var AdapterSchema = external_exports.string().min(1);
+var AdapterVersionSchema = external_exports.string().min(1);
+var OperationSchema = external_exports.string().min(1);
+var ActorIdSchema = external_exports.string().min(1);
+var EventKindSchema = external_exports.enum([
+  "run.start",
+  "run.end",
+  "run.error",
+  "agent.start",
+  "agent.end",
+  "agent.error",
+  "turn.start",
+  "turn.end",
+  "model.request",
+  "model.response",
+  "model.error",
+  "model.retry",
+  "tool.start",
+  "tool.result",
+  "tool.error",
+  "tool.timeout",
+  "tool.cancelled",
+  "tool.retry",
+  "stream.chunk",
+  "stream.truncated",
+  "stream.completed",
+  "stream.cancelled",
+  "stream.outOfOrder",
+  "stream.duplicate",
+  "stream.missing",
+  "handoff.requested",
+  "handoff.accepted",
+  "handoff.rejected",
+  "handoff.failed",
+  "handoff.completed",
+  "guardrail.start",
+  "guardrail.pass",
+  "guardrail.fail",
+  "guardrail.error",
+  "checkpoint.write",
+  "checkpoint.read",
+  "checkpoint.resume",
+  "interrupt",
+  "resume",
+  "partial.completion",
+  "state.read",
+  "state.write",
+  "state.update",
+  "state.rollback",
+  "recovery.decision",
+  "recovery.result",
+  "custom"
+]);
+var EventEnvelopeV1Schema = external_exports.object({
+  schemaVersion: external_exports.literal("1.0.0"),
+  envelopeVersion: external_exports.literal(1),
+  eventId: EventV1IdSchema,
+  runId: EventV1IdSchema,
+  traceId: external_exports.string().min(1),
+  spanId: external_exports.string().min(1),
+  parentSpanId: external_exports.string().min(1).optional(),
+  sequence: external_exports.number().int().nonnegative(),
+  turnId: external_exports.string().min(1),
+  actorId: ActorIdSchema,
+  framework: FrameworkSchema,
+  frameworkVersion: FrameworkVersionSchema,
+  adapter: AdapterSchema,
+  adapterVersion: AdapterVersionSchema,
+  operation: OperationSchema,
+  boundary: BoundarySchema,
+  phase: PhaseSchema,
+  eventKind: EventKindSchema,
+  attempt: external_exports.number().int().nonnegative(),
+  eventClass: EventClassSchema,
+  safetyClass: SafetyClassSchema,
+  payloadDigest: external_exports.string().regex(/^[a-f0-9]{64}$/),
+  redaction: RedactionSchema,
+  wallClock: external_exports.string().datetime({ offset: true }),
+  payload: external_exports.unknown(),
+  sideEffect: SideEffectSchema.optional(),
+  metadata: external_exports.record(external_exports.unknown()).default({}),
+  deterministicSeed: external_exports.number().int().optional(),
+  causeId: EventV1IdSchema.optional(),
+  parentEventId: EventV1IdSchema.optional()
+}).strict();
+var MigrationValidationResultSchema = external_exports.object({
+  from: external_exports.string(),
+  to: external_exports.literal("1.0.0"),
+  eventId: EventV1IdSchema,
+  redacted: external_exports.boolean()
+}).strict();
+var AdapterManifestSchema = external_exports.object({
+  schemaVersion: external_exports.literal("adapter-manifest/1.0"),
+  adapterName: external_exports.string().min(1),
+  adapterVersion: external_exports.string().min(1),
+  framework: external_exports.string().min(1),
+  frameworkVersionRange: external_exports.string().min(1),
+  capabilities: external_exports.array(external_exports.object({
+    name: external_exports.string().min(1),
+    level: external_exports.enum(["verified", "supported", "experimental", "documented", "unsupported"]),
+    reason: external_exports.string().default(""),
+    required: external_exports.boolean().default(false)
+  }).strict()).default([]),
+  limitations: external_exports.array(external_exports.string()),
+  createdAt: external_exports.string().datetime({ offset: true }),
+  evidence: external_exports.array(external_exports.string()).default([]),
+  limitationsHash: external_exports.string().regex(/^[a-f0-9]{64}$/)
+}).strict();
+var FaultBoundarySchema = external_exports.object({
+  name: external_exports.string().min(1),
+  recoverable: external_exports.boolean(),
+  retryable: external_exports.boolean(),
+  idempotentRequired: external_exports.boolean(),
+  supportsManualCleanup: external_exports.boolean().default(false)
+}).strict();
+
+// packages/agent/src/normalize.ts
 import { createHash } from "node:crypto";
 
-// ../agent/src/schemas.ts
+// packages/agent/src/schemas.ts
 var AGENT_EVENT_SCHEMA = "resilireplay.agent-event/v1";
 var CAPTURE_SESSION_SCHEMA = "resilireplay.capture-session/v1";
 var FAILURE_EVIDENCE_SCHEMA = "resilireplay.failure-evidence/v1";
@@ -4293,7 +4474,7 @@ var FailureEvidenceSchema = external_exports.object({
   causalEventIds: external_exports.array(Sha256).max(16),
   deterministic: external_exports.literal(true)
 }).strict();
-var AdapterManifestSchema = external_exports.object({
+var AdapterManifestSchema2 = external_exports.object({
   schemaVersion: external_exports.literal(ADAPTER_MANIFEST_SCHEMA),
   name: external_exports.string().regex(/^[a-z0-9][a-z0-9-]{1,63}$/u),
   version: external_exports.string().regex(/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u),
@@ -4308,7 +4489,7 @@ var AdapterManifestSchema = external_exports.object({
   }).strict()
 }).strict();
 
-// ../agent/src/normalize.ts
+// packages/agent/src/normalize.ts
 var SECRET = /(?:bearer\s+[a-z0-9._~+/=-]+|basic\s+[a-z0-9+/=]+|(?:gh[pousr]|sk)(?:-|%2d)[a-z0-9_-]{12,}|AKIA[A-Z0-9]{16}|base64:[a-z0-9+/]{20,}={0,2}|(?:api[-_]?key|token|secret|password|authorization)\s*[=:]\s*(?:bearer\s+|basic\s+)?[^\s,;]+)/giu;
 var PATH = /(?:[A-Za-z]:\\|\\\\|\/(?:Users|home|root|tmp)\/)[^\s"']+/gu;
 var CONTROL = new RegExp("\\p{Cc}", "gu");
@@ -4401,7 +4582,7 @@ function normalizeHookEvent(input, options) {
   return AgentEventSchema.parse({ ...base, eventId: hashValue2(base) });
 }
 
-// ../agent/src/capture.ts
+// packages/agent/src/capture.ts
 var STORE = ".resilireplay/capture";
 function inside(root, candidate) {
   const value = relative(root, candidate);
@@ -4660,7 +4841,7 @@ async function captureIngest(event, root = process.cwd()) {
   return (await captureIngestBatch([event], root))[0];
 }
 
-// ../agent/src/plugin-hook.ts
+// packages/agent/src/plugin-hook.ts
 async function runPluginHook(sourceInput, root = process.cwd()) {
   const source = AgentSourceSchema.parse(sourceInput);
   const chunks = [];

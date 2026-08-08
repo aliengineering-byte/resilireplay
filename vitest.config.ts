@@ -7,7 +7,9 @@ export default defineConfig({
   resolve: {
     alias: {
       "@resilireplay/agent": `${root}packages/agent/src/index.ts`,
+      "@resilireplay/adapter-sdk": `${root}packages/adapter-sdk/src/index.ts`,
       "@resilireplay/core": `${root}packages/core/src/index.ts`,
+      "@resilireplay/otel-bridge": `${root}packages/otel-bridge/src/index.ts`,
       "@resilireplay/trace": `${root}packages/trace/src/index.ts`,
       "@resilireplay/reporters": `${root}packages/reporters/src/index.ts`,
       "@resilireplay/mcp-chaos": `${root}packages/mcp-chaos/src/index.ts`,

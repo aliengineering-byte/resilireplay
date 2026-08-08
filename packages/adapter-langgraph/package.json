@@ -1,0 +1,35 @@
+{
+  "name": "@resilireplay/adapter-langgraph",
+  "version": "0.6.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@resilireplay/adapter-sdk": "workspace:*",
+    "@resilireplay/core": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "peerDependencies": {
+    "@langchain/langgraph": "1.4.9"
+  },
+  "devDependencies": {
+    "@langchain/core": "1.2.4",
+    "@langchain/langgraph": "1.4.9",
+    "@resilireplay/trace": "workspace:*"
+  }
+}

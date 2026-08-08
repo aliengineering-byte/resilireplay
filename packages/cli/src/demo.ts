@@ -333,7 +333,7 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
         canonicalEvidenceSha256: sha256(stableStringify(canonical)),
       },
       outputDirectory: persistentOutput ?? null,
-      nextCommand: "npx --yes resilireplay@0.5.0 adopt --config ./mcp.json --dry-run",
+      nextCommand: "npx --yes resilireplay@0.6.0 adopt --config ./mcp.json --dry-run",
     };
     if (persistentOutput) {
       await writeFile(join(workspace, "demo-summary.json"), `${stableStringify(result)}\n`, "utf8");

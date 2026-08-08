@@ -192,7 +192,7 @@ console.log("6/6 Writing source/config/scenario/fixture/test hashes");
 const integrationManifest = {
   schemaVersion: "1.0",
   product: "ResiliReplay",
-  productVersion: "0.5.0",
+  productVersion: "0.6.0",
   inspectorVersion: "2.0.0",
   sourceConfigSha256: resilientConfig.configSha256,
   sourceTraceSha256: regression.sourceTraceHash,

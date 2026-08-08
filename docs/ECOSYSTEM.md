@@ -1,6 +1,6 @@
 # Ecosystem
 
-ResiliReplay v0.5.0 provides one local-first reliability core across coding-agent hooks, Agent Skills, MCP clients, and outside adapters.
+ResiliReplay v0.6.0 provides one local-first reliability core across coding-agent hooks, Agent Skills, MCP clients, and outside adapters.
 
 ## Integration paths
 
@@ -10,7 +10,7 @@ ResiliReplay v0.5.0 provides one local-first reliability core across coding-agen
 | Codex                | Repo marketplace plugin with hooks, skill, MCP   | Installation + fixture verified |
 | Hermes Agent         | Local skill plus stdio MCP registration          | Installation verified           |
 | Agent Skills clients | `plugins/resilireplay/skills/resilireplay`       | Official format validated       |
-| MCP clients          | `npx --yes resilireplay@0.5.0 mcp serve`         | Live SDK/Inspector verified     |
+| MCP clients          | `npx --yes resilireplay@0.6.0 mcp serve`         | Live SDK/Inspector verified     |
 | New agents           | `adapter init` / `adapter verify`                | Contract fixture verified       |
 
 Hermes’ current contribution policy routes specialized community skills to the Skills Hub rather than the upstream core/optional bundle. ResiliReplay therefore publishes the downstream skill and MCP integration and does not open a promotional upstream PR.

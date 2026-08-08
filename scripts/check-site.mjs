@@ -33,16 +33,16 @@ for (const [name, content] of [
   ["landing page", html],
 ]) {
   invariant(
-    content.includes("resilireplay@0.5.0 demo"),
-    `${name} must include the shipped v0.5.0 demo command`,
+    content.includes("resilireplay@0.6.0 demo"),
+    `${name} must include the shipped v0.6.0 demo command`,
   );
   invariant(
-    content.includes("resilireplay@0.5.0 connect"),
-    `${name} must include the shipped v0.5.0 connect command`,
+    content.includes("resilireplay@0.6.0 connect"),
+    `${name} must include the shipped v0.6.0 connect command`,
   );
   invariant(
-    content.includes("resilireplay@0.5.0 mcp serve"),
-    `${name} must include the shipped v0.5.0 MCP server command`,
+    content.includes("resilireplay@0.6.0 mcp serve"),
+    `${name} must include the shipped v0.6.0 MCP server command`,
   );
 }
 invariant(

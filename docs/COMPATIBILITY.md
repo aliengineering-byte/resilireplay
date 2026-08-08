@@ -2,6 +2,21 @@
 
 Evidence levels are release-scoped:
 
+Framework adapters use the stricter labels `GENUINE_RUNTIME`, `FIXTURE_BACKED_PROTOCOL`,
+`DOCUMENTED_ONLY`, and `UNSUPPORTED`; these prevent protocol fixtures from being described as a
+framework runtime. Coding-agent/plugin evidence below retains its established installation/live
+labels.
+
+| Framework         | Version/profile | Framework evidence        | Verified boundary                                                                                |
+| ----------------- | --------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| LangGraph         | 1.4.9           | `GENUINE_RUNTIME`         | Pinned local graph and tool execution, recovery, streaming, checkpoints, regression              |
+| OpenAI Agents SDK | 0.14.3          | `GENUINE_RUNTIME`         | Pinned public SDK with deterministic local/no-key model, handoff, guardrail, tracing, regression |
+| AutoGen           | >=0.4 profile   | `FIXTURE_BACKED_PROTOCOL` | OTLP-compatible fixture only                                                                     |
+| CrewAI            | >=0.100 profile | `DOCUMENTED_ONLY`         | Public event-listener mapper only                                                                |
+| LlamaIndex        | >=0.12 profile  | `DOCUMENTED_ONLY`         | Public instrumentation mapper only                                                               |
+
+See [framework quick starts](FRAMEWORKS.md) for exact limitations.
+
 - **LIVE VERIFIED:** a real client or protocol implementation emitted/consumed the event and the intended result passed.
 - **FIXTURE VERIFIED:** official payload-shaped synthetic fixtures passed the adapter, privacy, and regression suite.
 - **INSTALLATION VERIFIED:** an isolated official installer/configuration path and discovery check passed without a live model flow.
