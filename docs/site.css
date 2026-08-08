@@ -717,7 +717,7 @@ pre code {
     padding-right: 22px;
   }
   h1 {
-    font-size: clamp(3.6rem, 19vw, 5.8rem);
+    font-size: clamp(3.2rem, 15.5vw, 5.8rem);
   }
   .comparison-grid {
     grid-template-columns: 1fr;
