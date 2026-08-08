@@ -105,6 +105,15 @@ try {
         `${profile.name}: horizontal overflow of ${overflow}px: ${JSON.stringify(offenders)}`,
       );
     }
+    const headline = await page.locator("h1").evaluate((element) => ({
+      clientWidth: element.clientWidth,
+      scrollWidth: element.scrollWidth,
+    }));
+    if (headline.scrollWidth > headline.clientWidth + 1) {
+      throw new Error(
+        `${profile.name}: hero headline clips by ${headline.scrollWidth - headline.clientWidth}px`,
+      );
+    }
     await page.keyboard.press("Tab");
     const focused = await page.evaluate(() => document.activeElement?.tagName);
     if (focused !== "A") throw new Error(`${profile.name}: first keyboard focus is not a link`);
