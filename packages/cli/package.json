@@ -41,7 +41,7 @@
     "@resilireplay/studio": "workspace:*",
     "commander": "14.0.0",
     "yaml": "2.8.1",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   },
   "engines": {
     "node": ">=22"
