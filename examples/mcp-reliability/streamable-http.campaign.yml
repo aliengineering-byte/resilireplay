@@ -1,0 +1,45 @@
+schemaVersion: "1.0"
+kind: resilireplay-campaign
+id: mcp-reliability-streamable-http
+description: Synthetic authenticated loopback Streamable HTTP reliability checks.
+seed: 42
+budgets:
+  concurrency: 1
+  retries: 1
+  scenarioTimeoutMs: 10000
+  totalTimeoutMs: 60000
+targets:
+  - id: fixture
+    kind: mcp
+    inspectorConfig: examples/mcp-reliability/mcp.http.example.json
+    server: resilient-http
+    allowTools: [reliability_probe]
+    toolArguments:
+      reliability_probe:
+        message: synthetic reliability probe
+    evidenceMode: metadata-only
+    allowRemote: false
+scenarios:
+  - id: clean-control
+    target: fixture
+    fault: none
+    recovery: none
+    assertions:
+      outcome: passed
+      maxRetries: 0
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+  - id: bounded-tool-error-recovery
+    target: fixture
+    fault: mcp-tool-error
+    recovery: retry
+    assertions:
+      outcome: passed
+      safeRecovery: true
+      maxRetries: 1
+      noDuplicateSideEffects: true
+      safetyPolicyCompliance: true
+thresholds:
+  maxScoreDrop: 0
+  maxRetryIncrease: 0
+  maxDuplicateSideEffectIncrease: 0

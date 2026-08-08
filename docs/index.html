@@ -38,6 +38,7 @@
       >
       <nav aria-label="Primary navigation">
         <a href="#quick-start">Try it</a>
+        <a href="#mcp-standard">MCP standard</a>
         <a href="#workflow">Workflow</a>
         <a href="#compatibility">Compatibility</a>
         <a href="#security">Safety</a>
@@ -109,6 +110,34 @@ npx --yes resilireplay@0.6.0 mcp serve</code></pre>
             >Plugin guide →</a
           ><a href="https://www.npmjs.com/package/resilireplay/v/0.6.0">npm package →</a>
         </div>
+      </section>
+
+      <section class="demo section" id="mcp-standard">
+        <div class="section-heading">
+          <p class="eyebrow">Public working standard · revision 0.1</p>
+          <h2>Minimum evidence for an MCP reliability claim.</h2>
+          <p>
+            Pin the target and authority. Run a clean control, deterministic fault, bounded
+            recovery, and expected failure. Bind the result to hashes, execute the causal
+            regression, and verify cleanup. This is an open testing convention—not certification or
+            security testing.
+          </p>
+        </div>
+        <figure class="demo-frame">
+          <img
+            src="assets/mcp-reliability-standard-demo.gif"
+            alt="Verified public ResiliReplay 0.6.0 terminal run showing a clean MCP control, one recovered tool error, one expected failure, and a passing generated causal regression"
+            width="1200"
+            height="760"
+          />
+          <figcaption>
+            Real public-package output ·
+            <a href="assets/mcp-reliability-standard-demo.png">static PNG</a> ·
+            <a href="assets/mcp-reliability-standard-demo-transcript.txt">transcript</a> ·
+            <a href="mcp-reliability/MCP_RELIABILITY_STANDARD.md">read the standard</a> ·
+            <a href="mcp-reliability/FIVE_MINUTE_MCP_TEST.md">five-minute test</a>
+          </figcaption>
+        </figure>
       </section>
 
       <section class="demo section" id="demo">

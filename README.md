@@ -21,6 +21,26 @@ npx --yes resilireplay@0.6.0 mcp serve
 
 [Static PNG](docs/assets/everywhere-demo.png) · [genuine transcript](docs/assets/everywhere-demo-transcript.txt) · [self-contained regression](examples/everywhere/everywhere.test.mjs) · [product site](https://aliengineering-byte.github.io/resilireplay/)
 
+## The MCP Reliability Standard
+
+The public working standard defines the minimum evidence for a bounded MCP reliability claim: pinned
+identity and authority, a clean control, deterministic fault, expected-failure negative control,
+bounded recovery, integrity hashes, executable regression when causal failure exists, and verified
+cleanup. It is an open testing convention—not the MCP specification, certification, security testing,
+or an endorsement.
+
+[Read the standard](docs/mcp-reliability/MCP_RELIABILITY_STANDARD.md) ·
+[run the five-minute MCP test](docs/mcp-reliability/FIVE_MINUTE_MCP_TEST.md) ·
+[compare seven executed profiles](docs/mcp-reliability/COMPATIBILITY_AND_RECOVERY_MATRIX.md) ·
+[contribute a case](docs/mcp-reliability/CONTRIBUTING_CASES.md)
+
+[![Verified public-package demo: clean MCP control, bounded retry, expected failure, and passing generated regression](docs/assets/mcp-reliability-standard-demo.gif)](docs/mcp-reliability/DEMO.md)
+
+[Static PNG](docs/assets/mcp-reliability-standard-demo.png) ·
+[verified transcript](docs/assets/mcp-reliability-standard-demo-transcript.txt) ·
+[campaign](examples/mcp-reliability/stdio.campaign.yml) ·
+[generated regression](examples/mcp-reliability/generated-regression/README.md)
+
 ## Try it in under five minutes
 
 Requirements: Node.js 22 or 24. Previewing is side-effect free; applying requires confirmation, backs up existing files, and leaves capture off.

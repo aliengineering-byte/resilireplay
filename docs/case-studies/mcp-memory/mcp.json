@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "memory": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["node_modules/@modelcontextprotocol/server-memory/dist/index.js"],
+      "cwd": ".",
+      "env": {
+        "PATH": "${env:PATH}"
+      },
+      "connectionTimeout": 10000,
+      "requestTimeout": 10000
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+        "../../../examples/mcp-reliability/fixtures/filesystem-root"
+      ],
+      "cwd": ".",
+      "env": {
+        "PATH": "${env:PATH}"
+      },
+      "connectionTimeout": 10000,
+      "requestTimeout": 10000
+    }
+  }
+}

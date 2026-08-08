@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "resilient-http": {
+      "type": "http",
+      "url": "http://127.0.0.1:43119/mcp",
+      "headers": {
+        "Authorization": "${env:RESILIREPLAY_FIXTURE_AUTHORIZATION}"
+      },
+      "connectionTimeout": 5000,
+      "requestTimeout": 5000
+    }
+  }
+}

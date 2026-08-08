@@ -1,0 +1,58 @@
+{
+  "schema": "mcp-reliability-result/0.1",
+  "profile": "PUBLIC_LOCAL_SERVER",
+  "level": "REGRESSION_VERIFIED",
+  "transport": "stdio",
+  "producer": { "name": "ResiliReplay", "version": "0.6.0" },
+  "target": {
+    "name": "MCP Filesystem",
+    "package": "@modelcontextprotocol/server-filesystem@2026.7.10",
+    "revision": "9a96ea6e5913736f92b88345bf51caeaaa8e719f",
+    "registryIntegrity": "sha512-Mmjg4anFBD5OzbPnGJOA0jPPN8645ERhQk38HQLpSenx1ox9bfdPkmAzUnNjeQtqQGFLtKe13J20RtLBmUKMZA==",
+    "license": "Apache-2.0/MIT transition; documentation CC-BY-4.0"
+  },
+  "boundary": {
+    "authorization": "public-local-no-key",
+    "operation": "list_directory",
+    "operationClass": "READ_ONLY_IDEMPOTENT",
+    "dataClass": "synthetic-public-fixture",
+    "remoteNetworkTarget": false,
+    "credentials": "none",
+    "expectedSideEffects": "none"
+  },
+  "campaign": {
+    "id": "mcp-filesystem-field-test",
+    "campaignSha256": "4a297a7a2047439c9b3443c7fdb8f228e6c32498a21da83aa633560cd3602810",
+    "targetConfigSha256": "f8dc5615af0f9c775789a8a9c2eff959a95fda3e1e7d438ed244d54c04ca3fa8",
+    "seed": 1702,
+    "status": "complete",
+    "runSha256": "bd64d1c1440a32734981e891bd07867de95223f491357f762941e374f7e103d5"
+  },
+  "outcome": {
+    "expectationsMatched": 3,
+    "expectationsTotal": 3,
+    "cleanControl": "passed",
+    "faultApplied": true,
+    "boundedRecovery": true,
+    "retryCount": 1,
+    "timeToRecoveryMs": 2,
+    "duplicateSideEffectAttempts": 0,
+    "safetyPolicyCompliance": true,
+    "expectedFailureObserved": true
+  },
+  "regression": {
+    "status": "generated",
+    "verified": true,
+    "fixtureSha256": "03d391c7f7841651fef2487d84555aafaf074cea222df8668df5233d24b7483f",
+    "testSha256": "81493ddc983c1f4471cdea55a8048588a102ce21fdb87a26f635b8bcce0f4799"
+  },
+  "cleanup": {
+    "serverProcessesRemaining": 0,
+    "listenersRemaining": 0,
+    "disposableStateRemoved": true
+  },
+  "limitations": [
+    "One read-only directory listing on one synthetic fixture",
+    "Synthetic injected failures are not vulnerabilities"
+  ]
+}
