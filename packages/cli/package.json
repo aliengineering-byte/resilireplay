@@ -40,7 +40,7 @@
     "@resilireplay/trace": "workspace:*",
     "@resilireplay/studio": "workspace:*",
     "commander": "14.0.0",
-    "yaml": "2.8.1",
+    "yaml": "2.9.0",
     "zod": "3.25.76"
   },
   "engines": {
