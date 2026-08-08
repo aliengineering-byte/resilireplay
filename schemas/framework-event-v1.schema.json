@@ -89,11 +89,31 @@
     },
     "boundary": {
       "type": "string",
-      "enum": ["framework", "model", "tool", "transport", "stream", "checkpoint", "state", "side_effect", "unknown"]
+      "enum": [
+        "framework",
+        "model",
+        "tool",
+        "transport",
+        "stream",
+        "checkpoint",
+        "state",
+        "side_effect",
+        "unknown"
+      ]
     },
     "phase": {
       "type": "string",
-      "enum": ["start", "running", "error", "retry", "succeeded", "cancelled", "skipped", "abort", "unknown"]
+      "enum": [
+        "start",
+        "running",
+        "error",
+        "retry",
+        "succeeded",
+        "cancelled",
+        "skipped",
+        "abort",
+        "unknown"
+      ]
     },
     "eventKind": {
       "$ref": "#/$defs/eventKind"
@@ -194,7 +214,23 @@
     },
     "eventClass": {
       "type": "string",
-      "enum": ["run", "agent", "turn", "model", "tool", "stream", "handoff", "guardrail", "checkpoint", "state", "interrupt", "retry", "side_effect", "recovery", "custom"]
+      "enum": [
+        "run",
+        "agent",
+        "turn",
+        "model",
+        "tool",
+        "stream",
+        "handoff",
+        "guardrail",
+        "checkpoint",
+        "state",
+        "interrupt",
+        "retry",
+        "side_effect",
+        "recovery",
+        "custom"
+      ]
     },
     "eventKind": {
       "type": "string",
@@ -250,4 +286,3 @@
     }
   }
 }
-

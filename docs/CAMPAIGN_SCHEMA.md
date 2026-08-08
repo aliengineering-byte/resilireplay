@@ -1,6 +1,6 @@
 # Campaign and baseline schemas
 
-ResiliReplay v0.5.0 accepts JSON or YAML campaign documents with the same strict runtime model. The normative machine-readable definition is [`schemas/campaign.schema.json`](../schemas/campaign.schema.json); runtime parsing additionally enforces unique target/scenario identifiers, valid target references, argument allowlist alignment, and credential-safe arguments. Existing v0.4.0 documents remain valid.
+ResiliReplay v0.6.0 accepts JSON or YAML campaign documents with the same strict runtime model. The normative machine-readable definition is [`schemas/campaign.schema.json`](../schemas/campaign.schema.json); runtime parsing additionally enforces unique target/scenario identifiers, valid target references, argument allowlist alignment, and credential-safe arguments. Existing v0.4.0 documents remain valid.
 
 ## Minimal workflow
 

@@ -2,6 +2,23 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.6.0] - 2026-08-07
+
+### Added
+
+- Versioned framework event contract, neutral OTLP/JSONL bridge, public adapter registry, and
+  deterministic framework campaign templates.
+- Genuine local runtime adapters for LangGraph 1.4.9 and OpenAI Agents SDK 0.14.3.
+- AutoGen OTLP bridge profile plus documented-only CrewAI and LlamaIndex callback mappings.
+- Explicit framework detection/override/doctor CLI commands and a no-key framework-layer demo.
+- Optional semantic advisor plugin boundary that is disabled by default and cannot override
+  deterministic policy.
+
+### Changed
+
+- Product, package, CLI, Studio, campaign, report, and schema artifact release identity is 0.6.0.
+- Framework support claims now carry explicit runtime, fixture, documented, or unsupported evidence.
+
 ## [0.5.0] - 2026-08-05
 
 ### Added

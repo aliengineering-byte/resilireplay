@@ -120,13 +120,27 @@ export interface AdapterHooks<TEvent extends EventEnvelopeV1 = EventEnvelopeV1> 
 
 export interface FrameworkAdapter {
   manifest: AdapterManifest;
-  detect(context: FrameworkDetectionContext): Promise<DetectResult | undefined> | DetectResult | undefined;
+  detect(
+    context: FrameworkDetectionContext,
+  ): Promise<DetectResult | undefined> | DetectResult | undefined;
   capabilities(): AdapterCapability[];
   faultBoundaries(): FaultBoundary[];
-  captureEvents(context: FrameworkDetectionContext, hooks?: AdapterHooks): Promise<EventEnvelopeV1[]>;
-  injectFaults(events: readonly EventEnvelopeV1[], request: FaultInjectionRequest): Promise<FaultInjectionResult>;
-  replay(events: readonly EventEnvelopeV1[], context?: FrameworkDetectionContext): Promise<ReplayResult>;
-  generateRegression(events: readonly EventEnvelopeV1[], destinationDirectory: string): Promise<RegressionArtifact>;
+  captureEvents(
+    context: FrameworkDetectionContext,
+    hooks?: AdapterHooks,
+  ): Promise<EventEnvelopeV1[]>;
+  injectFaults(
+    events: readonly EventEnvelopeV1[],
+    request: FaultInjectionRequest,
+  ): Promise<FaultInjectionResult>;
+  replay(
+    events: readonly EventEnvelopeV1[],
+    context?: FrameworkDetectionContext,
+  ): Promise<ReplayResult>;
+  generateRegression(
+    events: readonly EventEnvelopeV1[],
+    destinationDirectory: string,
+  ): Promise<RegressionArtifact>;
   sanitizeEvents(events: readonly EventEnvelopeV1[]): EventEnvelopeV1[];
   cleanup(context: FrameworkDetectionContext): Promise<void>;
   doctor(context?: FrameworkDetectionContext): Promise<HealthStatus>;

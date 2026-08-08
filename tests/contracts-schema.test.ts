@@ -4,7 +4,9 @@ import { adapterTemplates, parseAdapterTemplate } from "@resilireplay/adapter-sd
 import { createV1Event, EventEnvelopeV1Schema } from "@resilireplay/core";
 
 function requiredByRef(schema: Record<string, unknown>, name: string): string[] {
-  return ((schema.required as string[] | undefined) ?? []).filter((entry) => entry === name || entry !== "");
+  return ((schema.required as string[] | undefined) ?? []).filter(
+    (entry) => entry === name || entry !== "",
+  );
 }
 
 describe("contract schemas", () => {
@@ -15,10 +17,11 @@ describe("contract schemas", () => {
     expect((schema.required as string[]) ?? []).toContain("payloadDigest");
     expect((schema.required as string[]) ?? []).toContain("redaction");
     expect((schema.required as string[]) ?? []).toContain("wallClock");
-    expect(schema.properties?.["schemaVersion"]).toMatchObject({ const: "1.0.0" });
+    const properties = schema.properties as Record<string, unknown>;
+    expect(properties["schemaVersion"]).toMatchObject({ const: "1.0.0" });
     const required = requiredByRef(schema, "schemaVersion");
     expect(required).toContain("schemaVersion");
-    expect(schema.properties?.eventKind).toBeDefined();
+    expect(properties["eventKind"]).toBeDefined();
   });
 
   it("keeps JSON schema and runtime validation in lockstep for event examples", () => {
@@ -59,12 +62,12 @@ describe("contract schemas", () => {
   it("ships an adapter template JSON schema artifact", async () => {
     const raw = (await readFile("schemas/adapter-template-v1.schema.json", "utf8")) as string;
     const schema = JSON.parse(raw) as Record<string, unknown>;
+    const properties = schema.properties as Record<string, unknown>;
     expect(schema.$schema).toBe("https://json-schema.org/draft/2020-12/schema");
-    expect(schema.properties?.schemaVersion).toMatchObject({
+    expect(properties["schemaVersion"]).toMatchObject({
       const: "resilireplay.adapter-template/v1.0.0",
     });
     expect((schema.required as string[]) ?? []).toContain("expectedEvidence");
     expect((schema.required as string[]) ?? []).toContain("scenarioFixture");
   });
 });
-

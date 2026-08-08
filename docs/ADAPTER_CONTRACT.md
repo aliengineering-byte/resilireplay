@@ -5,8 +5,8 @@ Adapters translate stable vendor hook payloads into the canonical `resilireplay.
 Create a starting point and run the conformance suite:
 
 ```bash
-npx --yes resilireplay@0.5.0 adapter init my-agent-adapter
-npx --yes resilireplay@0.5.0 adapter verify ./my-agent-adapter
+npx --yes resilireplay@0.6.0 adapter init my-agent-adapter
+npx --yes resilireplay@0.6.0 adapter verify ./my-agent-adapter
 ```
 
 ## Package contract

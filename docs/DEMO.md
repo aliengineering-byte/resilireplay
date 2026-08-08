@@ -3,12 +3,26 @@
 ResiliReplay demos execute repository-owned local fixtures. They use no API key, paid model, external
 account, telemetry, or prerecorded pass result. Fixture output is not presented as a live provider.
 
-## Zero-configuration v0.5 demo
+## Framework layer
+
+```console
+pnpm install --frozen-lockfile
+pnpm build
+pnpm demo:frameworks
+```
+
+This local command proves registry detection, conservative capability manifests, an
+AutoGen-compatible OTLP fixture, a documented CrewAI callback mapping, secret redaction, and a
+disabled-by-default semantic advisor. The output retains the evidence class for every framework; it
+does not promote fixture or documented mappings to genuine runtime evidence. LangGraph and OpenAI
+Agents have separate pinned genuine-runtime suites described in [FRAMEWORKS.md](FRAMEWORKS.md).
+
+## Zero-configuration product demo
 
 From an empty directory:
 
 ```console
-npx --yes resilireplay@0.5.0 demo
+npx --yes resilireplay@0.6.0 demo
 ```
 
 The packaged deterministic fixture runs a clean control, injects one MCP-shaped tool-result error,
@@ -16,7 +30,7 @@ recovers with one bounded retry, verifies an expected malicious-canary negative 
 executable regression, and executes that regression. Without `--output`, its temporary workspace is
 removed. The same seed produces the same canonical evidence hash.
 
-The public GIF, static fallback, and transcript are generated from the packed v0.5.0 package rather
+The public GIF, static fallback, and transcript are generated from the packed v0.6.0 package rather
 than typed output:
 
 ![Genuine packed-package demo](assets/adopt-demo.gif)
@@ -28,8 +42,8 @@ See [ADOPT.md](ADOPT.md) for the next step against an existing MCP configuration
 ## Everywhere: passive agent capture
 
 ```console
-npx --yes resilireplay@0.5.0 connect --agent auto --dry-run
-npx --yes resilireplay@0.5.0 capture start
+npx --yes resilireplay@0.6.0 connect --agent auto --dry-run
+npx --yes resilireplay@0.6.0 capture start
 pnpm demo:agent
 ```
 

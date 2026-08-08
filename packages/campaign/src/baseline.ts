@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { stableStringify, sha256 } from "@resilireplay/core";
+import { PRODUCT_VERSION, stableStringify, sha256 } from "@resilireplay/core";
 import {
   CAMPAIGN_EXIT_CODES,
   CampaignBaselineSchema,
@@ -61,7 +61,7 @@ export function approveCampaignBaseline(runInput: CampaignRun): CampaignBaseline
   const withoutHash: Omit<CampaignBaseline, "baselineHash"> = {
     schemaVersion: "1.0",
     kind: "resilireplay-baseline",
-    productVersion: "0.5.0",
+    productVersion: PRODUCT_VERSION,
     campaignId: run.campaignId,
     campaignHash: run.campaignHash,
     approvedAt: new Date().toISOString(),
@@ -425,7 +425,7 @@ export function compareCampaignRun(
   const withoutHash: Omit<CampaignComparison, "comparisonHash"> = {
     schemaVersion: "1.0",
     kind: "resilireplay-comparison",
-    productVersion: "0.5.0",
+    productVersion: PRODUCT_VERSION,
     campaignId: baseline.campaignId,
     campaignHash: run.campaignHash,
     baselineHash: baseline.baselineHash,

@@ -53,6 +53,8 @@ import {
 import { startStudio } from "@resilireplay/studio";
 import {
   adapterTemplates,
+  createAdapterRegistry,
+  frameworkSupportProfiles,
   renderTemplateArtifact,
   templateById,
 } from "@resilireplay/adapter-sdk";
@@ -340,6 +342,50 @@ export function createProgram(): Command {
       "Run manifest, classification, determinism, bounds, and privacy conformance checks.",
     )
     .action(async (path: string) => console.log(stableStringify(await verifyAdapter(path))));
+  adapter
+    .command("list")
+    .description("List framework profiles and their honest evidence classifications.")
+    .action(() => console.log(stableStringify(frameworkSupportProfiles())));
+  adapter
+    .command("detect")
+    .description("Detect a framework profile, with an optional explicit override.")
+    .argument("[hint]", "Framework hint, package, or command text")
+    .option("--package <name>", "Exact installed package name")
+    .option("--command <command>", "Framework launch command")
+    .option("--framework <id>", "Explicit framework profile override")
+    .action(
+      (
+        hint: string | undefined,
+        options: { package?: string; command?: string; framework?: string },
+      ) => {
+        const resolution = createAdapterRegistry().resolve(
+          {
+            rootDirectory: process.cwd(),
+            ...(hint === undefined ? {} : { frameworkHint: hint }),
+            ...(options.package === undefined ? {} : { packageName: options.package }),
+            ...(options.command === undefined ? {} : { command: options.command }),
+          },
+          options.framework,
+        );
+        if (resolution === undefined) {
+          throw Object.assign(new Error("No supported framework profile detected"), {
+            exitCode: 2,
+          });
+        }
+        console.log(stableStringify(resolution));
+      },
+    );
+  adapter
+    .command("doctor")
+    .description("Report the registered evidence boundary for a framework profile.")
+    .argument("<framework>", "Framework profile identifier")
+    .action(async (framework: string) => {
+      console.log(
+        stableStringify(
+          await createAdapterRegistry().doctor(framework, { rootDirectory: process.cwd() }),
+        ),
+      );
+    });
 
   const template = program
     .command("template")

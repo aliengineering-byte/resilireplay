@@ -1,9 +1,5 @@
 import { hashValue } from "@resilireplay/core";
-import {
-  AdapterTemplateSchema,
-  parseAdapterTemplate,
-  type AdapterTemplate,
-} from "./contracts.js";
+import { AdapterTemplateSchema, parseAdapterTemplate, type AdapterTemplate } from "./contracts.js";
 
 const OWNER = {
   repository: "aliengineering-byte/resilireplay",
@@ -11,6 +7,84 @@ const OWNER = {
 } as const;
 
 const templates: readonly AdapterTemplate[] = [
+  {
+    schemaVersion: "resilireplay.adapter-template/v1.0.0",
+    templateVersion: "1.0",
+    id: "tool-error",
+    name: "Tool Error Recovery",
+    description:
+      "Injects one deterministic tool error and verifies the declared recovery boundary.",
+    framework: "universal",
+    frameworkVersionRange: ">=0.6",
+    compatibility: "verified",
+    safetyClass: "safe",
+    mode: "campaign",
+    source: OWNER,
+    license: "Apache-2.0",
+    expectedEvidence: ["tool.start", "tool.error", "recovery.decision", "recovery.result"],
+    scenarioFixture: {
+      fault: "tool-error",
+      event: "tool.start",
+      occurrence: 1,
+      recovery: "retry",
+      seed: 8,
+      assertions: { outcome: "passed", noDuplicateSideEffects: true },
+    },
+    schemaValidation: { requiredEvidenceFields: ["tool.error", "recovery.result"] },
+    limitations: ["Requires an adapter with an executable tool error boundary."],
+  },
+  {
+    schemaVersion: "resilireplay.adapter-template/v1.0.0",
+    templateVersion: "1.0",
+    id: "duplicated-call",
+    name: "Duplicated Tool Call",
+    description:
+      "Duplicates one tool request and verifies side-effect identity blocks double application.",
+    framework: "universal",
+    frameworkVersionRange: ">=0.6",
+    compatibility: "supported",
+    safetyClass: "unsafe",
+    mode: "campaign",
+    source: OWNER,
+    license: "Apache-2.0",
+    expectedEvidence: ["tool.start", "stream.duplicate", "guardrail.fail", "recovery.result"],
+    scenarioFixture: {
+      fault: "duplicated-call",
+      event: "tool.start",
+      occurrence: 1,
+      recovery: "none",
+      seed: 18,
+      assertions: { outcome: "failed", noDuplicateSideEffects: true },
+    },
+    schemaValidation: { requiredEvidenceFields: ["tool.start", "stream.duplicate"] },
+    limitations: ["Requires stable call identity before any external side effect."],
+  },
+  {
+    schemaVersion: "resilireplay.adapter-template/v1.0.0",
+    templateVersion: "1.0",
+    id: "stream-corruption",
+    name: "Stream Corruption",
+    description:
+      "Corrupts stream ordering and requires explicit missing, duplicate, or out-of-order evidence.",
+    framework: "universal",
+    frameworkVersionRange: ">=0.6",
+    compatibility: "supported",
+    safetyClass: "safe",
+    mode: "campaign",
+    source: OWNER,
+    license: "Apache-2.0",
+    expectedEvidence: ["stream.chunk", "stream.outOfOrder", "stream.missing", "run.error"],
+    scenarioFixture: {
+      fault: "stream-corruption",
+      event: "stream.chunk",
+      occurrence: 2,
+      recovery: "none",
+      seed: 28,
+      assertions: { outcome: "failed", safetyPolicyCompliance: true },
+    },
+    schemaValidation: { requiredEvidenceFields: ["stream.chunk", "stream.outOfOrder"] },
+    limitations: ["Requires stable stream item and sequence identity."],
+  },
   {
     schemaVersion: "resilireplay.adapter-template/v1.0.0",
     templateVersion: "1.0",
@@ -37,7 +111,10 @@ const templates: readonly AdapterTemplate[] = [
       },
     },
     schemaValidation: { requiredEvidenceFields: ["tool.timeout", "recovery.result"] },
-    limitations: ["Does not execute remote tools.", "Requires deterministic trace fixture support."],
+    limitations: [
+      "Does not execute remote tools.",
+      "Requires deterministic trace fixture support.",
+    ],
   },
   {
     schemaVersion: "resilireplay.adapter-template/v1.0.0",
@@ -73,7 +150,8 @@ const templates: readonly AdapterTemplate[] = [
     templateVersion: "1.0",
     id: "malformed-tool-result",
     name: "Malformed Tool Result Boundary",
-    description: "Injects malformed tool output and verifies guarded replay to a known safe failure.",
+    description:
+      "Injects malformed tool output and verifies guarded replay to a known safe failure.",
     framework: "universal",
     frameworkVersionRange: ">=5.0",
     compatibility: "verified",
@@ -129,7 +207,8 @@ const templates: readonly AdapterTemplate[] = [
     templateVersion: "1.0",
     id: "truncated-stream",
     name: "Truncated Stream Chunk Evidence",
-    description: "Injects truncated stream chunks and validates explicit completion or truncation boundaries.",
+    description:
+      "Injects truncated stream chunks and validates explicit completion or truncation boundaries.",
     framework: "universal",
     frameworkVersionRange: ">=5.0",
     compatibility: "supported",
@@ -186,7 +265,8 @@ const templates: readonly AdapterTemplate[] = [
     templateVersion: "1.0",
     id: "partial-completion-recovery",
     name: "Partial-Completion Recovery",
-    description: "Creates a known partial completion and verifies no duplicate external side effects on retry.",
+    description:
+      "Creates a known partial completion and verifies no duplicate external side effects on retry.",
     framework: "universal",
     frameworkVersionRange: ">=5.0",
     compatibility: "supported",
@@ -214,7 +294,8 @@ const templates: readonly AdapterTemplate[] = [
     templateVersion: "1.0",
     id: "handoff-failure",
     name: "Multi-Agent Handoff Failure",
-    description: "Injects handoff routing failure and verifies failure does not corrupt sibling agent state.",
+    description:
+      "Injects handoff routing failure and verifies failure does not corrupt sibling agent state.",
     framework: "universal",
     frameworkVersionRange: ">=5.0",
     compatibility: "experimental",
@@ -251,7 +332,12 @@ const templates: readonly AdapterTemplate[] = [
     mode: "scenario",
     source: OWNER,
     license: "Apache-2.0",
-    expectedEvidence: ["checkpoint.write", "checkpoint.resume", "state.rollback", "recovery.result"],
+    expectedEvidence: [
+      "checkpoint.write",
+      "checkpoint.resume",
+      "state.rollback",
+      "recovery.result",
+    ],
     scenarioFixture: {
       fault: "checkpoint-corruption",
       event: "checkpoint.write",
@@ -262,7 +348,9 @@ const templates: readonly AdapterTemplate[] = [
         outcome: "passed",
       },
     },
-    schemaValidation: { requiredEvidenceFields: ["checkpoint.write", "state.rollback", "checkpoint.resume"] },
+    schemaValidation: {
+      requiredEvidenceFields: ["checkpoint.write", "state.rollback", "checkpoint.resume"],
+    },
     limitations: ["Requires explicit checkpointed state support in the adapter."],
   },
   {
@@ -270,7 +358,8 @@ const templates: readonly AdapterTemplate[] = [
     templateVersion: "1.0",
     id: "guardrail-failure",
     name: "Guardrail Blocked Decision",
-    description: "Injects unsafe payload to trigger guardrail failure and confirms no unsafe recovery path.",
+    description:
+      "Injects unsafe payload to trigger guardrail failure and confirms no unsafe recovery path.",
     framework: "universal",
     frameworkVersionRange: ">=5.0",
     compatibility: "verified",
@@ -290,7 +379,9 @@ const templates: readonly AdapterTemplate[] = [
         safetyPolicyCompliance: false,
       },
     },
-    schemaValidation: { requiredEvidenceFields: ["guardrail.start", "guardrail.fail", "run.error"] },
+    schemaValidation: {
+      requiredEvidenceFields: ["guardrail.start", "guardrail.fail", "run.error"],
+    },
     limitations: ["Safe for deterministic fixtures only."],
   },
 ];
@@ -306,7 +397,10 @@ export function templateById(id: string): AdapterTemplate | undefined {
   return candidate ? { ...candidate } : undefined;
 }
 
-export function renderTemplateArtifact(template: AdapterTemplate, outputFileName = "template.json"): string {
+export function renderTemplateArtifact(
+  template: AdapterTemplate,
+  outputFileName = "template.json",
+): string {
   const parsed = parseAdapterTemplate(template);
   const manifestDigest = hashValue(parsed);
   return JSON.stringify(

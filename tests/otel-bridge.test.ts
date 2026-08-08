@@ -14,7 +14,7 @@ const context = {
   framework: "test-framework",
   frameworkVersion: "1.0.0",
   adapter: "otel-bridge",
-  adapterVersion: "0.5.0",
+  adapterVersion: "0.6.0",
   runId: "bridge-run",
 };
 
@@ -24,7 +24,7 @@ const lineEvent = JSON.stringify({
   framework: "test-framework",
   frameworkVersion: "1.0.0",
   adapter: "otel-bridge",
-  adapterVersion: "0.5.0",
+  adapterVersion: "0.6.0",
   turnId: "turn-1",
   actorId: "agent-1",
   traceId: "trace-1",
@@ -52,8 +52,11 @@ describe("otel bridge JSONL ingestion", () => {
       { maxEvents: 5 },
     );
     expect(result.events).toHaveLength(1);
-    expect(result.events[0].eventKind).toBe("tool.result");
-    const payload = result.events[0].payload as { apiKey?: string; nested?: { authorization?: string } };
+    expect(result.events[0]?.eventKind).toBe("tool.result");
+    const payload = result.events[0]!.payload as {
+      apiKey?: string;
+      nested?: { authorization?: string };
+    };
     expect(payload.apiKey).toBe("[REDACTED]");
     expect(payload.nested?.authorization).toBe("[REDACTED]");
   });
@@ -130,8 +133,61 @@ describe("otel bridge OTLP JSON ingestion", () => {
       { maxEvents: 5 },
     );
     expect(result.events).toHaveLength(1);
-    expect(result.events[0].eventKind).toBe("model.request");
-    expect(result.events[0].operation).toBe("model.request");
+    expect(result.events[0]?.eventKind).toBe("model.request");
+    expect(result.events[0]?.operation).toBe("model.request");
+  });
+
+  it("[FIXTURE_BACKED_PROTOCOL] maps an AutoGen-compatible OTLP agent/tool fixture", () => {
+    const autogenContext = {
+      ...context,
+      framework: "autogen",
+      frameworkVersion: "documented-stable",
+      adapter: "@resilireplay/otel-bridge/autogen",
+    };
+    const otlp = {
+      resourceSpans: [
+        {
+          resource: {
+            attributes: [{ key: "service.name", value: { stringValue: "autogen-agentchat" } }],
+          },
+          scopeSpans: [
+            {
+              spans: [
+                {
+                  traceId: "autogen-trace",
+                  spanId: "invoke-agent",
+                  name: "invoke_agent",
+                  events: [
+                    {
+                      name: "agent.start",
+                      attributes: [{ key: "eventKind", value: { stringValue: "agent.start" } }],
+                    },
+                    {
+                      name: "tool.start",
+                      attributes: [{ key: "eventKind", value: { stringValue: "tool.start" } }],
+                    },
+                    {
+                      name: "tool.result",
+                      attributes: [{ key: "eventKind", value: { stringValue: "tool.result" } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const result = parseOtlpJsonBridgeEvents(
+      { raw: JSON.stringify(otlp), context: autogenContext },
+      { maxEvents: 10 },
+    );
+    expect(result.events.map((event) => event.eventKind)).toEqual([
+      "agent.start",
+      "tool.start",
+      "tool.result",
+    ]);
+    expect(result.events.every((event) => event.framework === "autogen")).toBe(true);
   });
 });
 

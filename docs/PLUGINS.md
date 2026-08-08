@@ -43,7 +43,7 @@ auto-discover those repository files. After reviewing the staged command, regist
 through Hermes's supported interface:
 
 ```console
-hermes mcp add resilireplay --command npx --args --yes resilireplay@0.5.0 mcp serve
+hermes mcp add resilireplay --command npx --args --yes resilireplay@0.6.0 mcp serve
 hermes mcp test resilireplay
 ```
 

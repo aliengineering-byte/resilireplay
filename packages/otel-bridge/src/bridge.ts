@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { randomUUID, createHash } from "node:crypto";
-import { dirname, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, parse, relative, resolve, sep } from "node:path";
 import { lstat, readFile, stat } from "node:fs/promises";
 import { closeSync, openSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -28,7 +28,6 @@ type Boundary = z.infer<typeof BoundarySchema>;
 type EventKind = z.infer<typeof EventKindSchema>;
 type EventClass = z.infer<typeof EventClassSchema>;
 type Phase = z.infer<typeof PhaseSchema>;
-type SafetyClass = z.infer<typeof SafetyClassSchema>;
 
 type OtlpAttribute = { key: string; value?: { [name: string]: unknown } };
 type OtlpEvent = { name?: string; timeUnixNano?: string; attributes?: OtlpAttribute[] };
@@ -41,7 +40,10 @@ type OtlpSpan = {
   events?: OtlpEvent[];
 };
 type OtlpScopeSpan = { spans?: OtlpSpan[] };
-type OtlpResourceSpan = { scopeSpans?: OtlpScopeSpan[]; resource?: { attributes?: OtlpAttribute[] } };
+type OtlpResourceSpan = {
+  scopeSpans?: OtlpScopeSpan[];
+  resource?: { attributes?: OtlpAttribute[] };
+};
 type OtlpPayload = { resourceSpans?: OtlpResourceSpan[] };
 
 const BOUNDARY_BY_PREFIX: Record<string, Boundary> = {
@@ -99,8 +101,8 @@ const EVENT_CLASS_BY_KIND: Record<EventKind, EventClass> = {
   "checkpoint.write": "checkpoint",
   "checkpoint.read": "checkpoint",
   "checkpoint.resume": "checkpoint",
-  "interrupt": "interrupt",
-  "resume": "state",
+  interrupt: "interrupt",
+  resume: "state",
   "partial.completion": "tool",
   "state.read": "state",
   "state.write": "state",
@@ -108,7 +110,7 @@ const EVENT_CLASS_BY_KIND: Record<EventKind, EventClass> = {
   "state.rollback": "state",
   "recovery.decision": "retry",
   "recovery.result": "retry",
-  "custom": "custom",
+  custom: "custom",
 };
 
 const PHASE_BY_KIND: Record<EventKind, Phase> = {
@@ -153,12 +155,12 @@ const PHASE_BY_KIND: Record<EventKind, Phase> = {
   "state.write": "running",
   "state.update": "running",
   "state.rollback": "running",
-  "interrupt": "running",
-  "resume": "running",
+  interrupt: "running",
+  resume: "running",
   "partial.completion": "succeeded",
   "recovery.decision": "running",
   "recovery.result": "succeeded",
-  "custom": "running",
+  custom: "running",
 };
 
 const EVENT_KIND_ALIAS: Record<string, EventKind> = {
@@ -210,7 +212,8 @@ const EVENT_KIND_ALIAS: Record<string, EventKind> = {
   custom: "custom",
 };
 
-const SENSITIVE_KEY = /(api[_-]?key|authorization|auth[_-]?token|token|secret|password|private[_-]?key|credential|cookie)/iu;
+const SENSITIVE_KEY =
+  /(api[_-]?key|authorization|auth[_-]?token|token|secret|password|private[_-]?key|credential|cookie)/iu;
 const SENSITIVE_VALUE = /(sk-[A-Za-z0-9]{6,}|gh_[A-Za-z0-9_]{10,}|(?:^|\\s)secret(?:\\s|$))/iu;
 const MAX_PATH_ATTEMPT = 8;
 
@@ -302,8 +305,10 @@ function sanitizeValue(value: unknown, keyHint?: string): unknown {
   if (value === null || typeof value === "number" || typeof value === "boolean") return value;
   if (typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .map(([key, child]) => [key, sanitizeValue(child, key)]),
+      Object.entries(value as Record<string, unknown>).map(([key, child]) => [
+        key,
+        sanitizeValue(child, key),
+      ]),
     );
   }
   return value;
@@ -358,8 +363,8 @@ function mapEventClass(eventKind: EventKind): EventClass {
   return EVENT_CLASS_BY_KIND[eventKind];
 }
 
-function safePath(baseDirectory: string, candidate: string): string {
-  return safeOutputPath(baseDirectory, candidate);
+function resolveInputPath(baseDirectory: string, candidate: string): string {
+  return isAbsolute(candidate) ? resolve(candidate) : safeOutputPath(baseDirectory, candidate);
 }
 
 async function assertNoSymlinkInPath(baseDirectory: string, candidate: string): Promise<void> {
@@ -394,9 +399,17 @@ function parseOtlpValue(raw: unknown): unknown {
   if (typeof value.intValue === "string" || typeof value.intValue === "number")
     return Number(value.intValue);
   if (typeof value.bytesValue === "string") return value.bytesValue;
-  if (value.arrayValue && typeof value.arrayValue === "object" && Array.isArray((value.arrayValue as { values?: unknown[] }).values))
+  if (
+    value.arrayValue &&
+    typeof value.arrayValue === "object" &&
+    Array.isArray((value.arrayValue as { values?: unknown[] }).values)
+  )
     return (value.arrayValue as { values?: unknown[] }).values;
-  if (value.kvListValue && typeof value.kvListValue === "object" && Array.isArray((value.kvListValue as { values?: unknown[] }).values))
+  if (
+    value.kvListValue &&
+    typeof value.kvListValue === "object" &&
+    Array.isArray((value.kvListValue as { values?: unknown[] }).values)
+  )
     return (value.kvListValue as { values?: unknown[] }).values;
   return raw;
 }
@@ -404,7 +417,11 @@ function parseOtlpValue(raw: unknown): unknown {
 function attributesToRecord(source: unknown): Record<string, unknown> {
   if (Array.isArray(source)) {
     const entries = source.filter((entry): entry is OtlpAttribute => {
-      return entry !== null && typeof entry === "object" && typeof (entry as OtlpAttribute).key === "string";
+      return (
+        entry !== null &&
+        typeof entry === "object" &&
+        typeof (entry as OtlpAttribute).key === "string"
+      );
     });
     return Object.fromEntries(entries.map((entry) => [entry.key, parseOtlpValue(entry.value)]));
   }
@@ -414,7 +431,11 @@ function attributesToRecord(source: unknown): Record<string, unknown> {
   return {};
 }
 
-export function asV1Event(source: Record<string, unknown>, context: BridgeContext, sequence: number): EventEnvelopeV1 {
+export function asV1Event(
+  source: Record<string, unknown>,
+  context: BridgeContext,
+  sequence: number,
+): EventEnvelopeV1 {
   const maybeV1 = source as unknown as Partial<EventEnvelopeV1>;
   if (
     maybeV1.schemaVersion === "1.0.0" &&
@@ -441,15 +462,19 @@ export function asV1Event(source: Record<string, unknown>, context: BridgeContex
   };
 
   const turnId = typeof source.turnId === "string" ? source.turnId : `${context.runId}-${sequence}`;
-  const actorId = typeof source.actorId === "string" ? source.actorId : context.actorId ?? "otel-bridge";
-  const operation = typeof source.operation === "string" && source.operation.length > 0 ? source.operation : eventKind;
+  const actorId =
+    typeof source.actorId === "string" ? source.actorId : (context.actorId ?? "otel-bridge");
+  const operation =
+    typeof source.operation === "string" && source.operation.length > 0
+      ? source.operation
+      : eventKind;
 
   return createV1Event({
     runId: context.runId,
     traceId:
       typeof source.traceId === "string"
         ? source.traceId
-        : context.traceId ?? `${context.runId}-trace`,
+        : (context.traceId ?? `${context.runId}-trace`),
     spanId:
       typeof source.spanId === "string"
         ? source.spanId
@@ -471,7 +496,8 @@ export function asV1Event(source: Record<string, unknown>, context: BridgeContex
     attempt: typeof source.attempt === "number" ? Math.max(0, Math.trunc(source.attempt)) : 0,
     eventClass,
     safetyClass: SafetyClassSchema.parse(
-      typeof source.safetyClass === "string" && ["safe", "unsafe", "unknown"].includes(source.safetyClass)
+      typeof source.safetyClass === "string" &&
+        ["safe", "unsafe", "unknown"].includes(source.safetyClass)
         ? source.safetyClass
         : "unknown",
     ),
@@ -493,7 +519,10 @@ export function asV1Event(source: Record<string, unknown>, context: BridgeContex
   });
 }
 
-export function parseJsonlBridgeEvents(input: ParseInput, limits?: BridgeLimits): BridgeIngestResult {
+export function parseJsonlBridgeEvents(
+  input: ParseInput,
+  limits?: BridgeLimits,
+): BridgeIngestResult {
   BridgeContextSchema.parse(input.context);
   const maxBytes = limits?.maxBytes ?? DEFAULT_MAX_REQUEST_BYTES;
   const maxEvents = limits?.maxEvents ?? DEFAULT_MAX_EVENTS;
@@ -534,7 +563,10 @@ export function parseJsonlBridgeEvents(input: ParseInput, limits?: BridgeLimits)
   };
 }
 
-export function parseOtlpJsonBridgeEvents(input: ParseInput, limits?: BridgeLimits): BridgeIngestResult {
+export function parseOtlpJsonBridgeEvents(
+  input: ParseInput,
+  limits?: BridgeLimits,
+): BridgeIngestResult {
   BridgeContextSchema.parse(input.context);
   const maxBytes = limits?.maxBytes ?? DEFAULT_MAX_REQUEST_BYTES;
   const maxEvents = limits?.maxEvents ?? DEFAULT_MAX_EVENTS;
@@ -585,7 +617,7 @@ export function parseOtlpJsonBridgeEvents(input: ParseInput, limits?: BridgeLimi
           const eventKind = inferEventKindFromValue(
             typeof entryAttributes.eventKind === "string"
               ? (entryAttributes.eventKind as string)
-              : entry.name ?? span.name,
+              : (entry.name ?? span.name),
           );
           const sourcePayload = {
             sourceKind: "otlp",
@@ -605,7 +637,10 @@ export function parseOtlpJsonBridgeEvents(input: ParseInput, limits?: BridgeLimi
             parentSpanId: span.parentSpanId,
             traceId: span.traceId,
             turnId: `${entry.timeUnixNano ?? "0"}`,
-            actorId: typeof entryAttributes.actorId === "string" ? entryAttributes.actorId : input.context.actorId,
+            actorId:
+              typeof entryAttributes.actorId === "string"
+                ? entryAttributes.actorId
+                : input.context.actorId,
           } as Record<string, unknown>;
           try {
             events.push(asV1Event(sourcePayload, input.context, events.length));
@@ -666,7 +701,9 @@ export function detectPayloadKind(raw: string): "jsonl" | "otlp-json" {
   if (!trimmed.startsWith("{")) return "jsonl";
   try {
     const parsed = JSON.parse(trimmed) as Record<string, unknown>;
-    return parsed && typeof parsed === "object" && Array.isArray(parsed.resourceSpans) ? "otlp-json" : "jsonl";
+    return parsed && typeof parsed === "object" && Array.isArray(parsed.resourceSpans)
+      ? "otlp-json"
+      : "jsonl";
   } catch {
     return "jsonl";
   }
@@ -677,8 +714,9 @@ export async function loadEventsFromJsonlFile(
   context: BridgeContext,
   limits?: BridgeLimits,
 ): Promise<BridgeIngestResult> {
-  const bounded = safePath(process.cwd(), path);
-  await assertNoSymlinkInPath(process.cwd(), bounded);
+  const bounded = resolveInputPath(process.cwd(), path);
+  const symlinkBoundary = isAbsolute(path) ? parse(bounded).root : process.cwd();
+  await assertNoSymlinkInPath(symlinkBoundary, bounded);
   const info = await stat(bounded);
   if (!info.isFile()) throw new Error(`Not a file: ${bounded}`);
   const raw = await readFile(bounded, "utf8");
@@ -732,84 +770,86 @@ export async function startOtelBridgeServer(
   const maxEvents = options.maxEvents ?? DEFAULT_MAX_EVENTS;
   const requestTimeoutMs = options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
 
-  const server: Server = createServer(async (request: IncomingMessage, response: ServerResponse) => {
-    if (request.method !== "POST") {
-      response.writeHead(405, { "Content-Type": "text/plain" });
-      response.end("Method not allowed");
-      return;
-    }
-    if ((request.url ?? "") !== route) {
-      response.writeHead(404, { "Content-Type": "text/plain" });
-      response.end("Not found");
-      return;
-    }
-
-    try {
-      const bridgeChecks: { loopbackOnly?: boolean; allowedOrigins?: string[] } = {
-        loopbackOnly: options.loopbackOnly ?? true,
-      };
-      if (options.allowedOrigins !== undefined) {
-        bridgeChecks.allowedOrigins = options.allowedOrigins;
-      }
-      checkHostAndOrigin(request, bridgeChecks);
-    } catch (error) {
-      response.writeHead(403, { "Content-Type": "text/plain" });
-      response.end((error as Error).message);
-      return;
-    }
-
-    const chunks: Buffer[] = [];
-    let receivedBytes = 0;
-    let timedOut = false;
-    request.on("data", (chunk: Buffer) => {
-      receivedBytes += chunk.byteLength;
-      if (receivedBytes > maxBytes) {
-        response.writeHead(413, { "Content-Type": "text/plain" });
-        response.end("Payload too large");
-        request.destroy();
+  const server: Server = createServer(
+    async (request: IncomingMessage, response: ServerResponse) => {
+      if (request.method !== "POST") {
+        response.writeHead(405, { "Content-Type": "text/plain" });
+        response.end("Method not allowed");
         return;
       }
-      chunks.push(chunk);
-    });
-
-    request.setTimeout(requestTimeoutMs, () => {
-      timedOut = true;
-      response.writeHead(408, { "Content-Type": "text/plain" });
-      response.end("Request timeout");
-      request.destroy();
-    });
-
-    request.once("end", async () => {
-      if (timedOut) return;
-      try {
-        const raw = Buffer.concat(chunks).toString("utf8");
-        const payloadKind = detectPayloadKind(raw);
-        const result =
-          payloadKind === "otlp-json"
-            ? parseOtlpJsonBridgeEvents({ raw, context }, { maxBytes, maxEvents })
-            : parseJsonlBridgeEvents({ raw, context }, { maxBytes, maxEvents });
-        if (onEvents) await onEvents({ events: result.events, receivedBytes });
-        response.writeHead(200, { "Content-Type": "application/json" });
-        response.end(
-          JSON.stringify({
-            source: result.source,
-            events: result.events.length,
-            dropped: result.dropped,
-            malformed: result.malformed,
-            warnings: result.warnings,
-          }),
-        );
-      } catch (error) {
-        response.writeHead(400, { "Content-Type": "text/plain" });
-        response.end((error as Error).message);
+      if ((request.url ?? "") !== route) {
+        response.writeHead(404, { "Content-Type": "text/plain" });
+        response.end("Not found");
+        return;
       }
-    });
 
-    request.once("error", () => {
-      response.writeHead(400, { "Content-Type": "text/plain" });
-      response.end("Bad request");
-    });
-  });
+      try {
+        const bridgeChecks: { loopbackOnly?: boolean; allowedOrigins?: string[] } = {
+          loopbackOnly: options.loopbackOnly ?? true,
+        };
+        if (options.allowedOrigins !== undefined) {
+          bridgeChecks.allowedOrigins = options.allowedOrigins;
+        }
+        checkHostAndOrigin(request, bridgeChecks);
+      } catch (error) {
+        response.writeHead(403, { "Content-Type": "text/plain" });
+        response.end((error as Error).message);
+        return;
+      }
+
+      const chunks: Buffer[] = [];
+      let receivedBytes = 0;
+      let timedOut = false;
+      request.on("data", (chunk: Buffer) => {
+        receivedBytes += chunk.byteLength;
+        if (receivedBytes > maxBytes) {
+          response.writeHead(413, { "Content-Type": "text/plain" });
+          response.end("Payload too large");
+          request.destroy();
+          return;
+        }
+        chunks.push(chunk);
+      });
+
+      request.setTimeout(requestTimeoutMs, () => {
+        timedOut = true;
+        response.writeHead(408, { "Content-Type": "text/plain" });
+        response.end("Request timeout");
+        request.destroy();
+      });
+
+      request.once("end", async () => {
+        if (timedOut) return;
+        try {
+          const raw = Buffer.concat(chunks).toString("utf8");
+          const payloadKind = detectPayloadKind(raw);
+          const result =
+            payloadKind === "otlp-json"
+              ? parseOtlpJsonBridgeEvents({ raw, context }, { maxBytes, maxEvents })
+              : parseJsonlBridgeEvents({ raw, context }, { maxBytes, maxEvents });
+          if (onEvents) await onEvents({ events: result.events, receivedBytes });
+          response.writeHead(200, { "Content-Type": "application/json" });
+          response.end(
+            JSON.stringify({
+              source: result.source,
+              events: result.events.length,
+              dropped: result.dropped,
+              malformed: result.malformed,
+              warnings: result.warnings,
+            }),
+          );
+        } catch (error) {
+          response.writeHead(400, { "Content-Type": "text/plain" });
+          response.end((error as Error).message);
+        }
+      });
+
+      request.once("error", () => {
+        response.writeHead(400, { "Content-Type": "text/plain" });
+        response.end("Bad request");
+      });
+    },
+  );
 
   await new Promise<void>((resolve, reject) => {
     server.listen(options.port, host, (error?: Error) => {
@@ -818,8 +858,7 @@ export async function startOtelBridgeServer(
     });
   });
   const address = server.address();
-  const actualPort =
-    address === null || typeof address === "string" ? options.port : address.port;
+  const actualPort = address === null || typeof address === "string" ? options.port : address.port;
 
   return {
     url: `http://${host}:${actualPort}${route}`,

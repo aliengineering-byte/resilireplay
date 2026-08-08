@@ -210,7 +210,7 @@ describe("v1 event contract", () => {
   it("migrates legacy traces to v1 shape", () => {
     const migrated = migrateLegacyTrace(passingTrace());
     expect(migrated).toHaveLength(5);
-    expect(migrated[0].eventKind).toBe("run.start");
+    expect(migrated[0]?.eventKind).toBe("run.start");
     expect(migrated.at(-1)?.eventKind).toBe("run.end");
   });
 });

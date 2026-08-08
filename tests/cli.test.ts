@@ -15,7 +15,7 @@ describe("CLI end to end and subprocess safety", () => {
       windowsHide: true,
     });
     expect(version.status).toBe(0);
-    expect(version.stdout.trim()).toBe("0.5.0");
+    expect(version.stdout.trim()).toBe("0.6.0");
     const faults = spawnSync(process.execPath, [cli, "faults"], {
       encoding: "utf8",
       windowsHide: true,
@@ -25,11 +25,17 @@ describe("CLI end to end and subprocess safety", () => {
   });
 
   it("manages deterministic template artifacts", async () => {
-    const list = spawnSync(process.execPath, [cli, "template", "list"], { encoding: "utf8", windowsHide: true });
+    const list = spawnSync(process.execPath, [cli, "template", "list"], {
+      encoding: "utf8",
+      windowsHide: true,
+    });
     expect(list.status).toBe(0);
     const entries = JSON.parse(list.stdout) as Array<{ id: string; compatibility: string }>;
     expect(entries.length).toBeGreaterThanOrEqual(1);
-    const show = spawnSync(process.execPath, [cli, "template", "show", "tool-timeout"], { encoding: "utf8", windowsHide: true });
+    const show = spawnSync(process.execPath, [cli, "template", "show", "tool-timeout"], {
+      encoding: "utf8",
+      windowsHide: true,
+    });
     expect(show.status).toBe(0);
     const template = JSON.parse(show.stdout) as { id: string; expectedEvidence: string[] };
     expect(template.id).toBe("tool-timeout");
@@ -51,6 +57,48 @@ describe("CLI end to end and subprocess safety", () => {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+
+  it("lists, detects, overrides, and diagnoses framework adapters", () => {
+    const list = spawnSync(process.execPath, [cli, "adapter", "list"], {
+      encoding: "utf8",
+      windowsHide: true,
+    });
+    expect(list.status, list.stderr).toBe(0);
+    const profiles = JSON.parse(list.stdout) as Array<{ id: string; evidenceClass: string }>;
+    expect(profiles.find((profile) => profile.id === "langgraph")?.evidenceClass).toBe(
+      "GENUINE_RUNTIME",
+    );
+    expect(profiles.find((profile) => profile.id === "crewai")?.evidenceClass).toBe(
+      "DOCUMENTED_ONLY",
+    );
+
+    const detected = spawnSync(
+      process.execPath,
+      [cli, "adapter", "detect", "--package", "@openai/agents"],
+      { encoding: "utf8", windowsHide: true },
+    );
+    expect(detected.status, detected.stderr).toBe(0);
+    expect((JSON.parse(detected.stdout) as { profile: { id: string } }).profile.id).toBe(
+      "openai-agents",
+    );
+
+    const overridden = spawnSync(
+      process.execPath,
+      [cli, "adapter", "detect", "--package", "@openai/agents", "--framework", "crewai"],
+      { encoding: "utf8", windowsHide: true },
+    );
+    expect(overridden.status, overridden.stderr).toBe(0);
+    expect((JSON.parse(overridden.stdout) as { profile: { id: string } }).profile.id).toBe(
+      "crewai",
+    );
+
+    const doctor = spawnSync(process.execPath, [cli, "adapter", "doctor", "autogen"], {
+      encoding: "utf8",
+      windowsHide: true,
+    });
+    expect(doctor.status, doctor.stderr).toBe(0);
+    expect((JSON.parse(doctor.stdout) as { status: string }).status).toBe("degraded");
   });
 
   it("records a real local agent command", async () => {
@@ -95,7 +143,7 @@ describe("CLI end to end and subprocess safety", () => {
         { encoding: "utf8", windowsHide: true, timeout: 30_000 },
       );
       expect(run.status, `${run.stdout}\n${run.stderr}`).toBe(0);
-      expect(run.stdout).toContain("ResiliReplay Campaign v0.5.0");
+      expect(run.stdout).toContain("ResiliReplay Campaign v0.6.0");
       expect(run.stdout).toContain("Scenarios       4/4");
 
       const baseline = join(output, "baseline.json");

@@ -31,6 +31,7 @@ Fault boundaries are where failure is injected and where resilience guarantees a
 ## Recovery policy
 
 Every boundary must define:
+
 - retry budget
 - timeout policy
 - whether side effects are allowed before retry

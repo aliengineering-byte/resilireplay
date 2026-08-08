@@ -1,32 +1,27 @@
-# Framework Support Policy (v0.6)
+# Framework support policy (v0.6)
 
-## Tiering
+Framework claims use one of four exact evidence labels:
 
-### Tier 1 (verified)
-- **LangGraph**: adapter implemented with real runtime fixtures.
-- **OpenAI Agents SDK**: adapter implemented with real runtime fixtures.
+- `GENUINE_RUNTIME`: a pinned public framework runtime executed locally and produced the behavior.
+- `FIXTURE_BACKED_PROTOCOL`: protocol-shaped fixtures passed, but the named framework did not run.
+- `DOCUMENTED_ONLY`: a public callback or instrumentation mapping is supplied without runtime proof.
+- `UNSUPPORTED`: the behavior cannot be captured safely through the supported public boundary.
 
-### Tier 2 (targeted)
-- **AutoGen**: bridge verified only where stable public instrumentation is sufficient.
+| Framework                 | v0.6 evidence             | Public boundary                                                       |
+| ------------------------- | ------------------------- | --------------------------------------------------------------------- |
+| LangGraph 1.4.9           | `GENUINE_RUNTIME`         | v3 event stream, tasks/updates/custom channels, checkpoint APIs       |
+| OpenAI Agents SDK 0.14.3  | `GENUINE_RUNTIME`         | provider-neutral model, Runner, stream, guardrails, handoffs, tracing |
+| AutoGen >=0.4 profile     | `FIXTURE_BACKED_PROTOCOL` | documented OpenTelemetry spans                                        |
+| CrewAI >=0.100 profile    | `DOCUMENTED_ONLY`         | documented event-listener event types                                 |
+| LlamaIndex >=0.12 profile | `DOCUMENTED_ONLY`         | documented dispatcher events and span handlers                        |
 
-### Tier 3 (documented)
-- **CrewAI**: documented integration status based on public callback/tracing capabilities.
-- **LlamaIndex**: documented integration status based on public callback API behavior.
+“Verified” is reserved for `GENUINE_RUNTIME`. It requires pinned deterministic execution, failure and
+recovery evidence, a passing generated regression, redaction checks, and cleanup. A fixture that
+resembles a vendor event cannot satisfy that definition.
 
-## Verification language
+Adapters must use stable public interfaces and the neutral framework-event contract. Private
+monkey-patching, credential use, network inference, telemetry export, or inferred token/cost data are
+outside the v0.6 release claim. Missing evidence remains unavailable rather than estimated.
 
-A framework is called **verified** only when:
-- Required scenarios are executed against pinned, deterministic fixtures.
-- At least one failure scenario produces passing regression evidence.
-- Replay and baseline comparison are deterministic.
-
-A framework is **documented** when:
-- API references are stable and integration is safe but lacks deterministic, executable proof.
-
-A framework is **unsupported** when:
-- No stable public causal trace contract exists.
-- Required data cannot be captured without private monkey-patching.
-
-## Status publication
-
-`docs/ARCHITECTURE.md`, `docs/ADAPTERS.md`, and each adapter README must use the same tier language and include explicit limitations.
+The public registry, [adapter guide](../ADAPTERS.md), [framework quick starts](../FRAMEWORKS.md), and
+each adapter README must preserve these labels and limitations.

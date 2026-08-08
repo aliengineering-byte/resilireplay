@@ -4,7 +4,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// ../agent/src/capture.ts
+// packages/agent/src/capture.ts
 import {
   access,
   lstat,
@@ -19,7 +19,7 @@ import {
 import { basename, dirname, isAbsolute, relative, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/external.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/external.js
 var external_exports = {};
 __export(external_exports, {
   BRAND: () => BRAND,
@@ -131,7 +131,7 @@ __export(external_exports, {
   void: () => voidType
 });
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/util.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/util.js
 var util;
 (function(util2) {
   util2.assertEqual = (_) => {
@@ -265,7 +265,7 @@ var getParsedType = (data) => {
   }
 };
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/ZodError.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/ZodError.js
 var ZodIssueCode = util.arrayToEnum([
   "invalid_type",
   "invalid_literal",
@@ -383,7 +383,7 @@ ZodError.create = (issues) => {
   return error;
 };
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/locales/en.js
 var errorMap = (issue, _ctx) => {
   let message;
   switch (issue.code) {
@@ -486,7 +486,7 @@ var errorMap = (issue, _ctx) => {
 };
 var en_default = errorMap;
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/errors.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/errors.js
 var overrideErrorMap = en_default;
 function setErrorMap(map) {
   overrideErrorMap = map;
@@ -495,7 +495,7 @@ function getErrorMap() {
   return overrideErrorMap;
 }
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
   const { data, path, errorMaps, issueData } = params;
   const fullPath = [...path, ...issueData.path || []];
@@ -605,14 +605,14 @@ var isDirty = (x) => x.status === "dirty";
 var isValid = (x) => x.status === "valid";
 var isAsync = (x) => typeof Promise !== "undefined" && x instanceof Promise;
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/errorUtil.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/helpers/errorUtil.js
 var errorUtil;
 (function(errorUtil2) {
   errorUtil2.errToObj = (message) => typeof message === "string" ? { message } : message || {};
   errorUtil2.toString = (message) => typeof message === "string" ? message : message?.message;
 })(errorUtil || (errorUtil = {}));
 
-// ../../node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js
+// node_modules/.pnpm/zod@3.25.76/node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
   constructor(parent, value, path, key) {
     this._cachedPath = [];
@@ -4060,7 +4060,7 @@ var coerce = {
 };
 var NEVER = INVALID;
 
-// ../core/dist/stable.js
+// packages/core/dist/stable.js
 function normalize(value) {
   if (value === null || typeof value === "string" || typeof value === "boolean")
     return value;
@@ -4081,7 +4081,7 @@ function stableStringify(value) {
   return JSON.stringify(normalize(value));
 }
 
-// ../core/dist/events.js
+// packages/core/dist/events.js
 var EVENT_TYPES = [
   "run_started",
   "model_request",
@@ -4126,7 +4126,7 @@ var TraceEventSchema = external_exports.object({
   fault: FaultMetadataSchema.optional()
 }).strict();
 
-// ../core/dist/faults.js
+// packages/core/dist/faults.js
 var FAULT_TYPES = [
   "latency",
   "timeout",
@@ -4231,7 +4231,7 @@ var BUILTIN_SCENARIOS = {
   })
 };
 
-// ../core/dist/contracts/v1.js
+// packages/core/dist/contracts/v1.js
 var EventClassSchema = external_exports.enum([
   "run",
   "agent",
@@ -4272,7 +4272,13 @@ var PhaseSchema = external_exports.enum([
   "unknown"
 ]);
 var SafetyClassSchema = external_exports.enum(["safe", "unsafe", "unknown"]);
-var SideEffectStateSchema = external_exports.enum(["pending", "applied", "rolled-back", "blocked", "failed"]);
+var SideEffectStateSchema = external_exports.enum([
+  "pending",
+  "applied",
+  "rolled-back",
+  "blocked",
+  "failed"
+]);
 var SideEffectSchema = external_exports.object({
   id: external_exports.string().min(1),
   kind: external_exports.string().min(1),
@@ -4406,10 +4412,10 @@ var FaultBoundarySchema = external_exports.object({
   supportsManualCleanup: external_exports.boolean().default(false)
 }).strict();
 
-// ../agent/src/normalize.ts
+// packages/agent/src/normalize.ts
 import { createHash } from "node:crypto";
 
-// ../agent/src/schemas.ts
+// packages/agent/src/schemas.ts
 var AGENT_EVENT_SCHEMA = "resilireplay.agent-event/v1";
 var CAPTURE_SESSION_SCHEMA = "resilireplay.capture-session/v1";
 var FAILURE_EVIDENCE_SCHEMA = "resilireplay.failure-evidence/v1";
@@ -4483,7 +4489,7 @@ var AdapterManifestSchema2 = external_exports.object({
   }).strict()
 }).strict();
 
-// ../agent/src/normalize.ts
+// packages/agent/src/normalize.ts
 var SECRET = /(?:bearer\s+[a-z0-9._~+/=-]+|basic\s+[a-z0-9+/=]+|(?:gh[pousr]|sk)(?:-|%2d)[a-z0-9_-]{12,}|AKIA[A-Z0-9]{16}|base64:[a-z0-9+/]{20,}={0,2}|(?:api[-_]?key|token|secret|password|authorization)\s*[=:]\s*(?:bearer\s+|basic\s+)?[^\s,;]+)/giu;
 var PATH = /(?:[A-Za-z]:\\|\\\\|\/(?:Users|home|root|tmp)\/)[^\s"']+/gu;
 var CONTROL = new RegExp("\\p{Cc}", "gu");
@@ -4576,7 +4582,7 @@ function normalizeHookEvent(input, options) {
   return AgentEventSchema.parse({ ...base, eventId: hashValue2(base) });
 }
 
-// ../agent/src/capture.ts
+// packages/agent/src/capture.ts
 var STORE = ".resilireplay/capture";
 function inside(root, candidate) {
   const value = relative(root, candidate);
@@ -4835,7 +4841,7 @@ async function captureIngest(event, root = process.cwd()) {
   return (await captureIngestBatch([event], root))[0];
 }
 
-// ../agent/src/plugin-hook.ts
+// packages/agent/src/plugin-hook.ts
 async function runPluginHook(sourceInput, root = process.cwd()) {
   const source = AgentSourceSchema.parse(sourceInput);
   const chunks = [];

@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { sanitize } from "../sanitize.js";
 import { hashValue, stableStringify } from "../stable.js";
-import { type EventType as LegacyEventType, type TraceEvent as LegacyTraceEvent } from "../events.js";
+import {
+  type EventType as LegacyEventType,
+  type TraceEvent as LegacyTraceEvent,
+} from "../events.js";
 
 export const V1_SCHEMA_VERSIONS = ["1.0.0"] as const;
 export type V1SchemaVersion = (typeof V1_SCHEMA_VERSIONS)[number];
@@ -50,7 +53,13 @@ export const PhaseSchema = z.enum([
 
 export const SafetyClassSchema = z.enum(["safe", "unsafe", "unknown"]);
 
-export const SideEffectStateSchema = z.enum(["pending", "applied", "rolled-back", "blocked", "failed"]);
+export const SideEffectStateSchema = z.enum([
+  "pending",
+  "applied",
+  "rolled-back",
+  "blocked",
+  "failed",
+]);
 
 export const SideEffectSchema = z
   .object({
@@ -201,16 +210,18 @@ export const AdapterManifestSchema = z
     adapterVersion: z.string().min(1),
     framework: z.string().min(1),
     frameworkVersionRange: z.string().min(1),
-    capabilities: z.array(
-      z
-        .object({
-          name: z.string().min(1),
-          level: z.enum(["verified", "supported", "experimental", "documented", "unsupported"]),
-          reason: z.string().default(""),
-          required: z.boolean().default(false),
-        })
-        .strict(),
-    ).default([]),
+    capabilities: z
+      .array(
+        z
+          .object({
+            name: z.string().min(1),
+            level: z.enum(["verified", "supported", "experimental", "documented", "unsupported"]),
+            reason: z.string().default(""),
+            required: z.boolean().default(false),
+          })
+          .strict(),
+      )
+      .default([]),
     limitations: z.array(z.string()),
     createdAt: z.string().datetime({ offset: true }),
     evidence: z.array(z.string()).default([]),
@@ -387,7 +398,7 @@ export function migrateLegacyEvent(event: LegacyTraceEvent): EventEnvelopeV1 {
     framework: "resilireplay-legacy",
     frameworkVersion: "1.0.0",
     adapter: "legacy-migrator",
-    adapterVersion: "0.5.0",
+    adapterVersion: "0.6.0",
     operation,
     boundary,
     phase,

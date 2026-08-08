@@ -25,7 +25,7 @@ const claudeHooks = await json("plugins/resilireplay/hooks/claude-hooks.json");
 
 for (const manifest of [codex, claude]) {
   invariant(manifest.name === "resilireplay", "Plugin name must remain stable");
-  invariant(manifest.version === "0.5.0", "Plugin version must match the release");
+  invariant(manifest.version === "0.6.0", "Plugin version must match the release");
   invariant(manifest.license === "Apache-2.0", "Plugin license must remain Apache-2.0");
 }
 invariant(marketplace.name === "resilireplay", "Claude marketplace name must match install syntax");
@@ -38,7 +38,7 @@ invariant(
   "Codex marketplace must contain exactly one ResiliReplay entry",
 );
 invariant(
-  mcp.mcpServers?.resilireplay?.args?.includes("resilireplay@0.5.0"),
+  mcp.mcpServers?.resilireplay?.args?.includes("resilireplay@0.6.0"),
   "MCP registration must pin the release version",
 );
 invariant(codexHooks.hooks?.PostToolUse?.length === 1, "Codex PostToolUse hook is missing");
@@ -67,7 +67,7 @@ for (const [path, schemaVersion] of publicSchemas) {
     `${path} must use JSON Schema 2020-12`,
   );
   invariant(
-    schema.$id === `https://github.com/aliengineering-byte/resilireplay/blob/v0.5.0/${path}`,
+    schema.$id === `https://github.com/aliengineering-byte/resilireplay/blob/v0.6.0/${path}`,
     `${path} must use its immutable release URL`,
   );
   invariant(

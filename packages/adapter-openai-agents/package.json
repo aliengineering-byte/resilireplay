@@ -1,0 +1,37 @@
+{
+  "name": "@resilireplay/adapter-openai-agents",
+  "version": "0.6.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "description": "Local reliability evidence adapter for the OpenAI Agents SDK.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run src/adapter-openai-agents.test.ts"
+  },
+  "dependencies": {
+    "@resilireplay/adapter-sdk": "workspace:*",
+    "@resilireplay/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@openai/agents": "0.14.3"
+  },
+  "devDependencies": {
+    "@openai/agents": "0.14.3",
+    "@resilireplay/trace": "workspace:*",
+    "vitest": "3.2.4",
+    "zod": "4.4.3"
+  }
+}

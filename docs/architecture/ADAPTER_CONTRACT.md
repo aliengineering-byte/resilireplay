@@ -11,10 +11,10 @@ All adapters MUST implement:
 5. `injectFault(target, fault) -> void`
 6. `stopCapture(handle) -> void`
 7. `replay(run, trace) -> ReplayReport`
-7. `generateRegression(failure, templates) -> RegressionPack`
-8. `sanitize(payload) -> SanitizedPayload`
-9. `cleanup(handle) -> void`
-10. `doctor() -> HealthCheck`
+8. `generateRegression(failure, templates) -> RegressionPack`
+9. `sanitize(payload) -> SanitizedPayload`
+10. `cleanup(handle) -> void`
+11. `doctor() -> HealthCheck`
 
 ## Capability levels
 
@@ -27,6 +27,7 @@ All adapters MUST implement:
 ## Machine-readable manifest
 
 Manifest fields:
+
 - `adapterName`
 - `adapterVersion`
 - `framework`
@@ -45,6 +46,7 @@ Manifest fields:
 ## Fault boundaries
 
 Adapters MUST declare where failures are injected (boundary enum):
+
 - `wrapper`
 - `transport`
 - `model`

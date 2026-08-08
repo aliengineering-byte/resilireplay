@@ -1,6 +1,6 @@
 # Framework Event Contract v1
 
-ResiliReplay’s contract is framework-neutral and replay-oriented. Every event is represented as a normalized envelope emitted from adapters.
+ResiliReplayï¿½s contract is framework-neutral and replay-oriented. Every event is represented as a normalized envelope emitted from adapters.
 
 ## Envelope purpose
 
@@ -59,6 +59,7 @@ The v1 envelope is designed for deterministic replay, recovery analysis, side-ef
 `payloadDigest = sha256(stableStringify(normalize(event, redaction=true, removeUnstable=true)))`
 
 `removeUnstable` removes:
+
 - absolute file paths
 - process ids
 - thread ids

@@ -1,28 +1,34 @@
-# Adapter guide
+# Framework adapters
 
-Adapters translate framework/provider callbacks into the common event model. They do not implement scoring.
+Framework adapters translate public runtime, telemetry, or callback events into
+`resilireplay.framework-event/v1`. They do not change deterministic fault injection, recovery
+scoring, or regression compilation.
 
-```ts
-import { createEvent } from "@resilireplay/core";
+## v0.6 support
 
-const event = createEvent({
-  runId,
-  sequence,
-  type: "model_response",
-  actor: "planner",
-  model: providerResponse.model,
-  metadata: {
-    inputTokens: providerResponse.usage?.prompt_tokens ?? 0,
-    outputTokens: providerResponse.usage?.completion_tokens ?? 0,
-  },
-  payload: providerResponse.choices[0]?.message,
-});
+| Framework         | Tested version or range      | Integration                                                          | Evidence                  | Boundary                                                                           |
+| ----------------- | ---------------------------- | -------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------- |
+| LangGraph         | `@langchain/langgraph@1.4.9` | Native event stream                                                  | `GENUINE_RUNTIME`         | Local graph, tool, retry, timeout, stream, interrupt/resume, and subgraph behavior |
+| OpenAI Agents SDK | `@openai/agents@0.14.3`      | Public `Model`, runner, stream, guardrail, handoff, and tracing APIs | `GENUINE_RUNTIME`         | Deterministic local/no-key model; hosted provider behavior is not claimed          |
+| AutoGen           | `>=0.4` protocol profile     | Neutral OTLP bridge                                                  | `FIXTURE_BACKED_PROTOCOL` | Compatible OTLP spans are verified; no AutoGen runtime was executed                |
+| CrewAI            | `>=0.100` profile            | Public event-listener names                                          | `DOCUMENTED_ONLY`         | Stable callback mapping is supplied, but no CrewAI runtime claim is made           |
+| LlamaIndex        | `>=0.12` profile             | Public instrumentation names                                         | `DOCUMENTED_ONLY`         | Stable callback/span mapping is supplied, but no LlamaIndex runtime claim is made  |
+
+These exact evidence labels are part of the adapter registry. Fixture-shaped events never become a
+runtime-verification claim.
+
+## Registry and doctor
+
+```console
+resilireplay adapter list
+resilireplay adapter detect --package @langchain/langgraph
+resilireplay adapter detect --framework openai-agents
+resilireplay adapter doctor autogen
 ```
 
-Emit the original causal order. Set `parentId` for structural ownership and `causeId` for the event that directly caused this event. Tool and model identity belong in the dedicated fields, not only in payloads.
+Detection is deterministic and advisory. An explicit framework override wins, and an unknown
+framework fails without silently selecting a generic adapter. Runtime factories are registered by
+the application; registry detection never dynamically executes a detected package.
 
-Never place authorization headers, cookies, credentials, or raw environment variables in payload or metadata. `createEvent` performs defense-in-depth redaction, but adapters should omit secrets at the source.
-
-For streaming, emit one `model_response` after deterministic aggregation through v0.3.0. Record provider usage metadata only when it exists; missing token data is reported as unavailable rather than estimated.
-
-The OpenAI-compatible example is a translation function and does not make a network call. Other providers should wrap the same model without changing core schemas.
+See the [framework quick starts](FRAMEWORKS.md), [support policy](product/FRAMEWORK_SUPPORT_POLICY.md),
+and the [neutral adapter contract](ADAPTER_CONTRACT.md).

@@ -6,6 +6,7 @@ import { parseDocument, stringify } from "yaml";
 import {
   calculateMetrics,
   injectFaults,
+  PRODUCT_VERSION,
   safeOutputPath,
   sanitize,
   sha256,
@@ -771,7 +772,7 @@ export async function runCampaign(
     const withoutHash: Omit<CampaignRun, "runHash"> = {
       schemaVersion: "1.0",
       kind: "resilireplay-campaign-run",
-      productVersion: "0.5.0",
+      productVersion: PRODUCT_VERSION,
       campaignId: campaign.id,
       campaignHash: hash,
       runId,

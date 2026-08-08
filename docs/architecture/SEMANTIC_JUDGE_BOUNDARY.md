@@ -10,6 +10,7 @@ ResiliReplay is deterministic first. Semantic judging is advisory.
 ## Advisor output shape
 
 `Decision` object:
+
 - `deterministic_status`: `passed|failed|error`
 - `semantic_advisory`: `{ providerId, rubricVersion, promptHash, sampling, evidenceDigest, status, score?, notes? }`
 - `final_policy_status`: derived from deterministic policy only, with optional semantic annotation.
@@ -20,7 +21,7 @@ ResiliReplay is deterministic first. Semantic judging is advisory.
 - Must require explicit opt-in config.
 - Must never run in `demo`, `test`, or `ci` unless explicitly requested.
 - Inputs passed to judge providers must be sanitized and redacted.
-- Outputs cannot generate “correct”, “safe”, or “true” claims.
+- Outputs cannot generate ï¿½correctï¿½, ï¿½safeï¿½, or ï¿½trueï¿½ claims.
 
 ## Prompt hardening
 

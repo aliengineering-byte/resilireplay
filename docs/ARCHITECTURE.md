@@ -19,10 +19,18 @@ flowchart LR
 
 ## Packages and dependency direction
 
-`core` is the leaf library. `trace`, `reporters`, and `proxy` depend on core. `mcp-chaos` depends on
-core, reporters, and the official MCP SDK. `campaign` composes core, trace, reporters, and mcp-chaos.
-`studio` is a narrow HTTP/HTML adapter over campaign. `cli` bundles the product-facing packages into
-the published `resilireplay` executable. The GitHub Action invokes that same CLI.
+`core` is the leaf library. `adapter-sdk` depends only on core and owns the neutral framework
+contract, registry, capability manifests, callback mapper, and templates. `adapter-langgraph`,
+`adapter-openai-agents`, and `otel-bridge` depend inward on that neutral SDK; no framework-specific
+package is imported by core or the deterministic engines. `trace`, `reporters`, and `proxy` depend on
+core. `mcp-chaos` depends on core, reporters, and the official MCP SDK. `campaign` composes core,
+trace, reporters, and mcp-chaos. `studio` is a narrow HTTP/HTML adapter over campaign. `cli` bundles
+the product-facing packages into the published `resilireplay` executable. The GitHub Action invokes
+that same CLI.
+
+Runtime adapters emit one ordered identity model: run -> trace -> turn -> actor -> span, with parent
+and causal links kept separately. Detection reads manifest/package hints but never executes a
+framework package; applications explicitly register runtime factories.
 
 No UI-only fault engine or scoring path exists. Studio submits a repository-contained campaign or a
 reviewed Inspector-shaped target to the shared APIs and consumes persisted run evidence.

@@ -10,6 +10,7 @@ import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import {
   calculateMetrics,
+  PRODUCT_VERSION,
   containsLikelySecret,
   createEvent,
   injectFaults,
@@ -490,7 +491,10 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       "RR_MCP_TOOL_ALLOWLIST",
     );
   }
-  const client = new Client({ name: "resilireplay", version: "0.5.0" }, { capabilities: {} });
+  const client = new Client(
+    { name: "resilireplay", version: PRODUCT_VERSION },
+    { capabilities: {} },
+  );
   let secretOutputDetected = false;
   let recoveryAttempted = false;
   let recoveredFaultCount = 0;
@@ -747,7 +751,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
 }
 
 function certificationBadge(passed: boolean): string {
-  const value = passed ? "passing v0.5.0" : "findings v0.5.0";
+  const value = passed ? `passing v${PRODUCT_VERSION}` : `findings v${PRODUCT_VERSION}`;
   const color = passed ? "#159957" : "#c0392b";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="276" height="20" role="img" aria-label="MCP Chaos Tested: ${value}"><rect width="164" height="20" rx="3" fill="#555"/><rect x="164" width="112" height="20" rx="3" fill="${color}"/><g fill="#fff" text-anchor="middle" font-family="Verdana,sans-serif" font-size="11"><text x="82" y="15">MCP Chaos Tested</text><text x="220" y="15">${value}</text></g></svg>\n`;
 }
@@ -764,7 +768,7 @@ export async function writeMcpCertification(
   const json = `${stableStringify({
     schemaVersion: "1.0",
     product: "ResiliReplay",
-    version: "0.5.0",
+    version: PRODUCT_VERSION,
     scope:
       "Evidence for this declared local suite and version; not a universal security certification.",
     ...result,

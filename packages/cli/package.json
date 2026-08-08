@@ -1,6 +1,6 @@
 {
   "name": "resilireplay",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "license": "Apache-2.0",
   "description": "Turn reviewed MCP failures into deterministic recovery evidence and executable regression tests.",

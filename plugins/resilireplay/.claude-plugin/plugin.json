@@ -1,6 +1,6 @@
 {
   "name": "resilireplay",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Passive, opt-in failure capture and deterministic regression evidence for coding-agent tools.",
   "author": { "name": "Ali" },
   "homepage": "https://aliengineering-byte.github.io/resilireplay/",
