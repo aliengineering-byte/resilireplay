@@ -1,0 +1,22 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-handoff",
+  "session_id": "session-handoff",
+  "event": {
+    "type": "run_item_stream_event",
+    "name": "handoff_occurred",
+    "runId": "run-handoff",
+    "item": {
+      "type": "handoff_output_item",
+      "sourceAgent": { "name": "triage" },
+      "targetAgent": { "name": "specialist" },
+      "rawItem": {
+        "type": "function_call_result",
+        "callId": "call-handoff",
+        "status": "completed",
+        "output": "handoff accepted"
+      }
+    }
+  }
+}

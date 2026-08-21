@@ -1,0 +1,11 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-completion",
+  "session_id": "session-completion",
+  "event": {
+    "type": "run_completed",
+    "runId": "run-completion",
+    "status": "completed"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-success",
+  "session_id": "session-success",
+  "events": [
+    {
+      "type": "run_item_stream_event",
+      "name": "tool_output",
+      "runId": "run-success",
+      "durationMs": 12,
+      "item": {
+        "type": "tool_call_output_item",
+        "rawItem": {
+          "type": "function_call_result",
+          "name": "read_fixture",
+          "callId": "call-success",
+          "status": "completed",
+          "output": "fixture-only"
+        },
+        "output": "fixture-only",
+        "executionStatus": "executed"
+      }
+    }
+  ]
+}

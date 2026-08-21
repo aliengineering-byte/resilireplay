@@ -1,0 +1,23 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-failure",
+  "session_id": "session-failure",
+  "event": {
+    "type": "run_item_stream_event",
+    "name": "tool_output",
+    "runId": "run-failure",
+    "error": "permission denied",
+    "item": {
+      "type": "tool_call_output_item",
+      "rawItem": {
+        "type": "function_call_result",
+        "name": "write_fixture",
+        "callId": "call-failure",
+        "status": "completed",
+        "output": "permission denied"
+      },
+      "output": { "status": "error", "message": "permission denied" }
+    }
+  }
+}

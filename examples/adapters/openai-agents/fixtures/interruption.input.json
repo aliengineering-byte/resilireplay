@@ -1,0 +1,23 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-interruption",
+  "session_id": "session-interruption",
+  "event": {
+    "type": "run_item_stream_event",
+    "name": "tool_output",
+    "runId": "run-interruption",
+    "interrupted": true,
+    "item": {
+      "type": "tool_call_output_item",
+      "rawItem": {
+        "type": "function_call_result",
+        "name": "slow_fixture",
+        "callId": "call-interruption",
+        "status": "incomplete",
+        "output": "cancelled"
+      },
+      "output": { "status": "cancelled" }
+    }
+  }
+}

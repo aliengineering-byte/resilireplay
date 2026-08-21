@@ -1,0 +1,36 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-duplicate",
+  "session_id": "session-duplicate",
+  "events": [
+    {
+      "type": "run_item_stream_event",
+      "name": "tool_output",
+      "runId": "run-duplicate",
+      "item": {
+        "type": "tool_call_output_item",
+        "rawItem": {
+          "type": "function_call_result",
+          "name": "idempotent_tool",
+          "callId": "call-duplicate"
+        },
+        "output": "same-event"
+      }
+    },
+    {
+      "type": "run_item_stream_event",
+      "name": "tool_output",
+      "runId": "run-duplicate",
+      "item": {
+        "type": "tool_call_output_item",
+        "rawItem": {
+          "type": "function_call_result",
+          "name": "idempotent_tool",
+          "callId": "call-duplicate"
+        },
+        "output": "same-event"
+      }
+    }
+  ]
+}

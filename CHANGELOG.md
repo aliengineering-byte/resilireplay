@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [Unreleased]
+
+### Added
+
+- Fixture-verified offline `@openai/agents@0.14.3` adapter example with tool, failure,
+  interruption, completion, handoff, interleaved-run, duplicate-delivery, and privacy fixtures.
+
 ## [0.6.0] - 2026-08-07
 
 ### Added

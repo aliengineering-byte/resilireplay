@@ -1,0 +1,7 @@
+{
+  "eventType": "tool-result",
+  "outcome": "failed",
+  "errorClass": "permission",
+  "toolName": "write_fixture",
+  "summary": "permission denied"
+}

@@ -1,0 +1,6 @@
+{
+  "eventType": "tool-result",
+  "outcome": "interrupted",
+  "errorClass": "interrupted",
+  "toolName": "slow_fixture"
+}

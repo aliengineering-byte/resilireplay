@@ -1,0 +1,7 @@
+{
+  "eventType": "tool-result",
+  "outcome": "succeeded",
+  "errorClass": "none",
+  "toolName": "read_fixture",
+  "durationMs": 12
+}

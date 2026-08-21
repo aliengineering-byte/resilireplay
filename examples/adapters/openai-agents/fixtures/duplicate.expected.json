@@ -1,0 +1,7 @@
+{
+  "eventType": "tool-result",
+  "outcome": "succeeded",
+  "errorClass": "none",
+  "toolName": "idempotent_tool",
+  "toolCallId": "c05af2f5fb13aa81a344b51f1208d71981bade2efeccc9b51c4c558d0becb8f8"
+}

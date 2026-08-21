@@ -1,0 +1,6 @@
+{
+  "sdk": "@openai/agents",
+  "sdk_version": "0.14.3",
+  "run_id": "run-malformed",
+  "events": [{ "type": "run_item_stream_event", "name": "unknown_event" }]
+}
