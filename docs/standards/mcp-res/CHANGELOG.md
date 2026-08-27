@@ -2,7 +2,7 @@
 
 ## 0.2.0 — development
 
-- PR 1: added reason-bound negative observations, integrity-bound observation derivation, scenario fingerprints, execution instance digests, observation-coverage manifests, trial summaries, and false-green/mutation/migration tests.
+- PR 1 ([#50](https://github.com/aliengineering-byte/resilireplay/pull/50)): added reason-bound negative observations, integrity-bound observation derivation, scenario fingerprints, execution instance digests, observation-coverage manifests, trial summaries, and false-green/mutation/migration tests.
 - Preserved the v0.1.0 normative tree and digest semantics unchanged.
 
 ## 0.1.0 — 2026-08-27
