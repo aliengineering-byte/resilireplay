@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "mcp-res.test-vector-catalog/0.2.0",
+  "canonicalizationAlgorithm": "mcp-res-json-utf16-v1",
+  "valid": [
+    {
+      "id": "reason-bound-negative",
+      "path": "valid/reason-bound-negative.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "d7b6bea30de5b55fbcbbddcf569e6909f6aabfb9134cf7d06e225f12913ca1c8"
+    },
+    {
+      "id": "correct-validator-kills-mutant",
+      "path": "valid/correct-validator-kills-mutant.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "13636c0c6ea043e3169af0acfaf4177654806e543a18a02ed4d95ffe19cca78c"
+    },
+    {
+      "id": "repeated-stable",
+      "path": "valid/repeated-stable.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "395e52dd8366fc277e83936c14641a3a889d217c14be6b9fde7a85163286f8df"
+    },
+    {
+      "id": "equivalent-scenario-distinct-run",
+      "path": "valid/equivalent-scenario-distinct-run.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "e3eed4272637cd36ed1e012eb7d008bbd3f455773a5787e386682310131247b2"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "wrong-stop-reason",
+      "path": "invalid/wrong-stop-reason.json",
+      "expectedDiagnostics": ["MCP_RES_WRONG_STOP_REASON"],
+      "fileSha256": "3dd2f44af7ebe26d1ca2d094972c91f634cd45380c30b81ce45527d2f0529003"
+    },
+    {
+      "id": "second-negative-wrong-reason",
+      "path": "invalid/second-negative-wrong-reason.json",
+      "expectedDiagnostics": ["MCP_RES_WRONG_STOP_REASON"],
+      "fileSha256": "ce3e94d42fd49f002deccd6a1f5a60ca0509784cf375cd871a4e7e71f18b4933"
+    },
+    {
+      "id": "earlier-version-guard",
+      "path": "invalid/earlier-version-guard.json",
+      "expectedDiagnostics": ["MCP_RES_PROPERTY_NOT_REACHED"],
+      "fileSha256": "4d0e5d647b53ef3fcf7ed0da6e87b7c7a4c3659a356f54d266bf41973b35ab3a"
+    },
+    {
+      "id": "target-property-not-reached",
+      "path": "invalid/target-property-not-reached.json",
+      "expectedDiagnostics": ["MCP_RES_PROPERTY_NOT_REACHED"],
+      "fileSha256": "baf744edae35ab1ab7a5b2a0e02334c288a02192a9c3374575d116e6c03f57de"
+    },
+    {
+      "id": "negative-prerequisite-missing",
+      "path": "invalid/negative-prerequisite-missing.json",
+      "expectedDiagnostics": ["MCP_RES_NEGATIVE_PREREQUISITE_MISSING"],
+      "fileSha256": "4b3624b96e7aa262555eb7c67d356414e4b78ea87237de0bb33c6dd344bb24da"
+    },
+    {
+      "id": "verdict-only-false-green",
+      "path": "invalid/verdict-only-false-green.json",
+      "expectedDiagnostics": ["MCP_RES_WRONG_STOP_REASON"],
+      "fileSha256": "8bf48965375c9f21c26173a42247c458c4311373c84251d5b689000e6a7cc0c0"
+    },
+    {
+      "id": "negative-mutant-survived",
+      "path": "invalid/negative-mutant-survived.json",
+      "expectedDiagnostics": ["MCP_RES_NEGATIVE_MUTANT_SURVIVED"],
+      "fileSha256": "99916577501ea0249755356765bdc7c3da21ce2d9f113910e59e6bfe22393bb0"
+    },
+    {
+      "id": "stale-expected-failure-after-fix",
+      "path": "invalid/stale-expected-failure-after-fix.json",
+      "expectedDiagnostics": ["MCP_RES_VACUOUS_NEGATIVE_CONTROL"],
+      "fileSha256": "3381c9f7aa8d51427c975431e2ea8663234ae27d0335dd5d1a32b71e934132c1"
+    },
+    {
+      "id": "false-runtime-boolean",
+      "path": "invalid/false-runtime-boolean.json",
+      "expectedDiagnostics": ["MCP_RES_SELF_ASSERTED_CLAIM"],
+      "fileSha256": "c51221e948c93e0f1630976f2b1ede9c85e42cec64478760afae05deec979b09"
+    },
+    {
+      "id": "unbound-source-evidence-promotion",
+      "path": "invalid/unbound-source-evidence-promotion.json",
+      "expectedDiagnostics": ["MCP_RES_EVIDENCE_CLASS_PROMOTION"],
+      "fileSha256": "912cbe460a938d12bc753e78cda93584505e61eafd91a0a49d737cd6d9fa907f"
+    },
+    {
+      "id": "missing-observation-artifact",
+      "path": "invalid/missing-observation-artifact.json",
+      "expectedDiagnostics": ["MCP_RES_MISSING_OBSERVATION_ARTIFACT"],
+      "fileSha256": "3c9e5c7442eb986f7a4f4d5211c722da96e2496ca82e862cebe3eaac19bd36ae"
+    },
+    {
+      "id": "mismatched-observation-hash",
+      "path": "invalid/mismatched-observation-hash.json",
+      "expectedDiagnostics": ["MCP_RES_OBSERVATION_HASH_MISMATCH"],
+      "fileSha256": "216c5b229e8d967bc55f0f62056744f5fda0bd0bd3658a1a17ab879c1df52264"
+    },
+    {
+      "id": "cross-operation-oracle-substitution",
+      "path": "invalid/cross-operation-oracle-substitution.json",
+      "expectedDiagnostics": ["MCP_RES_OBSERVATION_CAUSAL_MISMATCH"],
+      "fileSha256": "54650041a768d580a9203b19736d34fbb86fd9d68fcc5120f17d3c15a71e58fb"
+    },
+    {
+      "id": "cross-run-substitution",
+      "path": "invalid/cross-run-substitution.json",
+      "expectedDiagnostics": ["MCP_RES_CROSS_RUN_SUBSTITUTION"],
+      "fileSha256": "5d563914e32498520c234572e0349c01b994dac2b3491d016e8ad506b00f7454"
+    },
+    {
+      "id": "scenario-fingerprint-collision-attempt",
+      "path": "invalid/scenario-fingerprint-collision-attempt.json",
+      "expectedDiagnostics": ["MCP_RES_SCENARIO_FINGERPRINT_MISMATCH"],
+      "fileSha256": "5f8d6152d0eca06b4759e4cd1732cfada90d9b78937831cab27de699d868097c"
+    },
+    {
+      "id": "uninstrumented-required-surface",
+      "path": "invalid/uninstrumented-required-surface.json",
+      "expectedDiagnostics": ["MCP_RES_REQUIRED_SURFACE_UNOBSERVED"],
+      "fileSha256": "3bee5d657e7ba594f57b2d8e0e7641b1e9665af795d7509ca2587252c80f5a7a"
+    },
+    {
+      "id": "falsely-claimed-repeated-stability",
+      "path": "invalid/falsely-claimed-repeated-stability.json",
+      "expectedDiagnostics": ["MCP_RES_FALSE_STABILITY_CLAIM"],
+      "fileSha256": "69ddbef04ad52b635c231adb0125c2219d8e6370b19bcddaacf1554971cce9b7"
+    },
+    {
+      "id": "inconsistent-trial-counts",
+      "path": "invalid/inconsistent-trial-counts.json",
+      "expectedDiagnostics": ["MCP_RES_TRIAL_SUMMARY_INCONSISTENT"],
+      "fileSha256": "a3eba2f98c198f0b4c2e9fb643b246f6ef3d40e1e2292e4679d6e5a796fc7e7e"
+    },
+    {
+      "id": "wall-clock-reversal",
+      "path": "invalid/wall-clock-reversal.json",
+      "expectedDiagnostics": ["MCP_RES_WALL_CLOCK_REVERSAL"],
+      "fileSha256": "c6f96beeb22bb052b18dbff3cd824a9f96d0a54d90c4793a88f312239fa12638"
+    },
+    {
+      "id": "operation-parent-cycle",
+      "path": "invalid/operation-parent-cycle.json",
+      "expectedDiagnostics": ["MCP_RES_OPERATION_PARENT_CYCLE"],
+      "fileSha256": "b983e4fc67ec2159434f68eae8330192a4846f05190754169ec95ff20c2901cb"
+    },
+    {
+      "id": "retry-attempt-exceeds-policy",
+      "path": "invalid/retry-attempt-exceeds-policy.json",
+      "expectedDiagnostics": ["MCP_RES_RETRY_LIMIT_EXCEEDED"],
+      "fileSha256": "cebf992c6c482be2940670285f943c608952b2425a823a46a3de75dc6cf29f39"
+    }
+  ]
+}

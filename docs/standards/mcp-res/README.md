@@ -4,6 +4,8 @@ MCP-RES is a project-defined, vendor-neutral, open reliability-evidence standard
 
 The current publication is **Draft v0.1.0**. It defines a small implementation-neutral core, versioned profiles, strict JSON Schema 2020-12 records, valid and invalid vectors, and a black-box validator. “Normative” in this tree means normative only for this project-defined draft.
 
+Draft v0.2.0 is under sequential review and is not yet a published release. Its [development tree](v0.2.0/) currently contains the PR 1 evidence-semantics slice, [research ledger](v0.2.0/RESEARCH.md), and [master gap ledger](v0.2.0/GAP_LEDGER.md). The published v0.1 tree and its claims remain unchanged.
+
 - [Draft specification](v0.1.0/MCP_RES.md)
 - [Conformance requirements](v0.1.0/CONFORMANCE.md)
 - [Schemas](v0.1.0/schemas/)

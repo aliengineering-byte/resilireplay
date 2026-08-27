@@ -2,6 +2,8 @@
 
 Version `0.1.0` is a public project draft. Schemas and profile identifiers can change before 1.0 through the RFC process. A profile marked `NORMATIVE` has executable positive and negative vectors in this draft; that label does not make it part of the official MCP specification.
 
+Version `0.2.0` is in development through five sequential pull requests. It is not the current publication and MUST NOT be represented as released until the final draft release audit is complete. Development status and residual risks are tracked in the [v0.2 gap ledger](v0.2.0/GAP_LEDGER.md).
+
 ## Stable 1.0 entry criteria
 
 All of these criteria MUST be met before a stable 1.0 proposal:

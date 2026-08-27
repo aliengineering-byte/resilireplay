@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/observation-coverage.schema.json",
+  "title": "MCP-RES observation coverage v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "surfaces"],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.observation-coverage/0.2.0" },
+    "surfaces": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["surface", "required", "status", "observationRefs"],
+        "properties": {
+          "surface": {
+            "enum": [
+              "MCP_WIRE_MESSAGES",
+              "RAW_HTTP_REQUESTS",
+              "RAW_HTTP_RESPONSES",
+              "STDIO_INPUT_OUTPUT",
+              "CHILD_PROCESS_LIFECYCLE",
+              "TRANSPORT_DISCONNECTS",
+              "RETRIES",
+              "FILESYSTEM_OUTPUTS",
+              "CLEANUP",
+              "GENERATED_REGRESSION_EXECUTION",
+              "AUTHORIZATION_REDIRECTS",
+              "TOKEN_ENDPOINT",
+              "CACHE_BEHAVIOR",
+              "SOURCE_EVIDENCE"
+            ]
+          },
+          "required": { "type": "boolean" },
+          "status": {
+            "enum": [
+              "INSTRUMENTED",
+              "OBSERVED_INDIRECTLY",
+              "BYPASSED_INTENTIONALLY",
+              "UNINSTRUMENTED",
+              "UNKNOWN",
+              "NOT_APPLICABLE"
+            ]
+          },
+          "observationRefs": {
+            "type": "array",
+            "maxItems": 32,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^obs-[A-Za-z0-9._:-]+$" }
+          }
+        }
+      }
+    }
+  }
+}
