@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/integrity-manifest.schema.json",
+  "title": "MCP-RES integrity manifest v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "canonicalizationAlgorithm",
+    "hashAlgorithm",
+    "publication",
+    "complete",
+    "artifacts",
+    "bundleDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "canonicalizationAlgorithm": { "const": "mcp-res-json-utf16-v1" },
+    "hashAlgorithm": { "const": "SHA-256" },
+    "publication": { "const": "MANIFEST_LAST" },
+    "complete": { "const": true },
+    "artifacts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "mediaType", "bytes", "sha256"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+          },
+          "mediaType": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 96,
+            "pattern": "^[a-z0-9.+-]+/[a-z0-9.+-]+$"
+          },
+          "bytes": { "type": "integer", "minimum": 0, "maximum": 16777216 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    },
+    "bundleDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/recovery-policy.schema.json",
+  "title": "MCP-RES bounded recovery policy v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "retryLimit",
+    "timeLimitMs",
+    "cancellationBoundary",
+    "backoff",
+    "sideEffectModel",
+    "safetyMechanism",
+    "terminalOutcomes"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._/-]*$"
+    },
+    "retryLimit": { "type": "integer", "minimum": 0, "maximum": 32 },
+    "timeLimitMs": { "type": "integer", "minimum": 1, "maximum": 3600000 },
+    "cancellationBoundary": {
+      "enum": ["PER_ATTEMPT", "PER_OPERATION", "PER_SCENARIO", "TOTAL_RUN"]
+    },
+    "backoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "maxDelayMs"],
+      "properties": {
+        "kind": { "enum": ["NONE", "FIXED", "EXPONENTIAL_BOUNDED"] },
+        "maxDelayMs": { "type": "integer", "minimum": 0, "maximum": 300000 }
+      }
+    },
+    "sideEffectModel": { "enum": ["READ_ONLY", "IDEMPOTENT", "SIDE_EFFECTING", "UNKNOWN"] },
+    "safetyMechanism": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "evidenceSha256"],
+          "properties": {
+            "kind": {
+              "enum": ["IDEMPOTENCY_KEY", "TRANSACTION", "COMPENSATION", "EXACTLY_ONCE_GUARD"]
+            },
+            "evidenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        }
+      ]
+    },
+    "terminalOutcomes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "enum": ["PASS", "EXPECTED_FAILURE", "FAIL", "CANCELLED", "TIME_LIMIT"] }
+    }
+  }
+}

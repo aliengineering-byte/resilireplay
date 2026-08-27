@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "mcp-res.test-vector-catalog/0.1.0",
+  "canonicalizationAlgorithm": "mcp-res-json-utf16-v1",
+  "valid": [
+    {
+      "id": "minimal-valid-clean-control",
+      "path": "valid/minimal-valid-clean-control.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "25cf487df90d5d2374da9ef0644565126fb568d52ae11e514face2dd1d5d250e"
+    },
+    {
+      "id": "bounded-failure-without-recovery",
+      "path": "valid/bounded-failure-without-recovery.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "fd27983b7f290efe0627222c3080642878b46266b7f0744b64dfa0d3aab890d1"
+    },
+    {
+      "id": "bounded-successful-recovery",
+      "path": "valid/bounded-successful-recovery.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "b34362c1c9c97948146c006d3bddec5f913cf14493ce44ee1b18827ea1442eb1"
+    },
+    {
+      "id": "expected-failure-negative-control",
+      "path": "valid/expected-failure-negative-control.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "0565c750fbc5255b0b67e473591c8b7dc50dcb8703776f44b69124185a0000d1"
+    },
+    {
+      "id": "executable-regression-profile",
+      "path": "valid/executable-regression-profile.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "b5018da3a2563c5950fb991ce9ab02d26e110b65aecfb14187acf85ce5f09f9b"
+    },
+    {
+      "id": "sanitized-local-stdio",
+      "path": "valid/sanitized-local-stdio.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "9886ef968a9c7db53e21d2ff5b58f258fe28dee657f7e798e189e1e11bfa0758"
+    },
+    {
+      "id": "sanitized-loopback-http",
+      "path": "valid/sanitized-loopback-http.json",
+      "expectedDiagnostics": [],
+      "fileSha256": "be1a01853263cc1a2c9b3107ed8f7a0a6eb4f12f7bd88d06e5728d961f4e1996"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "missing-clean-control",
+      "path": "invalid/missing-clean-control.json",
+      "expectedDiagnostics": ["MCP_RES_MISSING_CLEAN_CONTROL"],
+      "fileSha256": "9b2d8a11fe5b38c2e8bf8b0935b7eeffd43941b47ea0f0a5e017ebf82c0cac0c"
+    },
+    {
+      "id": "vacuous-negative-control",
+      "path": "invalid/vacuous-negative-control.json",
+      "expectedDiagnostics": ["MCP_RES_VACUOUS_NEGATIVE_CONTROL"],
+      "fileSha256": "b56102653b0a791c25fc8a574a6ce1aa864c0e2f9f3a4c946c913d76e312310d"
+    },
+    {
+      "id": "unbounded-retry",
+      "path": "invalid/unbounded-retry.json",
+      "expectedDiagnostics": ["MCP_RES_UNBOUNDED_RETRY"],
+      "fileSha256": "b3700041393c505b3a0135a991b852cbc89f0827ce2f3380f10a50172851da27"
+    },
+    {
+      "id": "missing-cleanup",
+      "path": "invalid/missing-cleanup.json",
+      "expectedDiagnostics": ["MCP_RES_CLEANUP_INCOMPLETE"],
+      "fileSha256": "147663443f5b07653c84cf7f1fa15e7d6e3535981bcde5de0e45ca334eb0b3d6"
+    },
+    {
+      "id": "altered-evidence-hash",
+      "path": "invalid/altered-evidence-hash.json",
+      "expectedDiagnostics": ["MCP_RES_DIGEST_MISMATCH"],
+      "fileSha256": "caed20903bf560e7614119012342683314154ee4fcffb60d0f7504bbeab3f725"
+    },
+    {
+      "id": "partial-manifest",
+      "path": "invalid/partial-manifest.json",
+      "expectedDiagnostics": ["MCP_RES_PARTIAL_MANIFEST"],
+      "fileSha256": "6192e1977242bacc989ba3f04136d0b5b6a3d1e3d8cbe76ee230846171a6f905"
+    },
+    {
+      "id": "encoded-secret",
+      "path": "invalid/encoded-secret.json",
+      "expectedDiagnostics": ["MCP_RES_SECRET_DETECTED"],
+      "fileSha256": "cc63e8bedd1c4d3ca2b921db0f18d2e0b6a42b6ba5db6dd1e299483a3f7931f2"
+    },
+    {
+      "id": "raw-authorization-header",
+      "path": "invalid/raw-authorization-header.json",
+      "expectedDiagnostics": ["MCP_RES_AUTH_HEADER_FORBIDDEN"],
+      "fileSha256": "e104734f1b80eaa54d3966eb91f8ce8c0b31450d14df2544cfb44abede180497"
+    },
+    {
+      "id": "ambiguous-subject-identity",
+      "path": "invalid/ambiguous-subject-identity.json",
+      "expectedDiagnostics": ["MCP_RES_SUBJECT_AMBIGUOUS"],
+      "fileSha256": "f25ff8299c587ad42af77580fd21c40a7fef6ece75f0f70d340364d98ce52d61"
+    },
+    {
+      "id": "unsupported-profile-version",
+      "path": "invalid/unsupported-profile-version.json",
+      "expectedDiagnostics": ["MCP_RES_PROFILE_UNSUPPORTED"],
+      "fileSha256": "115478fcebc6cfb8585924eb0f1344b134e4b28283b826d4f32d0e0126fc9066"
+    },
+    {
+      "id": "causal-mismatch",
+      "path": "invalid/causal-mismatch.json",
+      "expectedDiagnostics": ["MCP_RES_CAUSAL_MISMATCH"],
+      "fileSha256": "17d88f10d69ed4dfe3e1f536f7adf06e124aca127a7eba2bbf8074ab8cf92822"
+    },
+    {
+      "id": "side-effecting-retry-without-safety",
+      "path": "invalid/side-effecting-retry-without-safety.json",
+      "expectedDiagnostics": ["MCP_RES_SIDE_EFFECT_RETRY_UNSAFE"],
+      "fileSha256": "0ad85f2afbe995ed302e2f47c22a1779b27a9eb04dbf9ac569a4157bb8ad6993"
+    },
+    {
+      "id": "oversized-evidence",
+      "path": "invalid/oversized-evidence.json",
+      "expectedDiagnostics": ["MCP_RES_EVIDENCE_TOO_LARGE"],
+      "fileSha256": "9448ea3d81e8a9fe4a9f8c21d0302cebd6c42bfddd6946ac1280c64ec2c85f77"
+    },
+    {
+      "id": "nondeterministic-identity-field",
+      "path": "invalid/nondeterministic-identity-field.json",
+      "expectedDiagnostics": ["MCP_RES_NONDETERMINISTIC_IDENTITY"],
+      "fileSha256": "2b5c964a5a10d09618dac297a6a547889085f4fa3b584d3ccbd6812c2d0f64df"
+    },
+    {
+      "id": "invalid-evidence-class-promotion",
+      "path": "invalid/invalid-evidence-class-promotion.json",
+      "expectedDiagnostics": ["MCP_RES_EVIDENCE_CLASS_PROMOTION"],
+      "fileSha256": "f0c776b5432727e113b986bba134b5c3ac9e1e68a12e74101afb972e6d314bd4"
+    },
+    {
+      "id": "cleanup-interruption",
+      "path": "invalid/cleanup-interruption.json",
+      "expectedDiagnostics": ["MCP_RES_CLEANUP_INCOMPLETE"],
+      "fileSha256": "7319edb86db0dd4f3e3b2b4e44e767a4be08563ccba01f715f0144a6b920a555"
+    },
+    {
+      "id": "unknown-execution-field",
+      "path": "invalid/unknown-execution-field.json",
+      "expectedDiagnostics": ["MCP_RES_SCHEMA_INVALID"],
+      "fileSha256": "2e1fc2249a25a4ddc2b97f1d5ca144c720c38bf90a1c77b58cc5ff6b7b729acd"
+    },
+    {
+      "id": "invalid-executable-regression",
+      "path": "invalid/invalid-executable-regression.json",
+      "expectedDiagnostics": ["MCP_RES_REGRESSION_INVALID"],
+      "fileSha256": "3263318b3ef8d976473e235267bdbf6e0c2efb9aa9a587f6bda5bbcb00c167ef"
+    }
+  ]
+}

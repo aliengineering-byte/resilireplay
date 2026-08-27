@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/subject-identity.schema.json",
+  "title": "MCP-RES subject identity v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "subjectType",
+    "name",
+    "version",
+    "artifact",
+    "transport",
+    "configurationProfile",
+    "harness",
+    "runtimes"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "subjectType": {
+      "enum": [
+        "MCP_SERVER",
+        "MCP_CLIENT",
+        "AGENT_RUNTIME",
+        "GATEWAY_PROXY",
+        "ADAPTER",
+        "TRANSPORT_IMPLEMENTATION",
+        "TEST_HARNESS"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._/@ -]*$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9.+_:-]*$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "identifier", "sha256"],
+      "properties": {
+        "kind": { "enum": ["PACKAGE", "IMAGE", "EXECUTABLE", "SOURCE"] },
+        "identifier": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/@:+-]*$"
+        },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "endpointClass", "authenticated"],
+      "properties": {
+        "kind": { "enum": ["STDIO", "STREAMABLE_HTTP", "SSE", "IN_PROCESS", "OTHER"] },
+        "endpointClass": { "enum": ["LOCAL", "LOOPBACK", "REMOTE"] },
+        "authenticated": { "type": "boolean" }
+      }
+    },
+    "configurationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "sha256"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-z0-9][a-z0-9._/-]*$"
+        },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "harness": { "$ref": "#/$defs/toolIdentity" },
+    "runtimes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/toolIdentity" }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "toolIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/@ -]*$"
+        },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

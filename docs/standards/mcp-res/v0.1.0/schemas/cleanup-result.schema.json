@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/cleanup-result.schema.json",
+  "title": "MCP-RES cleanup result v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "complete",
+    "childProcessesRemaining",
+    "listenersRemaining",
+    "temporaryArtifacts",
+    "targetState",
+    "partialOutput",
+    "durationMs"
+  ],
+  "properties": {
+    "complete": { "type": "boolean" },
+    "childProcessesRemaining": { "type": "integer", "minimum": 0, "maximum": 1024 },
+    "listenersRemaining": { "type": "integer", "minimum": 0, "maximum": 1024 },
+    "temporaryArtifacts": { "enum": ["NONE", "REMOVED", "RETAINED_INCOMPLETE"] },
+    "targetState": { "enum": ["CLEAN", "APPROVED_CHANGE", "UNAPPROVED_CHANGE"] },
+    "partialOutput": { "enum": ["ABSENT", "INCOMPLETE_MARKED", "COMPLETE"] },
+    "durationMs": { "type": "integer", "minimum": 0, "maximum": 3600000 }
+  }
+}

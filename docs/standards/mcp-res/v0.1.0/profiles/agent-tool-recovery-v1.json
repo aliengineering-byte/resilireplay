@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "mcp-res.profile-manifest/0.1.0",
+  "id": "mcp-res/agent-tool-recovery/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "subjectTypes": ["AGENT_RUNTIME", "ADAPTER"],
+  "evidenceClasses": [
+    "GENUINE_RUNTIME",
+    "FIXTURE_BACKED_PROTOCOL",
+    "FIXTURE_VERIFIED",
+    "INSTALLATION_VERIFIED",
+    "DOCUMENTED_ONLY"
+  ],
+  "requirements": [
+    "MCPRES-ID-001",
+    "MCPRES-CTRL-001",
+    "MCPRES-FAULT-001",
+    "MCPRES-NEG-001",
+    "MCPRES-CAUSE-001",
+    "MCPRES-REC-001",
+    "MCPRES-PRIV-001",
+    "MCPRES-INT-001",
+    "MCPRES-REG-001",
+    "MCPRES-LIMIT-001",
+    "MCPRES-CLEAN-001"
+  ],
+  "negativeControls": [
+    "A broken recovery must remain an expected failure",
+    "A side-effecting retry without safety evidence must be rejected",
+    "A fixture event must not be promoted to GENUINE_RUNTIME"
+  ],
+  "limitations": [
+    "Agent event surfaces are vendor-specific and the profile does not standardize hooks",
+    "Only supported adapters may make runtime claims; fixture and installation evidence remain separately labeled"
+  ]
+}

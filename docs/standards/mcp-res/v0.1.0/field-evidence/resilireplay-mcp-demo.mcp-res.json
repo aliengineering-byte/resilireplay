@@ -1,0 +1,236 @@
+{
+  "schemaVersion": "mcp-res.conformance-bundle/0.1.0",
+  "evidence": {
+    "schemaVersion": "mcp-res.evidence-envelope/0.1.0",
+    "standardVersion": "0.1.0",
+    "profile": { "id": "mcp-res/server-tool-call/v1", "version": "1.0.0" },
+    "evidenceClass": "GENUINE_RUNTIME",
+    "run": {
+      "id": "run-01528fefd178388f80a76ac5",
+      "startedAt": "2026-08-27T16:06:36.782Z",
+      "finishedAt": "2026-08-27T16:06:38.979Z"
+    },
+    "subject": {
+      "schemaVersion": "0.1.0",
+      "subjectType": "MCP_SERVER",
+      "name": "ResiliReplay resilient MCP fixture",
+      "version": "0.6.0",
+      "artifact": {
+        "kind": "SOURCE",
+        "identifier": "resilireplay/examples/resilient-mcp-server@0.6.0",
+        "sha256": "e65bdf619064419629bd5b46a52311ab2fd4d8843a650992c0b0d993cfc27c78"
+      },
+      "transport": {
+        "kind": "STDIO",
+        "endpointClass": "LOCAL",
+        "authenticated": false
+      },
+      "configurationProfile": {
+        "id": "resilireplay/pinned-mcp-source",
+        "version": "1.0.0",
+        "sha256": "10d4ce1d793e6d041b1ee50b98d1dbe4aab550bf25833ca135b8dfe686ca700c"
+      },
+      "harness": {
+        "name": "ResiliReplay MCP auditor",
+        "version": "0.6.0",
+        "sha256": "7e5c37c1ca535212fbc234220125bb2782115ef3d43f1f31164739af3d845634"
+      },
+      "runtimes": [
+        {
+          "name": "node-windows-x64",
+          "version": "24.19.0",
+          "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+        }
+      ]
+    },
+    "validator": {
+      "name": "mcp-res-black-box-validator",
+      "version": "0.1.0",
+      "sha256": "d9e2a71b47b5eabe385fa17fe3c9d0e5898f323933f21654643a54e4f9d50580"
+    },
+    "execution": {
+      "actualRuntime": true,
+      "protocolMessagesExchanged": true,
+      "fixtureUsed": true,
+      "installationExecuted": true,
+      "regressionExecuted": true
+    },
+    "sourceEvidence": {
+      "kind": "SANITIZED_PROJECTION",
+      "name": "resilireplay-mcp-demo.json",
+      "originalSha256": "01528fefd178388f80a76ac54653c4db93a0cd8a75b9728748bb61de0c1a7671",
+      "originalBytes": 715,
+      "projectionSha256": "dd514dca6de41d91b6232600f364a64f46224c87bda15d20cb03567f483a0648",
+      "projectionBytes": 1904
+    },
+    "limits": {
+      "inputBytes": 1048576,
+      "eventCount": 1000,
+      "nestingDepth": 32,
+      "stringBytes": 65536,
+      "retryCount": 1,
+      "concurrency": 1,
+      "scenarioDurationMs": 10000,
+      "totalDurationMs": 30000,
+      "generatedOutputBytes": 1048576
+    },
+    "operations": [
+      {
+        "runId": "run-01528fefd178388f80a76ac5",
+        "operationId": "op-clean",
+        "parentOperationId": null,
+        "kind": "CLEAN_CONTROL",
+        "faultId": null,
+        "recoveryPolicyId": null,
+        "attempt": 0,
+        "outcome": "PASS",
+        "startedOffsetMs": 0,
+        "durationMs": 927
+      },
+      {
+        "runId": "run-01528fefd178388f80a76ac5",
+        "operationId": "op-fault",
+        "parentOperationId": null,
+        "kind": "FAULT_CASE",
+        "faultId": "fault/tool-error",
+        "recoveryPolicyId": "recovery/bounded-read-only",
+        "attempt": 0,
+        "outcome": "EXPECTED_FAILURE",
+        "startedOffsetMs": 927,
+        "durationMs": 377
+      },
+      {
+        "runId": "run-01528fefd178388f80a76ac5",
+        "operationId": "op-recovery",
+        "parentOperationId": "op-fault",
+        "kind": "RECOVERY_ATTEMPT",
+        "faultId": null,
+        "recoveryPolicyId": "recovery/bounded-read-only",
+        "attempt": 1,
+        "outcome": "PASS",
+        "startedOffsetMs": 1304,
+        "durationMs": 2
+      },
+      {
+        "runId": "run-01528fefd178388f80a76ac5",
+        "operationId": "op-negative",
+        "parentOperationId": null,
+        "kind": "NEGATIVE_CONTROL",
+        "faultId": "fault/expected-invalid-result",
+        "recoveryPolicyId": null,
+        "attempt": 0,
+        "outcome": "EXPECTED_FAILURE",
+        "startedOffsetMs": 1306,
+        "durationMs": 397
+      }
+    ],
+    "faults": [
+      {
+        "id": "fault/tool-error",
+        "version": "1.0.0",
+        "method": "RETURN_ERROR",
+        "seed": 42,
+        "targetOperationId": "op-fault",
+        "activation": { "trigger": "DURING_OPERATION", "maxApplications": 1 },
+        "expectedEffect": "FAILURE",
+        "reproducibilitySha256": "990698403e52ae6dc10248909048a44de2567a4ceeceffb3c423c0da9da6c087"
+      },
+      {
+        "id": "fault/expected-invalid-result",
+        "version": "1.0.0",
+        "method": "FIXTURE_MUTATION",
+        "seed": 42,
+        "targetOperationId": "op-negative",
+        "activation": { "trigger": "AFTER_OPERATION", "maxApplications": 1 },
+        "expectedEffect": "INVALID_RESULT",
+        "reproducibilitySha256": "c987c59c147256253630c516b8baa58f6566bcb44c4fbb3af8b0b4294dc2609d"
+      }
+    ],
+    "recoveryPolicies": [
+      {
+        "id": "recovery/bounded-read-only",
+        "retryLimit": 1,
+        "timeLimitMs": 5000,
+        "cancellationBoundary": "PER_OPERATION",
+        "backoff": { "kind": "NONE", "maxDelayMs": 0 },
+        "sideEffectModel": "READ_ONLY",
+        "safetyMechanism": null,
+        "terminalOutcomes": ["PASS", "FAIL", "TIME_LIMIT"]
+      }
+    ],
+    "cleanup": {
+      "complete": true,
+      "childProcessesRemaining": 0,
+      "listenersRemaining": 0,
+      "temporaryArtifacts": "REMOVED",
+      "targetState": "CLEAN",
+      "partialOutput": "COMPLETE",
+      "durationMs": 25
+    },
+    "regression": {
+      "provided": true,
+      "generatedWithoutExecution": true,
+      "containedOutput": true,
+      "deterministicDependencies": true,
+      "brokenConditionFails": true,
+      "fixedConditionPasses": true,
+      "secretScanPassed": true,
+      "runtimeRequirements": ["node-windows-x64 24.19.0"]
+    },
+    "privacy": {
+      "credentialsOmitted": true,
+      "authorizationHeadersOmitted": true,
+      "environmentValuesOmitted": true,
+      "promptsOmitted": true,
+      "toolBodiesOmitted": true,
+      "personalPathsOmitted": true,
+      "summariesBounded": true,
+      "oneWayIdentities": true,
+      "scanPassed": true
+    }
+  },
+  "statement": {
+    "schemaVersion": "mcp-res.conformance-statement/0.1.0",
+    "standardVersion": "0.1.0",
+    "profileId": "mcp-res/server-tool-call/v1",
+    "profileVersion": "1.0.0",
+    "subjectType": "MCP_SERVER",
+    "subjectName": "ResiliReplay resilient MCP fixture",
+    "subjectVersion": "0.6.0",
+    "evidenceClass": "GENUINE_RUNTIME",
+    "result": "PASS",
+    "evidenceSha256": "2642f8527d762badd64bd3ebe633f1871ebf6ccbdbb9da54dc71e520e89e270d",
+    "validatorName": "mcp-res-black-box-validator",
+    "validatorVersion": "0.1.0",
+    "validatorSha256": "d9e2a71b47b5eabe385fa17fe3c9d0e5898f323933f21654643a54e4f9d50580",
+    "verifiedAt": "2026-08-27T16:06:38.979Z"
+  },
+  "integrity": {
+    "schemaVersion": "0.1.0",
+    "canonicalizationAlgorithm": "mcp-res-json-utf16-v1",
+    "hashAlgorithm": "SHA-256",
+    "publication": "MANIFEST_LAST",
+    "complete": true,
+    "artifacts": [
+      {
+        "path": "conformance-statement.json",
+        "mediaType": "application/json",
+        "bytes": 583,
+        "sha256": "679497500902dd62254d1bd692292a12886f5f734e0e2f0accaf695ce1e35d56"
+      },
+      {
+        "path": "evidence-envelope.json",
+        "mediaType": "application/json",
+        "bytes": 4475,
+        "sha256": "2642f8527d762badd64bd3ebe633f1871ebf6ccbdbb9da54dc71e520e89e270d"
+      },
+      {
+        "path": "source-evidence/resilireplay-mcp-demo.json",
+        "mediaType": "application/json",
+        "bytes": 1904,
+        "sha256": "dd514dca6de41d91b6232600f364a64f46224c87bda15d20cb03567f483a0648"
+      }
+    ],
+    "bundleDigest": "9da3210d0edc42420a2421a73554616c5df30de86c7d35f23465165883ba4bca"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "mcp-res.profile-manifest/0.1.0",
+  "id": "mcp-res/server-tool-call/v1",
+  "version": "1.0.0",
+  "status": "NORMATIVE",
+  "subjectTypes": ["MCP_SERVER"],
+  "evidenceClasses": ["GENUINE_RUNTIME", "FIXTURE_BACKED_PROTOCOL", "FIXTURE_VERIFIED"],
+  "requirements": [
+    "MCPRES-ID-001",
+    "MCPRES-CTRL-001",
+    "MCPRES-FAULT-001",
+    "MCPRES-NEG-001",
+    "MCPRES-CAUSE-001",
+    "MCPRES-REC-001",
+    "MCPRES-PRIV-001",
+    "MCPRES-INT-001",
+    "MCPRES-LIMIT-001",
+    "MCPRES-CLEAN-001"
+  ],
+  "negativeControls": [
+    "An injected invalid result must be observed as EXPECTED_FAILURE",
+    "Altered evidence must produce MCP_RES_DIGEST_MISMATCH",
+    "Incomplete cleanup must produce MCP_RES_CLEANUP_INCOMPLETE"
+  ],
+  "limitations": [
+    "Normative only within this project-defined draft, not within the MCP specification",
+    "Covers bounded tool calls; subscriptions, sampling, elicitation, and long-running tasks are not yet profiled"
+  ]
+}

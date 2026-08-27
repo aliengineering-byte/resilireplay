@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/conformance-statement.schema.json",
+  "title": "MCP-RES conformance statement v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "standardVersion",
+    "profileId",
+    "profileVersion",
+    "subjectType",
+    "subjectName",
+    "subjectVersion",
+    "evidenceClass",
+    "result",
+    "evidenceSha256",
+    "validatorName",
+    "validatorVersion",
+    "validatorSha256",
+    "verifiedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.conformance-statement/0.1.0" },
+    "standardVersion": { "const": "0.1.0" },
+    "profileId": {
+      "type": "string",
+      "pattern": "^mcp-res/[a-z0-9-]+/v[1-9][0-9]*$",
+      "maxLength": 128
+    },
+    "profileVersion": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$" },
+    "subjectType": {
+      "enum": [
+        "MCP_SERVER",
+        "MCP_CLIENT",
+        "AGENT_RUNTIME",
+        "GATEWAY_PROXY",
+        "ADAPTER",
+        "TRANSPORT_IMPLEMENTATION",
+        "TEST_HARNESS"
+      ]
+    },
+    "subjectName": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "subjectVersion": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "evidenceClass": {
+      "enum": [
+        "GENUINE_RUNTIME",
+        "FIXTURE_BACKED_PROTOCOL",
+        "FIXTURE_VERIFIED",
+        "INSTALLATION_VERIFIED",
+        "DOCUMENTED_ONLY"
+      ]
+    },
+    "result": { "enum": ["PASS", "FAIL", "INCOMPLETE"] },
+    "evidenceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "validatorName": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "validatorVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "validatorSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "verifiedAt": { "type": "string", "format": "date-time" }
+  }
+}

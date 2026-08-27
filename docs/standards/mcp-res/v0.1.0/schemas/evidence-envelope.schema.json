@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/evidence-envelope.schema.json",
+  "title": "MCP-RES evidence envelope v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "standardVersion",
+    "profile",
+    "evidenceClass",
+    "run",
+    "subject",
+    "validator",
+    "execution",
+    "limits",
+    "operations",
+    "faults",
+    "recoveryPolicies",
+    "cleanup",
+    "privacy"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.evidence-envelope/0.1.0" },
+    "standardVersion": { "const": "0.1.0" },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^mcp-res/[a-z0-9-]+/v[1-9][0-9]*$"
+        },
+        "version": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$" }
+      }
+    },
+    "evidenceClass": {
+      "enum": [
+        "GENUINE_RUNTIME",
+        "FIXTURE_BACKED_PROTOCOL",
+        "FIXTURE_VERIFIED",
+        "INSTALLATION_VERIFIED",
+        "DOCUMENTED_ONLY"
+      ]
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "startedAt", "finishedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "finishedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "subject": { "$ref": "subject-identity.schema.json" },
+    "validator": { "$ref": "#/$defs/toolIdentity" },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actualRuntime",
+        "protocolMessagesExchanged",
+        "fixtureUsed",
+        "installationExecuted",
+        "regressionExecuted"
+      ],
+      "properties": {
+        "actualRuntime": { "type": "boolean" },
+        "protocolMessagesExchanged": { "type": "boolean" },
+        "fixtureUsed": { "type": "boolean" },
+        "installationExecuted": { "type": "boolean" },
+        "regressionExecuted": { "type": "boolean" }
+      }
+    },
+    "sourceEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "originalSha256",
+        "originalBytes",
+        "projectionSha256",
+        "projectionBytes"
+      ],
+      "properties": {
+        "kind": { "const": "SANITIZED_PROJECTION" },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.json$"
+        },
+        "originalSha256": { "$ref": "#/$defs/sha256" },
+        "originalBytes": { "type": "integer", "minimum": 2, "maximum": 16777216 },
+        "projectionSha256": { "$ref": "#/$defs/sha256" },
+        "projectionBytes": { "type": "integer", "minimum": 2, "maximum": 1048576 }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inputBytes",
+        "eventCount",
+        "nestingDepth",
+        "stringBytes",
+        "retryCount",
+        "concurrency",
+        "scenarioDurationMs",
+        "totalDurationMs",
+        "generatedOutputBytes"
+      ],
+      "properties": {
+        "inputBytes": { "type": "integer", "minimum": 1, "maximum": 16777216 },
+        "eventCount": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "nestingDepth": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "stringBytes": { "type": "integer", "minimum": 1, "maximum": 1048576 },
+        "retryCount": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "concurrency": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "scenarioDurationMs": { "type": "integer", "minimum": 1, "maximum": 3600000 },
+        "totalDurationMs": { "type": "integer", "minimum": 1, "maximum": 14400000 },
+        "generatedOutputBytes": { "type": "integer", "minimum": 1, "maximum": 16777216 }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 100000,
+      "items": { "$ref": "#/$defs/operation" }
+    },
+    "faults": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "fault-description.schema.json" }
+    },
+    "recoveryPolicies": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "recovery-policy.schema.json" }
+    },
+    "cleanup": { "$ref": "cleanup-result.schema.json" },
+    "regression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provided",
+        "generatedWithoutExecution",
+        "containedOutput",
+        "deterministicDependencies",
+        "brokenConditionFails",
+        "fixedConditionPasses",
+        "secretScanPassed",
+        "runtimeRequirements"
+      ],
+      "properties": {
+        "provided": { "type": "boolean" },
+        "generatedWithoutExecution": { "type": "boolean" },
+        "containedOutput": { "type": "boolean" },
+        "deterministicDependencies": { "type": "boolean" },
+        "brokenConditionFails": { "type": "boolean" },
+        "fixedConditionPasses": { "type": "boolean" },
+        "secretScanPassed": { "type": "boolean" },
+        "runtimeRequirements": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 96 }
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credentialsOmitted",
+        "authorizationHeadersOmitted",
+        "environmentValuesOmitted",
+        "promptsOmitted",
+        "toolBodiesOmitted",
+        "personalPathsOmitted",
+        "summariesBounded",
+        "oneWayIdentities",
+        "scanPassed"
+      ],
+      "properties": {
+        "credentialsOmitted": { "const": true },
+        "authorizationHeadersOmitted": { "const": true },
+        "environmentValuesOmitted": { "const": true },
+        "promptsOmitted": { "const": true },
+        "toolBodiesOmitted": { "const": true },
+        "personalPathsOmitted": { "const": true },
+        "summariesBounded": { "const": true },
+        "oneWayIdentities": { "const": true },
+        "scanPassed": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "toolIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._/@ -]*$"
+        },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runId",
+        "operationId",
+        "parentOperationId",
+        "kind",
+        "faultId",
+        "recoveryPolicyId",
+        "attempt",
+        "outcome",
+        "startedOffsetMs",
+        "durationMs"
+      ],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "operationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        "parentOperationId": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+        "kind": { "enum": ["CLEAN_CONTROL", "FAULT_CASE", "NEGATIVE_CONTROL", "RECOVERY_ATTEMPT"] },
+        "faultId": { "type": ["string", "null"], "maxLength": 128 },
+        "recoveryPolicyId": { "type": ["string", "null"], "maxLength": 128 },
+        "attempt": { "type": "integer", "minimum": 0, "maximum": 32 },
+        "outcome": { "enum": ["PASS", "EXPECTED_FAILURE", "FAIL", "CANCELLED", "TIME_LIMIT"] },
+        "startedOffsetMs": { "type": "integer", "minimum": 0, "maximum": 14400000 },
+        "durationMs": { "type": "integer", "minimum": 0, "maximum": 3600000 }
+      }
+    }
+  }
+}

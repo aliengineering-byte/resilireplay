@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "mcp-res.validator-release/0.1.0",
+  "name": "mcp-res-black-box-validator",
+  "version": "0.1.0",
+  "entrypoint": "validate.mjs",
+  "schemaDialect": "https://json-schema.org/draft/2020-12/schema",
+  "semanticRuleSet": "MCP-RES-v0.1.0",
+  "implementationBoundary": "No ResiliReplay package imports"
+}
