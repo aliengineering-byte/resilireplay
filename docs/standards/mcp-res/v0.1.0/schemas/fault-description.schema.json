@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.1.0/schemas/fault-description.schema.json",
+  "title": "MCP-RES deterministic fault v0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "method",
+    "seed",
+    "targetOperationId",
+    "activation",
+    "expectedEffect",
+    "reproducibilitySha256"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._/-]*$"
+    },
+    "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "method": {
+      "enum": [
+        "RETURN_ERROR",
+        "TIMEOUT",
+        "MALFORMED_RESPONSE",
+        "CONNECTION_CLOSE",
+        "CANCELLATION",
+        "INTERRUPTION",
+        "FIXTURE_MUTATION"
+      ]
+    },
+    "seed": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+    "targetOperationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "activation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trigger", "maxApplications"],
+      "properties": {
+        "trigger": { "enum": ["BEFORE_OPERATION", "DURING_OPERATION", "AFTER_OPERATION"] },
+        "maxApplications": { "type": "integer", "minimum": 1, "maximum": 32 }
+      }
+    },
+    "expectedEffect": { "enum": ["FAILURE", "TIMEOUT", "CANCELLED", "INVALID_RESULT"] },
+    "reproducibilitySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

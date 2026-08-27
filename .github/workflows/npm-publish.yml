@@ -22,7 +22,8 @@ jobs:
   publish:
     if: >-
       github.repository == 'aliengineering-byte/resilireplay' &&
-      (github.event_name == 'release' || github.event_name == 'workflow_dispatch')
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')))
     runs-on: ubuntu-latest
     environment: npm
     steps:

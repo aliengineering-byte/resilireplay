@@ -73,6 +73,34 @@ invariant(
   "README must make the MCP standard and verified demo prominent",
 );
 invariant(
+  html.includes('href="standards/mcp-res/"') &&
+    readme.includes("docs/standards/mcp-res/README.md") &&
+    readme.includes("MCP-RES is independent of the official MCP specification") &&
+    html.includes("does not imply MCP endorsement or security certification"),
+  "MCP-RES draft or required disclaimer is not prominent",
+);
+const mcpResPagePath = join(docs, "standards", "mcp-res", "index.html");
+const mcpResPage = await readFile(mcpResPagePath, "utf8");
+invariant(mcpResPage.includes('<html lang="en">'), "MCP-RES page must declare its language");
+invariant(mcpResPage.includes('rel="canonical"'), "MCP-RES page needs a canonical URL");
+invariant(mcpResPage.includes('http-equiv="Content-Security-Policy"'), "MCP-RES page needs a CSP");
+invariant(!/<script\b/iu.test(mcpResPage), "MCP-RES page must not execute scripts");
+invariant(
+  !/(google-analytics|googletagmanager|segment\.com|posthog|mixpanel)/iu.test(mcpResPage),
+  "MCP-RES page must not use analytics",
+);
+for (const phrase of [
+  "Problem and boundary",
+  "Who can implement",
+  "Initial profiles",
+  "Validate safe bundled evidence",
+  "Independent implementation",
+  "Reference, not dependency",
+  "Change control and 1.0",
+]) {
+  invariant(mcpResPage.includes(phrase), `MCP-RES page is missing: ${phrase}`);
+}
+invariant(
   demoTranscript.includes("PASS 1 executable regression") &&
     demoTranscript.includes("original command was not retried") &&
     demoTranscript.includes("under-60s=true"),
@@ -105,7 +133,11 @@ for (const reference of references) {
   const target = resolve(dirname(htmlPath), clean);
   invariant(target.startsWith(`${docs}${sep}`), `Local reference escapes docs: ${reference}`);
   await access(target);
-  invariant((await stat(target)).size > 0, `Local reference is empty: ${reference}`);
+  const targetStat = await stat(target);
+  invariant(
+    targetStat.isDirectory() || targetStat.size > 0,
+    `Local reference is empty: ${reference}`,
+  );
 }
 
 const images = [...html.matchAll(/<img\b[^>]*>/giu)];
@@ -122,6 +154,10 @@ invariant(
 invariant(
   sitemap.includes("https://aliengineering-byte.github.io/resilireplay/"),
   "sitemap canonical URL is wrong",
+);
+invariant(
+  sitemap.includes("https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/"),
+  "sitemap is missing the MCP-RES landing page",
 );
 
 console.log(`Landing page verified: ${references.length} references, ${ids.size} section targets`);

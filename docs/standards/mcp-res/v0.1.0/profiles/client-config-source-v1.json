@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "mcp-res.profile-manifest/0.1.0",
+  "id": "mcp-res/client-config-source/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "subjectTypes": ["MCP_CLIENT", "TEST_HARNESS"],
+  "evidenceClasses": ["FIXTURE_VERIFIED", "INSTALLATION_VERIFIED", "DOCUMENTED_ONLY"],
+  "requirements": [
+    "MCPRES-ID-001",
+    "MCPRES-CTRL-001",
+    "MCPRES-NEG-001",
+    "MCPRES-PRIV-001",
+    "MCPRES-INT-001",
+    "MCPRES-LIMIT-001",
+    "MCPRES-CLEAN-001"
+  ],
+  "negativeControls": [
+    "An unsupported configuration profile version must be rejected",
+    "A configuration containing a credential value must be rejected before evidence publication"
+  ],
+  "limitations": [
+    "The general mcp.json format is an open proposal, not released normative MCP behavior",
+    "Read-only parsing evidence does not prove that a client launches or connects to a configured server"
+  ]
+}

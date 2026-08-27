@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MCP-RES Draft v0.1.0 — reliability evidence for MCP</title>
+    <meta
+      name="description"
+      content="The project-defined, vendor-neutral MCP Reliability Evidence Standard draft, schemas, profiles, vectors, and black-box validator."
+    />
+    <meta name="theme-color" content="#10232a" />
+    <meta name="color-scheme" content="light" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="MCP Reliability Evidence Standard — Draft v0.1.0" />
+    <meta
+      property="og:description"
+      content="Executable, profile-specific reliability evidence for MCP ecosystem participants."
+    />
+    <meta
+      property="og:image"
+      content="https://aliengineering-byte.github.io/resilireplay/assets/social-preview.png"
+    />
+    <meta
+      property="og:url"
+      content="https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/"
+    />
+    <link
+      rel="canonical"
+      href="https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/"
+    />
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../../site.css?v=mcpres010" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="../../index.html" aria-label="ResiliReplay home"
+        ><span class="brand-mark" aria-hidden="true">RR</span><span>ResiliReplay</span></a
+      >
+      <nav aria-label="MCP-RES navigation">
+        <a href="#problem">Problem</a>
+        <a href="#profiles">Profiles</a>
+        <a href="#validate">Validate</a>
+        <a href="#governance">Governance</a>
+        <a
+          href="https://github.com/aliengineering-byte/resilireplay/tree/main/docs/standards/mcp-res"
+          >GitHub</a
+        >
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">Project draft · v0.1.0 · executable</p>
+          <h1>Reliability claims.<br />Bound to evidence.</h1>
+          <p class="hero-statement">
+            MCP-RES defines a portable way to show the exact subject, clean control, deterministic
+            fault, bounded recovery, expected failure, privacy boundary, integrity, and cleanup
+            behind an MCP reliability claim.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#validate">Validate in five minutes</a>
+            <a class="button secondary" href="v0.1.0/MCP_RES.md">Read the draft</a>
+          </div>
+        </div>
+        <aside class="signal-card" aria-label="Draft status and scope">
+          <div class="signal-topline"><span>MCP-RES</span><span class="status">DRAFT</span></div>
+          <p class="signal-number">0.1</p>
+          <p class="signal-label">open evidence contract</p>
+          <dl>
+            <div>
+              <dt>Schemas</dt>
+              <dd>9</dd>
+            </div>
+            <div>
+              <dt>Valid vectors</dt>
+              <dd>7</dd>
+            </div>
+            <div>
+              <dt>Invalid vectors</dt>
+              <dd>18</dd>
+            </div>
+            <div>
+              <dt>Certification</dt>
+              <dd>NO</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
+      <section class="section" id="problem">
+        <div class="section-heading">
+          <p class="eyebrow">Problem and boundary</p>
+          <h2>A pass needs more than a green label.</h2>
+          <p>
+            MCP-RES makes a narrow result reproducible: what was tested, what failed, what
+            recovered, what stayed bounded, what was omitted, and which bytes were validated. It
+            does not define MCP wire behavior, certify security, guarantee availability, or imply
+            endorsement.
+          </p>
+          <p>
+            <strong
+              >MCP-RES is independent of the official MCP specification and does not imply MCP
+              endorsement or security certification.</strong
+            >
+          </p>
+        </div>
+      </section>
+      <section class="band" id="profiles">
+        <div>
+          <p class="eyebrow">Who can implement it?</p>
+          <h2>Any MCP ecosystem participant.</h2>
+          <p>
+            Servers, clients, agent runtimes, gateways/proxies, adapters, transports, and test
+            harnesses can produce the core records. A profile narrows the required operations and
+            negative controls for one subject class.
+          </p>
+        </div>
+        <div>
+          <h3>Initial profiles</h3>
+          <ul>
+            <li><code>server-tool-call/v1</code> — normative within this project draft</li>
+            <li><code>client-config-source/v1</code> — provisional</li>
+            <li><code>agent-tool-recovery/v1</code> — provisional</li>
+          </ul>
+          <p>
+            A subject is never simply “MCP-RES compliant.” Every result names a profile/version,
+            evidence class, validator, and evidence SHA-256.
+          </p>
+        </div>
+      </section>
+      <section class="quick-start band" id="validate">
+        <div>
+          <p class="eyebrow">Five-minute black-box check</p>
+          <h2>Validate safe bundled evidence.</h2>
+          <p>The kit reads JSON only. It launches no subject and uses no network or credential.</p>
+        </div>
+        <div class="code-wrap">
+          <pre tabindex="0"><code>pnpm install --frozen-lockfile
+node docs/standards/mcp-res/v0.1.0/conformance-kit/validate.mjs docs/standards/mcp-res/v0.1.0/examples/hand-authored-valid.json
+pnpm mcp-res:validate</code></pre>
+        </div>
+        <div class="quick-links">
+          <a href="v0.1.0/FIVE_MINUTES.md">Exact output →</a>
+          <a href="v0.1.0/test-vectors/catalog.json">Vector catalog →</a>
+        </div>
+      </section>
+      <section class="section" id="reproduce">
+        <div class="section-heading">
+          <p class="eyebrow">Independent implementation and reproduction</p>
+          <h2>Schemas, vectors, bundle. Nothing private.</h2>
+          <p>
+            An independent implementation consumes the published JSON Schema 2020-12 files, profile
+            manifest, vectors, canonicalization rule, and submitted bundle. It does not need
+            ResiliReplay. Verify <code>SHA256SUMS</code>, run every positive and negative vector,
+            then validate the claim's evidence digest with a named validator version.
+          </p>
+        </div>
+        <div class="docs-grid">
+          <a href="v0.1.0/schemas/conformance-bundle.schema.json"
+            ><strong>Bundle schema</strong><span>Closed portable record</span></a
+          >
+          <a href="v0.1.0/test-vectors/SHA256SUMS"
+            ><strong>Vector hashes</strong><span>Exact published bytes</span></a
+          >
+          <a href="v0.1.0/conformance-kit/README.md"
+            ><strong>Independent validator</strong><span>No ResiliReplay package import</span></a
+          >
+          <a href="v0.1.0/FIELD_EVIDENCE.md"
+            ><strong>Field evidence</strong><span>Two pinned local stdio subjects</span></a
+          >
+        </div>
+      </section>
+      <section class="limitations band" id="reference">
+        <div>
+          <p class="eyebrow">Reference, not dependency</p>
+          <h2>Why ResiliReplay is only first.</h2>
+        </div>
+        <div>
+          <p>
+            ResiliReplay maps completed runs through a boundary exporter. The standard schemas and
+            black-box validator require none of its campaign, trace, agent, or reporter internals. A
+            second implementation should be able to produce the same portable records from its own
+            engine.
+          </p>
+          <p>Testing a public package does not make that package an adopter.</p>
+        </div>
+      </section>
+      <section class="section" id="governance">
+        <div class="section-heading">
+          <p class="eyebrow">Change control and 1.0</p>
+          <h2>Evidence before stability.</h2>
+          <p>
+            Changes are proposed through this repository's issues, Discussion, and pull requests
+            with compatibility, privacy, schemas, vectors, and CI evidence. Stable 1.0 requires a
+            completed public draft period, no unresolved critical standard defect, cross-platform
+            conformance, stable identifiers/canonicalization, migration policy, two independent
+            implementations, and at least one independently published external implementation or
+            adopter claim.
+          </p>
+          <p>Those independent criteria are not yet met.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="GOVERNANCE.md">Governance</a>
+            <a class="button primary" href="STATUS.md">Draft status</a>
+            <a class="button primary" href="v0.1.0/RESEARCH.md">Source ledger</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <p>MCP-RES Draft v0.1.0 · project-defined reliability evidence</p>
+      <p>Not official MCP · not certification · no analytics</p>
+    </footer>
+  </body>
+</html>

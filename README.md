@@ -21,6 +21,17 @@ npx --yes resilireplay@0.6.0 mcp serve
 
 [Static PNG](docs/assets/everywhere-demo.png) · [genuine transcript](docs/assets/everywhere-demo-transcript.txt) · [self-contained regression](examples/everywhere/everywhere.test.mjs) · [product site](https://aliengineering-byte.github.io/resilireplay/)
 
+## MCP Reliability Evidence Standard — Draft v0.1.0
+
+**ResiliReplay is the initial reference implementation of the project-defined MCP Reliability Evidence Standard draft.** MCP-RES defines an implementation-neutral core, versioned profiles, strict schemas, positive and negative vectors, and a black-box validator.
+
+**MCP-RES is independent of the official MCP specification and does not imply MCP endorsement or security certification.** It is not an official certification program. A result is always limited to its exact profile, subject, evidence class, validator, and evidence digest.
+
+[Read MCP-RES v0.1.0](docs/standards/mcp-res/README.md) ·
+[validate in five minutes](docs/standards/mcp-res/v0.1.0/FIVE_MINUTES.md) ·
+[inspect the schemas and vectors](docs/standards/mcp-res/v0.1.0/CONFORMANCE.md) ·
+[open the standards site](https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/)
+
 ## ResiliReplay MCP Reliability Evidence Profile
 
 This project-defined profile describes the minimum evidence for a bounded MCP reliability claim: pinned

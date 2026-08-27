@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "resilireplay.mcp-res-export-input/0.1.0",
+  "sourceKind": "MCP_INSPECTOR_DEMO",
+  "sourceEvidenceName": "integration-manifest.json",
+  "sourceEvidenceSha256": "01528fefd178388f80a76ac54653c4db93a0cd8a75b9728748bb61de0c1a7671",
+  "sourceEvidenceBytes": 715,
+  "runId": "run-01528fefd178388f80a76ac5",
+  "startedAt": "2026-08-27T16:06:36.782Z",
+  "finishedAt": "2026-08-27T16:06:38.979Z",
+  "subject": {
+    "name": "ResiliReplay resilient MCP fixture",
+    "version": "0.6.0",
+    "artifactKind": "SOURCE",
+    "artifactIdentifier": "resilireplay/examples/resilient-mcp-server@0.6.0",
+    "artifactSha256": "e65bdf619064419629bd5b46a52311ab2fd4d8843a650992c0b0d993cfc27c78",
+    "transport": "STDIO",
+    "configurationSha256": "10d4ce1d793e6d041b1ee50b98d1dbe4aab550bf25833ca135b8dfe686ca700c"
+  },
+  "harness": {
+    "name": "ResiliReplay MCP auditor",
+    "version": "0.6.0",
+    "sha256": "7e5c37c1ca535212fbc234220125bb2782115ef3d43f1f31164739af3d845634"
+  },
+  "runtime": {
+    "name": "node-windows-x64",
+    "version": "24.19.0",
+    "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+  },
+  "controlDurationMs": 927,
+  "faultDurationMs": 377,
+  "recoveryDurationMs": 2,
+  "negativeDurationMs": 397,
+  "retryLimit": 1,
+  "faultSeed": 42,
+  "negativeSeed": 42,
+  "regression": {
+    "sourceTraceSha256": "c7253880fe8e8c1f52ff0de5e92620a4127467be08b5c1aec10239e0a86c01ee",
+    "scenarioSha256": "98971ebdd0b839a87fe28c4e681649617cc42672c38635cf6095ccc4d9dd5f01",
+    "fixtureSha256": "3ba8a81567fafcaeb1b8907b3394e39a87cb6d53905bfb121d40877feaefd45f",
+    "testSha256": "0193cc3e31ce00e2f4174cfddc53d5eae0033bace7f3dba920684aa4428bdf3c",
+    "executed": true
+  },
+  "cleanup": {
+    "childProcessesRemaining": 0,
+    "listenersRemaining": 0
+  },
+  "evaluationStatement": "ResiliReplay generated this evidence from its own pinned local MCP fixture."
+}

@@ -1,0 +1,168 @@
+{
+  "schemaVersion": "mcp-res.conformance-bundle/0.1.0",
+  "evidence": {
+    "schemaVersion": "mcp-res.evidence-envelope/0.1.0",
+    "standardVersion": "0.1.0",
+    "profile": { "id": "mcp-res/server-tool-call/v1", "version": "1.0.0" },
+    "evidenceClass": "FIXTURE_BACKED_PROTOCOL",
+    "run": {
+      "id": "run-example-0001",
+      "startedAt": "2026-08-27T12:00:00.000Z",
+      "finishedAt": "2026-08-27T12:00:01.000Z"
+    },
+    "subject": {
+      "schemaVersion": "0.1.0",
+      "subjectType": "MCP_SERVER",
+      "name": "independent-mcp-fixture",
+      "version": "1.0.0",
+      "artifact": {
+        "kind": "SOURCE",
+        "identifier": "example/independent-mcp-fixture@1.0.0",
+        "sha256": "283603e2ae0a3e6df7148742b4261dc2130056630d3c24d7cff661ad0552113a"
+      },
+      "transport": {
+        "kind": "STDIO",
+        "endpointClass": "LOCAL",
+        "authenticated": false
+      },
+      "configurationProfile": {
+        "id": "mcp-res/example-config",
+        "version": "1.0.0",
+        "sha256": "891654a9d127d81f382b195d66eb9c6d54095693f66a7fba73efa0560a19f801"
+      },
+      "harness": {
+        "name": "independent-example-harness",
+        "version": "1.0.0",
+        "sha256": "f10bcdfa8a7c84fc3795ac1dfa4a13150d0301be1a8e0b75712b60454d6eb8a8"
+      },
+      "runtimes": [
+        {
+          "name": "node",
+          "version": "24.6.0",
+          "sha256": "d6654227fddbeb83d6a06135222cca474bb337c0e05a253f1106b0b92dfd1245"
+        }
+      ],
+      "absolutePath": "/tmp/build-123/subject"
+    },
+    "validator": {
+      "name": "mcp-res-black-box-validator",
+      "version": "0.1.0",
+      "sha256": "d9e2a71b47b5eabe385fa17fe3c9d0e5898f323933f21654643a54e4f9d50580"
+    },
+    "execution": {
+      "actualRuntime": false,
+      "protocolMessagesExchanged": true,
+      "fixtureUsed": true,
+      "installationExecuted": false,
+      "regressionExecuted": false
+    },
+    "limits": {
+      "inputBytes": 1048576,
+      "eventCount": 1000,
+      "nestingDepth": 32,
+      "stringBytes": 65536,
+      "retryCount": 2,
+      "concurrency": 1,
+      "scenarioDurationMs": 10000,
+      "totalDurationMs": 30000,
+      "generatedOutputBytes": 1048576
+    },
+    "operations": [
+      {
+        "runId": "run-example-0001",
+        "operationId": "op-clean",
+        "parentOperationId": null,
+        "kind": "CLEAN_CONTROL",
+        "faultId": null,
+        "recoveryPolicyId": null,
+        "attempt": 0,
+        "outcome": "PASS",
+        "startedOffsetMs": 0,
+        "durationMs": 25
+      },
+      {
+        "runId": "run-example-0001",
+        "operationId": "op-negative",
+        "parentOperationId": null,
+        "kind": "NEGATIVE_CONTROL",
+        "faultId": "fault/expected-invalid-result",
+        "recoveryPolicyId": null,
+        "attempt": 0,
+        "outcome": "EXPECTED_FAILURE",
+        "startedOffsetMs": 100,
+        "durationMs": 25
+      }
+    ],
+    "faults": [
+      {
+        "id": "fault/expected-invalid-result",
+        "version": "1.0.0",
+        "method": "FIXTURE_MUTATION",
+        "seed": 1702,
+        "targetOperationId": "op-negative",
+        "activation": { "trigger": "AFTER_OPERATION", "maxApplications": 1 },
+        "expectedEffect": "INVALID_RESULT",
+        "reproducibilitySha256": "77e9ccf04ab35200fd35e9b3eb7666e1a5f1bd482c84076f89186a3daa2ebfd8"
+      }
+    ],
+    "recoveryPolicies": [],
+    "cleanup": {
+      "complete": true,
+      "childProcessesRemaining": 0,
+      "listenersRemaining": 0,
+      "temporaryArtifacts": "REMOVED",
+      "targetState": "CLEAN",
+      "partialOutput": "COMPLETE",
+      "durationMs": 5
+    },
+    "privacy": {
+      "credentialsOmitted": true,
+      "authorizationHeadersOmitted": true,
+      "environmentValuesOmitted": true,
+      "promptsOmitted": true,
+      "toolBodiesOmitted": true,
+      "personalPathsOmitted": true,
+      "summariesBounded": true,
+      "oneWayIdentities": true,
+      "scanPassed": true
+    }
+  },
+  "statement": {
+    "schemaVersion": "mcp-res.conformance-statement/0.1.0",
+    "standardVersion": "0.1.0",
+    "profileId": "mcp-res/server-tool-call/v1",
+    "profileVersion": "1.0.0",
+    "subjectType": "MCP_SERVER",
+    "subjectName": "independent-mcp-fixture",
+    "subjectVersion": "1.0.0",
+    "evidenceClass": "FIXTURE_BACKED_PROTOCOL",
+    "result": "PASS",
+    "evidenceSha256": "1f93d237acd164341e07e9b0166fd60fca7857d2b07e2092323b293ae2b2cfee",
+    "validatorName": "mcp-res-black-box-validator",
+    "validatorVersion": "0.1.0",
+    "validatorSha256": "d9e2a71b47b5eabe385fa17fe3c9d0e5898f323933f21654643a54e4f9d50580",
+    "verifiedAt": "2026-08-27T12:05:00.000Z"
+  },
+  "integrity": {
+    "schemaVersion": "0.1.0",
+    "canonicalizationAlgorithm": "mcp-res-json-utf16-v1",
+    "hashAlgorithm": "SHA-256",
+    "publication": "MANIFEST_LAST",
+    "complete": true,
+    "artifacts": [
+      {
+        "path": "conformance-statement.json",
+        "mediaType": "application/json",
+        "bytes": 580,
+        "sha256": "dfd930ce7ec63ce2cfd681c548ac01ad157f9c0343aea05da7302732604bb631"
+      },
+      {
+        "path": "evidence-envelope.json",
+        "mediaType": "application/json",
+        "bytes": 2834,
+        "sha256": "1f93d237acd164341e07e9b0166fd60fca7857d2b07e2092323b293ae2b2cfee"
+      }
+    ],
+    "bundleDigest": "50e601df70fde7ca5a0b63940892e9ea604fea9dfa1249e84aad8b502ab07d4b"
+  }
+}

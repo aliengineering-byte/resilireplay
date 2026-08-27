@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "resilireplay.mcp-res-export-input/0.1.0",
+  "sourceKind": "CAMPAIGN_RUN",
+  "sourceEvidenceName": "campaign-run.json",
+  "sourceEvidenceSha256": "ade051d18fc566f8ccfa555b0b260164a054f6ed35b957151434103b6628c014",
+  "sourceEvidenceBytes": 4270,
+  "runId": "run-ade051d18fc566f8ccfa555b",
+  "startedAt": "2026-08-27T16:07:31.572Z",
+  "finishedAt": "2026-08-27T16:07:34.583Z",
+  "subject": {
+    "name": "MCP Everything Server",
+    "version": "2026.7.4",
+    "artifactKind": "PACKAGE",
+    "artifactIdentifier": "npm/@modelcontextprotocol/server-everything@2026.7.4",
+    "artifactSha256": "ece23eb0e5252fb63449fb2e8b90676062d1344bf47e53417c8e422b4a18b765",
+    "transport": "STDIO",
+    "configurationSha256": "40d5040e597007796dc0ea848ebe0c8c730fd9064509f50989c791a717ade607"
+  },
+  "harness": {
+    "name": "ResiliReplay campaign runner",
+    "version": "0.3.0",
+    "sha256": "7d6806aee3c6900d639f9a3316bd93771c4bc67a33d7fe8e1f6fb962ebc83b6b"
+  },
+  "runtime": {
+    "name": "node-windows-x64",
+    "version": "24.19.0",
+    "sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237"
+  },
+  "controlDurationMs": 918,
+  "faultDurationMs": 880,
+  "recoveryDurationMs": 1,
+  "negativeDurationMs": 1210,
+  "retryLimit": 1,
+  "faultSeed": 1702,
+  "negativeSeed": 1703,
+  "regression": {
+    "sourceTraceSha256": "2ac3108f940e9498ba4e8978496909673afb9f5041b126b17cb4ac30cc909ec9",
+    "scenarioSha256": "34a8ee74fea47ede8035f33b29ee69dd30934b635afe23cdeb49b5302e29147d",
+    "fixtureSha256": "ad5d9053fae7e1829210d09bf9dd8b86ec6cfea43dcbbba04329734f060228d3",
+    "testSha256": "4edb973048963373d40fc40a7b55d178ce7ae00e5caae02cf6902c79978ff941",
+    "executed": true
+  },
+  "cleanup": {
+    "childProcessesRemaining": 0,
+    "listenersRemaining": 0
+  },
+  "evaluationStatement": "MCP-RES was evaluated against this pinned public subject by the ResiliReplay project; this is not an adopter claim."
+}

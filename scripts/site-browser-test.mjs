@@ -47,8 +47,20 @@ try {
   if (!address || typeof address === "string") throw new Error("Site server did not bind a port");
   browser = await chromium.launch({ headless: true });
   for (const profile of [
-    { name: "desktop", width: 1440, height: 1000 },
-    { name: "mobile", width: 390, height: 844 },
+    { name: "desktop", path: "/", width: 1440, height: 1000 },
+    { name: "mobile", path: "/", width: 390, height: 844 },
+    {
+      name: "mcp-res-desktop",
+      path: "/standards/mcp-res/index.html",
+      width: 1440,
+      height: 1000,
+    },
+    {
+      name: "mcp-res-mobile",
+      path: "/standards/mcp-res/index.html",
+      width: 390,
+      height: 844,
+    },
   ]) {
     const page = await browser.newPage({
       viewport: { width: profile.width, height: profile.height },
@@ -59,7 +71,7 @@ try {
     });
     page.on("pageerror", (error) => errors.push(error.message));
     await page.addInitScript({ path: require.resolve("axe-core/axe.min.js") });
-    const response = await page.goto(`http://127.0.0.1:${address.port}/`, {
+    const response = await page.goto(`http://127.0.0.1:${address.port}${profile.path}`, {
       waitUntil: "networkidle",
     });
     if (!response?.ok())
