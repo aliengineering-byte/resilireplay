@@ -1,3 +1,8 @@
+import { spawnSync } from "node:child_process";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   createEvent,
@@ -43,6 +48,48 @@ describe("versioned event model", () => {
   it("uses canonical object ordering", () => {
     expect(stableStringify({ z: 1, a: { y: 2, b: 3 } })).toBe('{"a":{"b":3,"y":2},"z":1}');
     expect(validateTrace(passingTrace())).toHaveLength(5);
+  });
+
+  it("uses locale-independent canonical ordering under concurrency", async () => {
+    const input = { z: 1, ä: 2, a: 3, Z: 4 };
+    const expected = '{"Z":4,"a":3,"z":1,"ä":2}';
+    expect(stableStringify(input)).toBe(expected);
+    const results = await Promise.all(
+      Array.from({ length: 128 }, async (_, index) =>
+        stableStringify(index % 2 === 0 ? input : { Z: 4, a: 3, ä: 2, z: 1 }),
+      ),
+    );
+    expect(new Set(results)).toEqual(new Set([expected]));
+    expect(hashValue({ ...input, z: 2 })).not.toBe(hashValue(input));
+  });
+
+  it("produces the same canonical bytes in separate processes and working directories", async () => {
+    const firstDirectory = await mkdtemp(join(tmpdir(), "resilireplay-canonical-first-"));
+    const secondDirectory = await mkdtemp(join(tmpdir(), "resilireplay-canonical-second-"));
+    const coreModule = pathToFileURL(resolve("packages/core/dist/index.js")).href;
+    const source = `import { stableStringify } from ${JSON.stringify(coreModule)}; process.stdout.write(stableStringify({z:1,a:2,"ä":3}));`;
+    try {
+      const outputs = [firstDirectory, secondDirectory].map((cwd) =>
+        spawnSync(process.execPath, ["--input-type=module", "--eval", source], {
+          cwd,
+          encoding: "utf8",
+          windowsHide: true,
+        }),
+      );
+      expect(outputs.map((result) => result.status)).toEqual([0, 0]);
+      expect(new Set(outputs.map((result) => result.stdout))).toEqual(
+        new Set(['{"a":2,"z":1,"ä":3}']),
+      );
+    } finally {
+      await rm(firstDirectory, { recursive: true, force: true });
+      await rm(secondDirectory, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects interleaved run identities", () => {
+    expect(() =>
+      validateTrace([event(0, "run_started"), { ...event(1, "run_completed"), runId: "other" }]),
+    ).toThrow("more than one run ID");
   });
 });
 

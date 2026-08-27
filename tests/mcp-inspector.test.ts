@@ -1,13 +1,27 @@
 import { spawn, spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { once } from "node:events";
-import { access, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  mkdtemp,
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   auditMcp,
   classifyInspectorPath,
+  INSPECTOR_SOURCE_PROFILE,
+  listInspectorServers,
   loadInspectorConfig,
+  MAX_INSPECTOR_CONFIG_BYTES,
+  MAX_INSPECTOR_SERVERS,
   MCP_EXIT_CODES,
   McpConnectionError,
   McpRemoteAuthorizationError,
@@ -257,6 +271,8 @@ describe("MCP Inspector configuration integration", () => {
     const serializedPlan = JSON.stringify(imported.plan);
     expect(serializedPlan).not.toContain(secret);
     expect(serializedPlan).not.toContain("reviewed literal");
+    expect(imported.plan.sourceProfile).toEqual(INSPECTOR_SOURCE_PROFILE);
+    expect(imported.plan.compatibility).toBe("MCP Inspector >=2.0.0 <2.2.0");
     expect(imported.plan.environment).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ name: "API_KEY", source: "variable-reference" }),
@@ -420,6 +436,106 @@ describe("MCP Inspector configuration integration", () => {
     }
   });
 
+  it("fails closed with bounded diagnostics for hostile source-profile inputs", async () => {
+    const directory = await artifactDirectory("mcp-profile-bounds-");
+    const writeCase = async (name: string, value: string | Buffer): Promise<string> => {
+      const path = join(directory, `${name}.json`);
+      await writeFile(path, value);
+      return path;
+    };
+    try {
+      const oversized = await writeCase(
+        "oversized",
+        Buffer.alloc(MAX_INSPECTOR_CONFIG_BYTES + 1, 0x20),
+      );
+      await expect(loadInspectorConfig(oversized, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_TOO_LARGE",
+      });
+      await expect(listInspectorServers(oversized, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_TOO_LARGE",
+      });
+
+      const malformedUtf8 = await writeCase("invalid-utf8", Buffer.from([0xff, 0xfe, 0xfd]));
+      await expect(loadInspectorConfig(malformedUtf8, { allowedRoot: root })).rejects.toMatchObject(
+        { errorId: "RR_MCP_CONFIG_INVALID_UTF8" },
+      );
+
+      const bom = await writeCase(
+        "bom",
+        `\uFEFF${JSON.stringify({ mcpServers: { one: { command: "node" } } })}`,
+      );
+      await expect(loadInspectorConfig(bom, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_BOM",
+      });
+
+      const invalidSurrogate = await writeCase(
+        "invalid-surrogate",
+        '{"mcpServers":{"one":{"command":"node","note":"\\ud800"}}}',
+      );
+      await expect(
+        loadInspectorConfig(invalidSurrogate, { allowedRoot: root }),
+      ).rejects.toMatchObject({ errorId: "RR_MCP_CONFIG_INVALID_UNICODE" });
+
+      const deepValue = `${"[".repeat(40)}null${"]".repeat(40)}`;
+      const deep = await writeCase(
+        "deep",
+        `{"mcpServers":{"one":{"command":"node","note":${deepValue}}}}`,
+      );
+      await expect(loadInspectorConfig(deep, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_TOO_DEEP",
+      });
+
+      const tooMany = await writeCase(
+        "too-many-servers",
+        JSON.stringify({
+          mcpServers: Object.fromEntries(
+            Array.from({ length: MAX_INSPECTOR_SERVERS + 1 }, (_, index) => [
+              `server-${index}`,
+              { command: "node" },
+            ]),
+          ),
+        }),
+      );
+      await expect(loadInspectorConfig(tooMany, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_TOO_MANY_SERVERS",
+      });
+
+      const tooManyArguments = await writeCase(
+        "too-many-arguments",
+        JSON.stringify({
+          mcpServers: { one: { command: "node", args: Array.from({ length: 257 }, () => "x") } },
+        }),
+      );
+      await expect(
+        loadInspectorConfig(tooManyArguments, { allowedRoot: root }),
+      ).rejects.toMatchObject({ errorId: "RR_MCP_CONFIG_ARGS" });
+
+      const foreignPath =
+        process.platform === "win32" ? "/opt/mcp/server.js" : "C:\\mcp\\server.js";
+      const foreign = await writeCase(
+        "foreign-path",
+        JSON.stringify({ mcpServers: { one: { command: "node", args: [foreignPath] } } }),
+      );
+      await expect(loadInspectorConfig(foreign, { allowedRoot: root })).rejects.toMatchObject({
+        errorId: "RR_MCP_CONFIG_FOREIGN_PATH",
+      });
+
+      const encodedSecret = Buffer.from(`sk-${"Z".repeat(24)}`, "utf8").toString("base64");
+      const secretField = await writeCase(
+        "secret-error",
+        JSON.stringify({ mcpServers: { one: { command: "node", [encodedSecret]: true } } }),
+      );
+      const error = await loadInspectorConfig(secretField, { allowedRoot: root }).catch(
+        (caught: unknown) => caught,
+      );
+      expect(error).toMatchObject({ errorId: "RR_MCP_CONFIG_UNKNOWN_FIELD" });
+      expect((error as Error).message).not.toContain(encodedSecret);
+      expect((error as Error).message).toContain("[REDACTED]");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("cleans up a timed-out stdio server process", async () => {
     const directory = await artifactDirectory("mcp-timeout-");
     const pidFile = join(directory, "server.pid");
@@ -510,6 +626,7 @@ describe("MCP Inspector configuration integration", () => {
 
   it("exposes dry-run help and stable CLI exit codes without calling a server", async () => {
     const directory = await artifactDirectory("mcp-cli-");
+    const outside = await mkdtemp(join(tmpdir(), "resilireplay-mcp-cli-outside-"));
     try {
       const help = spawnSync(process.execPath, [cli, "mcp", "audit", "--help"], {
         encoding: "utf8",
@@ -548,6 +665,40 @@ describe("MCP Inspector configuration integration", () => {
           () => false,
         ),
       ).toBe(false);
+
+      const sentinel = join(directory, "must-not-start.txt");
+      await writeFile(
+        join(directory, "sentinel-server.mjs"),
+        `import { writeFileSync } from "node:fs"; writeFileSync(${JSON.stringify(sentinel)}, "started");`,
+        "utf8",
+      );
+      const containmentConfig = join(directory, "containment.json");
+      await writeFile(
+        containmentConfig,
+        JSON.stringify({
+          mcpServers: { sentinel: { command: "node", args: ["sentinel-server.mjs"] } },
+        }),
+        "utf8",
+      );
+      const linkedOutput = join(directory, "linked-output");
+      let linkAvailable = true;
+      try {
+        await symlink(outside, linkedOutput, process.platform === "win32" ? "junction" : "dir");
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "EPERM") linkAvailable = false;
+        else throw error;
+      }
+      if (linkAvailable) {
+        const containmentFailure = spawnSync(
+          process.execPath,
+          [cli, "mcp", "audit", "--inspector-config", containmentConfig, "--output", linkedOutput],
+          { encoding: "utf8", windowsHide: true },
+        );
+        expect(containmentFailure.status).toBe(2);
+        expect(containmentFailure.stderr).toContain("symbolic link or junction");
+        await expect(access(sentinel)).rejects.toThrow();
+        expect(await readdir(outside)).toEqual([]);
+      }
 
       const missingTarget = spawnSync(process.execPath, [cli, "mcp", "audit", "--dry-run"], {
         encoding: "utf8",
@@ -602,6 +753,7 @@ describe("MCP Inspector configuration integration", () => {
       expect(await allText(secretOutput)).not.toContain(`sk-${"fixture".repeat(7)}`);
     } finally {
       await rm(directory, { recursive: true, force: true });
+      await rm(outside, { recursive: true, force: true });
     }
   });
 });
