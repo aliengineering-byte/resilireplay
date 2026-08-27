@@ -1,5 +1,13 @@
 import { readFile, stat, writeFile } from "node:fs/promises";
-import { stableStringify, validateEvent, validateTrace, type TraceEvent } from "@resilireplay/core";
+import { dirname, resolve } from "node:path";
+import {
+  containsLikelySecret,
+  prepareContainedOutputFile,
+  stableStringify,
+  validateEvent,
+  validateTrace,
+  type TraceEvent,
+} from "@resilireplay/core";
 
 export const MAX_TRACE_BYTES = 32 * 1024 * 1024;
 export const MAX_TRACE_EVENTS = 100_000;
@@ -9,6 +17,9 @@ export function serializeTrace(events: readonly TraceEvent[]): string {
     throw new Error(`Trace exceeds ${MAX_TRACE_EVENTS} events`);
   }
   validateTrace(events);
+  if (containsLikelySecret(events)) {
+    throw new Error("Trace contains credential-shaped material and cannot be persisted");
+  }
   return `${events.map((event) => stableStringify(event)).join("\n")}\n`;
 }
 
@@ -42,6 +53,22 @@ export async function readTrace(path: string): Promise<TraceEvent[]> {
   return parseTrace(await readFile(path, "utf8"));
 }
 
-export async function writeTrace(path: string, events: readonly TraceEvent[]): Promise<void> {
-  await writeFile(path, serializeTrace(events), "utf8");
+export interface WriteTraceOptions {
+  allowedRoot?: string;
+  overwrite?: boolean;
+}
+
+export async function writeTrace(
+  path: string,
+  events: readonly TraceEvent[],
+  options: WriteTraceOptions = {},
+): Promise<void> {
+  const output = resolve(path);
+  const allowedRoot = resolve(options.allowedRoot ?? dirname(output));
+  await prepareContainedOutputFile(allowedRoot, output);
+  await writeFile(output, serializeTrace(events), {
+    encoding: "utf8",
+    flag: options.overwrite === false ? "wx" : "w",
+    flush: true,
+  });
 }

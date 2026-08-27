@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import {
   StdioClientTransport,
@@ -14,6 +14,7 @@ import {
   containsLikelySecret,
   createEvent,
   injectFaults,
+  prepareContainedOutputDirectory,
   safeOutputPath,
   sanitize,
   stableStringify,
@@ -760,8 +761,11 @@ export async function writeMcpCertification(
   result: McpAuditResult,
   directoryInput: string,
 ): Promise<{ jsonPath: string; htmlPath: string; badgePath: string }> {
-  const directory = resolve(directoryInput);
-  await mkdir(directory, { recursive: true });
+  const requestedDirectory = resolve(directoryInput);
+  const directory = await prepareContainedOutputDirectory(
+    dirname(requestedDirectory),
+    requestedDirectory,
+  );
   const jsonPath = safeOutputPath(directory, "mcp-certification.json");
   const htmlPath = safeOutputPath(directory, "mcp-certification.html");
   const badgePath = safeOutputPath(directory, "mcp-badge.svg");

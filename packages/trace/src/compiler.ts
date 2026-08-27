@@ -1,7 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { basename, resolve } from "node:path";
+import { link, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import {
   calculateMetrics,
+  prepareContainedOutputDirectory,
   PRODUCT_VERSION,
   safeOutputPath,
   sha256,
@@ -25,6 +26,10 @@ export interface RegressionArtifacts {
   firstCriticalStep: string;
   minimizedEventCount: number;
   sourceEventCount: number;
+}
+
+export interface CompileRegressionOptions {
+  allowedRoot?: string;
 }
 
 function causalSlice(events: readonly TraceEvent[], critical: TraceEvent): TraceEvent[] {
@@ -112,6 +117,7 @@ export function identifyFirstCriticalEvent(events: readonly TraceEvent[]): Trace
 export async function compileRegression(
   source: readonly TraceEvent[],
   outputDirectoryInput: string,
+  options: CompileRegressionOptions = {},
 ): Promise<RegressionArtifacts> {
   const sourceSerialized = serializeTrace(source);
   const sourceTraceHash = sha256(sourceSerialized);
@@ -123,7 +129,8 @@ export async function compileRegression(
   }
 
   const outputDirectory = resolve(outputDirectoryInput);
-  await mkdir(outputDirectory, { recursive: true });
+  const allowedRoot = resolve(options.allowedRoot ?? dirname(outputDirectory));
+  await prepareContainedOutputDirectory(allowedRoot, outputDirectory);
   const scenarioPath = safeOutputPath(outputDirectory, "scenario.yaml");
   const fixturePath = safeOutputPath(outputDirectory, "replay.fixture.jsonl");
   const testPath = safeOutputPath(outputDirectory, "regression.test.mjs");
@@ -161,6 +168,7 @@ export async function compileRegression(
   const scenarioHash = sha256(scenario);
   const manifest = {
     schemaVersion: "1.0",
+    status: "complete",
     product: "ResiliReplay",
     productVersion: PRODUCT_VERSION,
     sourceTraceSha256: sourceTraceHash,
@@ -173,12 +181,52 @@ export async function compileRegression(
     scenarioSha256: scenarioHash,
   };
 
-  await Promise.all([
-    writeFile(scenarioPath, scenario, "utf8"),
-    writeFile(fixturePath, fixture, "utf8"),
-    writeFile(testPath, testSource, "utf8"),
-    writeFile(manifestPath, `${stableStringify(manifest)}\n`, "utf8"),
-  ]);
+  const stagingDirectory = await mkdtemp(join(outputDirectory, ".resilireplay-regression-"));
+  const staged = [
+    { name: basename(scenarioPath), finalPath: scenarioPath, content: scenario },
+    { name: basename(fixturePath), finalPath: fixturePath, content: fixture },
+    { name: basename(testPath), finalPath: testPath, content: testSource },
+    {
+      name: basename(manifestPath),
+      finalPath: manifestPath,
+      content: `${stableStringify(manifest)}\n`,
+    },
+  ];
+  const published: string[] = [];
+  try {
+    await Promise.all(
+      staged.map((artifact) =>
+        writeFile(join(stagingDirectory, artifact.name), artifact.content, {
+          encoding: "utf8",
+          flag: "wx",
+          flush: true,
+        }),
+      ),
+    );
+    for (const artifact of staged) {
+      try {
+        await link(join(stagingDirectory, artifact.name), artifact.finalPath);
+        published.push(artifact.finalPath);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+          const existing = await readFile(artifact.finalPath, "utf8").catch(() => undefined);
+          if (existing === artifact.content) continue;
+          throw new Error(
+            `Regression artifact conflict; refusing to overwrite: ${artifact.finalPath}`,
+            {
+              cause: error,
+            },
+          );
+        }
+        throw error;
+      }
+    }
+  } catch (error) {
+    await Promise.all(published.map((path) => rm(path, { force: true })));
+    throw error;
+  } finally {
+    await rm(stagingDirectory, { recursive: true, force: true });
+  }
   return {
     outputDirectory,
     scenarioPath,

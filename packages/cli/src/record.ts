@@ -1,8 +1,13 @@
 import { spawn, spawnSync } from "node:child_process";
-import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
-import { createEvent, sanitize, type EventType, type TraceEvent } from "@resilireplay/core";
+import {
+  createEvent,
+  prepareContainedOutputFile,
+  sanitize,
+  type EventType,
+  type TraceEvent,
+} from "@resilireplay/core";
 import { writeTrace } from "@resilireplay/trace";
 
 interface InlineEvent {
@@ -36,9 +41,10 @@ export async function recordCommand(
   command: string[],
   outputPath: string,
   timeoutMs: number,
+  allowedRoot: string = dirname(outputPath),
 ): Promise<{ events: TraceEvent[]; exitCode: number }> {
   if (command.length === 0) throw new Error("A command is required after --");
-  await mkdir(dirname(outputPath), { recursive: true });
+  await prepareContainedOutputFile(allowedRoot, outputPath);
   const runId = randomUUID();
   const events: TraceEvent[] = [
     createEvent({
@@ -134,6 +140,6 @@ export async function recordCommand(
       payload: { exitCode, timedOut, timeoutMs },
     }),
   );
-  await writeTrace(outputPath, events);
+  await writeTrace(outputPath, events, { allowedRoot });
   return { events, exitCode };
 }

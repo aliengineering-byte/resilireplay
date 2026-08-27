@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+import { sanitize } from "@resilireplay/core";
 import { runCli } from "./index.js";
 
 runCli().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : stableError(error);
+  const message = sanitize(error instanceof Error ? error.message : stableError(error));
   const code = exitCode(error);
   console.error(
     process.argv.includes("--json")
@@ -13,6 +14,14 @@ runCli().catch((error: unknown) => {
 });
 
 function exitCode(error: unknown): number {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "RR_OUTPUT_CONTAINMENT"
+  ) {
+    return 2;
+  }
   if (
     typeof error === "object" &&
     error !== null &&

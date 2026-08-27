@@ -1,8 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { basename, resolve } from "node:path";
+import { writeFile } from "node:fs/promises";
+import { basename, dirname, resolve } from "node:path";
 import {
   calculateMetrics,
   PRODUCT_VERSION,
+  prepareContainedOutputDirectory,
   safeOutputPath,
   sha256,
   stableStringify,
@@ -184,8 +185,11 @@ export async function writeReportBundle(
   events: readonly TraceEvent[],
   directoryInput: string,
 ): Promise<ReportBundle> {
-  const directory = resolve(directoryInput);
-  await mkdir(directory, { recursive: true });
+  const requestedDirectory = resolve(directoryInput);
+  const directory = await prepareContainedOutputDirectory(
+    dirname(requestedDirectory),
+    requestedDirectory,
+  );
   const metrics = calculateMetrics(events);
   const jsonPath = safeOutputPath(directory, "report.json");
   const htmlPath = safeOutputPath(directory, "report.html");
