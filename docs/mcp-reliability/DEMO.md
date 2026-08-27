@@ -5,7 +5,7 @@ This 32-second silent demo is rendered from a real local run of the public npm
 tool error, one expected failure, the integrity-bound campaign result, and the generated regression
 executing with one pass and zero failures.
 
-![Terminal demo of the MCP Reliability Standard: clean control, bounded recovery, expected failure, and passing generated regression](../assets/mcp-reliability-standard-demo.gif)
+![Terminal demo of the ResiliReplay MCP reliability evidence profile: clean control, bounded recovery, expected failure, and passing generated regression](../assets/mcp-reliability-standard-demo.gif)
 
 [Static PNG](../assets/mcp-reliability-standard-demo.png) ·
 [verified transcript](../assets/mcp-reliability-standard-demo-transcript.txt) ·
@@ -31,8 +31,8 @@ formats existing terminal output; it does not invent server behavior or test res
 ## Artifact hashes
 
 ```text
-f7fd36130bd32d9b9c37f7c1fea9bfa616ed8720d224a0c4a2183801e859fefd  docs/assets/mcp-reliability-standard-demo.gif
-f19cfd5eee587c904b26702d4f902743d9cac405d27b120fa15e1fd2d2af4d17  docs/assets/mcp-reliability-standard-demo.png
+de5caeaf6ef6540a0b598b9876ec8a85d707074ad8b29e58446ae9b3142709fd  docs/assets/mcp-reliability-standard-demo.gif
+4100ddf2f5c8e4da37139e80d6dd3bbba6e26acf3a06f4fb6f7a82645942e0ff  docs/assets/mcp-reliability-standard-demo.png
 8b498d10320ebec648157f0bc9f53d16d00accc21cf2f103afbae853c6f35cb3  docs/assets/mcp-reliability-standard-demo-transcript.txt
-1e478c2321c8f31023ad9fd152002954459ecce77f69e568d173b7f69bbfc4ac  scripts/generate-mcp-standard-demo.py
+3a2ad8521a72e7e9ca251fc2bfcd5ab7e6d82e64c2151b28366fdd5ea5be2fb7  scripts/generate-mcp-standard-demo.py
 ```

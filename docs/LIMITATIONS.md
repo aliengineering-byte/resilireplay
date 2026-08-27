@@ -19,6 +19,10 @@ ResiliReplay v0.6.0 has these explicit boundaries:
 
 - **Execution isolation:** reviewed commands execute directly without a shell, but ResiliReplay is not
   an OS sandbox.
+- **Filesystem race boundary:** output roots, ancestors, and targets are checked with lexical and
+  real-path containment before writes. Node.js does not expose a portable directory-file-descriptor
+  write API, so an attacker who can replace checked directories concurrently retains a residual
+  time-of-check/time-of-use race. Run in a repository not writable by an untrusted local principal.
 - **MCP side effects:** discovery is read-only; an explicitly allowlisted and confirmed tool can still
   change server state.
 - **Studio exposure:** Studio is loopback-only and assumes the local browser/user account is trusted.

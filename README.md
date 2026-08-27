@@ -21,15 +21,15 @@ npx --yes resilireplay@0.6.0 mcp serve
 
 [Static PNG](docs/assets/everywhere-demo.png) · [genuine transcript](docs/assets/everywhere-demo-transcript.txt) · [self-contained regression](examples/everywhere/everywhere.test.mjs) · [product site](https://aliengineering-byte.github.io/resilireplay/)
 
-## The MCP Reliability Standard
+## ResiliReplay MCP Reliability Evidence Profile
 
-The public working standard defines the minimum evidence for a bounded MCP reliability claim: pinned
+This project-defined profile describes the minimum evidence for a bounded MCP reliability claim: pinned
 identity and authority, a clean control, deterministic fault, expected-failure negative control,
 bounded recovery, integrity hashes, executable regression when causal failure exists, and verified
-cleanup. It is an open testing convention—not the MCP specification, certification, security testing,
-or an endorsement.
+cleanup. It is an open testing convention maintained by ResiliReplay—not an official MCP standard,
+certification, security testing, or an endorsement.
 
-[Read the standard](docs/mcp-reliability/MCP_RELIABILITY_STANDARD.md) ·
+[Read the evidence profile](docs/mcp-reliability/MCP_RELIABILITY_STANDARD.md) ·
 [run the five-minute MCP test](docs/mcp-reliability/FIVE_MINUTE_MCP_TEST.md) ·
 [compare seven executed profiles](docs/mcp-reliability/COMPATIBILITY_AND_RECOVERY_MATRIX.md) ·
 [contribute a case](docs/mcp-reliability/CONTRIBUTING_CASES.md)

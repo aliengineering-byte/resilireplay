@@ -1,10 +1,17 @@
 # MCP Inspector `mcp.json` compatibility matrix
 
-Reviewed upstream: MCP Inspector `2.0.0`, commit
-`7aebf168e6277ea26b1f04a7987a1cd11328ec83`. The Inspector source of truth was its released
-[`mcp-server-configuration.md`](https://github.com/modelcontextprotocol/inspector/blob/2.0.0/docs/mcp-server-configuration.md)
+Source profile: `mcp-inspector/mcp-json` version `1.0.0`, read-only import, compatible with MCP
+Inspector `>=2.0.0 <2.2.0`.
+
+Reviewed upstream: MCP Inspector `2.1.0`, commit
+`c7bccd477d38c2c17afb4878bcca8ee5f563c5d2`. The Inspector source of truth was its released
+[`mcp-server-configuration.md`](https://github.com/modelcontextprotocol/inspector/blob/2.1.0/docs/mcp-server-configuration.md)
 and released config/runtime types. Protocol transport behavior was reviewed against MCP revision
 [`2026-07-28`](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports).
+
+Import is bounded to 1 MiB of UTF-8 JSON, 32 container levels, 128 server entries, 256 arguments per
+server, 128 environment or header entries, and 16 KiB per imported string. Duplicate keys, a UTF-8
+BOM, malformed UTF-8, and unsupported or foreign absolute paths fail closed.
 
 | Inspector field/form                                                                | ResiliReplay interpretation                      | Status                           | Security rule                                                                        | Validation error                                               |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
