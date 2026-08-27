@@ -80,6 +80,12 @@ describe("security boundaries", () => {
     expect(containsLikelySecret(undefined)).toBe(false);
   });
 
+  it("scans an oversized benign base64-like run in bounded linear space", () => {
+    const benign = "x".repeat(1024 * 1024);
+    expect(containsLikelySecret({ diagnostic: benign })).toBe(false);
+    expect(sanitize({ diagnostic: benign })).toEqual({ diagnostic: benign });
+  });
+
   it("rejects output path traversal", () => {
     const base = resolve("safe-output");
     expect(() => safeOutputPath(base, "../escape.json")).toThrow("escapes");

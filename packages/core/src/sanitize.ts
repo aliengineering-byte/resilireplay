@@ -12,7 +12,27 @@ const TOKEN_PATTERNS = [
   /\bsk%2D[A-Za-z0-9_-]{16,}\b/gi,
   /\bAKIA[0-9A-Z]{16}\b/g,
 ];
-const BASE64_CANDIDATE = /(?<![A-Za-z0-9+/_-])[A-Za-z0-9+/_-]{16,}={0,2}(?![A-Za-z0-9+/_=-])/gu;
+const BASE64_CHARACTER = /^[A-Za-z0-9+/_-]$/u;
+
+function* base64CandidateRanges(value: string): Generator<readonly [number, number]> {
+  let index = 0;
+  while (index < value.length) {
+    if (!BASE64_CHARACTER.test(value[index]!)) {
+      index += 1;
+      continue;
+    }
+    const start = index;
+    while (index < value.length && BASE64_CHARACTER.test(value[index]!)) index += 1;
+    const alphabetLength = index - start;
+    let end = index;
+    while (end < value.length && value[end] === "=" && end - index < 2) end += 1;
+    const hasExcessPadding = value[end] === "=";
+    if (alphabetLength >= 16 && end - start <= MAX_ENCODED_CANDIDATE_LENGTH && !hasExcessPadding) {
+      yield [start, end];
+    }
+    index = Math.max(end, index + 1);
+  }
+}
 
 function matchesTokenPattern(value: string): boolean {
   return TOKEN_PATTERNS.some((pattern) => {
@@ -40,9 +60,8 @@ function decodedBase64ContainsSecret(value: string): boolean {
 }
 
 function encodedValueContainsSecret(value: string): boolean {
-  BASE64_CANDIDATE.lastIndex = 0;
-  for (const match of value.matchAll(BASE64_CANDIDATE)) {
-    if (decodedBase64ContainsSecret(match[0])) return true;
+  for (const [start, end] of base64CandidateRanges(value)) {
+    if (decodedBase64ContainsSecret(value.slice(start, end))) return true;
   }
   if (!value.includes("%")) return false;
   try {
@@ -58,10 +77,18 @@ function sanitizeString(value: string): string {
     (current, pattern) => current.replace(pattern, REDACTED),
     value,
   );
-  BASE64_CANDIDATE.lastIndex = 0;
-  sanitized = sanitized.replace(BASE64_CANDIDATE, (candidate) =>
-    decodedBase64ContainsSecret(candidate) ? REDACTED : candidate,
-  );
+  const replacements: string[] = [];
+  let cursor = 0;
+  for (const [start, end] of base64CandidateRanges(sanitized)) {
+    const candidate = sanitized.slice(start, end);
+    if (!decodedBase64ContainsSecret(candidate)) continue;
+    replacements.push(sanitized.slice(cursor, start), REDACTED);
+    cursor = end;
+  }
+  if (replacements.length > 0) {
+    replacements.push(sanitized.slice(cursor));
+    sanitized = replacements.join("");
+  }
   if (sanitized.includes("%")) {
     try {
       const decoded = decodeURIComponent(sanitized);

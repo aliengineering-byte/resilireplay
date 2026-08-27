@@ -1,4 +1,14 @@
-import { mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import {
+  copyFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -6,12 +16,13 @@ import { describe, expect, it } from "vitest";
 import { hashValue, injectFaults } from "@resilireplay/core";
 import {
   MAX_TRACE_EVENTS,
+  MAX_TRACE_NESTING_DEPTH,
   compileRegression,
   identifyFirstCriticalEvent,
   parseTrace,
   serializeTrace,
 } from "@resilireplay/trace";
-import { failedTrace, passingTrace } from "./helpers.js";
+import { event, failedTrace, passingTrace } from "./helpers.js";
 
 describe("trace serialization and regression compiler", () => {
   it("rejects traces above the hard event limit before parsing their payloads", () => {
@@ -29,7 +40,28 @@ describe("trace serialization and regression compiler", () => {
   });
 
   it("reports malformed JSONL line numbers", () => {
-    expect(() => parseTrace('{"no":"close"\n')).toThrow("line 1");
+    try {
+      parseTrace('{"no":"close"\n');
+      throw new Error("expected invalid JSONL to fail");
+    } catch (error) {
+      expect(error).toMatchObject({ code: "RR_TRACE_INVALID_JSONL" });
+      expect((error as Error).message).toContain("line 1");
+    }
+  });
+
+  it("accepts the trace nesting boundary and rejects one level beyond it", () => {
+    const nestedPayload = (levels: number): unknown => {
+      let value: unknown = "leaf";
+      for (let level = 0; level < levels; level += 1) value = { child: value };
+      return value;
+    };
+    const accepted = event(0, "run_started", nestedPayload(MAX_TRACE_NESTING_DEPTH - 1));
+    expect(parseTrace(serializeTrace([accepted]))).toHaveLength(1);
+
+    const rejected = event(0, "run_started", nestedPayload(MAX_TRACE_NESTING_DEPTH));
+    expect(() => parseTrace(serializeTrace([rejected]))).toThrow(
+      `Trace exceeds nesting depth ${MAX_TRACE_NESTING_DEPTH}`,
+    );
   });
 
   it("rejects a hash-valid credential canary before trace or regression persistence", async () => {
@@ -130,13 +162,20 @@ describe("trace serialization and regression compiler", () => {
     }
   });
 
-  it("publishes one coherent idempotent bundle under 64 concurrent writers", async () => {
+  it("publishes one coherent idempotent bundle under 64 fallback-copy writers", async () => {
     const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-concurrent-"));
     const output = join(root, "generated");
     try {
       const results = await Promise.all(
         Array.from({ length: 64 }, () =>
-          compileRegression(failedTrace(), output, { allowedRoot: root }),
+          compileRegression(failedTrace(), output, {
+            allowedRoot: root,
+            publicationOperations: {
+              link: async () => {
+                throw Object.assign(new Error("hard links unsupported"), { code: "EXDEV" });
+              },
+            },
+          }),
         ),
       );
       expect(new Set(results.map((result) => result.sourceTraceHash)).size).toBe(1);
@@ -151,6 +190,129 @@ describe("trace serialization and regression compiler", () => {
       expect((await readdir(output)).filter((name) => name.startsWith(".resilireplay-"))).toEqual(
         [],
       );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("falls back from unsupported hard links to verified exclusive copies", async () => {
+    const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-copy-"));
+    try {
+      const result = await compileRegression(failedTrace(), join(root, "generated"), {
+        allowedRoot: root,
+        publicationOperations: {
+          link: async () => {
+            throw Object.assign(new Error("hard links unsupported"), { code: "ENOTSUP" });
+          },
+        },
+      });
+      expect(await readFile(result.manifestPath, "utf8")).toContain('"status":"complete"');
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses an exclusive-copy conflict without changing the existing artifact", async () => {
+    const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-copy-conflict-"));
+    const output = join(root, "generated");
+    const scenario = join(output, "scenario.yaml");
+    try {
+      await mkdir(output);
+      await writeFile(scenario, "existing-mismatch\n", "utf8");
+      await expect(
+        compileRegression(failedTrace(), output, {
+          allowedRoot: root,
+          publicationOperations: {
+            link: async () => {
+              throw Object.assign(new Error("hard links unsupported"), { code: "EXDEV" });
+            },
+          },
+        }),
+      ).rejects.toMatchObject({ code: "RR_REGRESSION_CONFLICT" });
+      expect(await readFile(scenario, "utf8")).toBe("existing-mismatch\n");
+      expect(await readdir(output)).toEqual(["scenario.yaml"]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("removes a partial exclusive copy after an injected copy failure", async () => {
+    const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-copy-partial-"));
+    const output = join(root, "generated");
+    try {
+      await expect(
+        compileRegression(failedTrace(), output, {
+          allowedRoot: root,
+          publicationOperations: {
+            link: async () => {
+              throw Object.assign(new Error("hard links unsupported"), { code: "EXDEV" });
+            },
+            copyFileExclusive: async (_source, destination) => {
+              await writeFile(destination, "partial", { flag: "wx" });
+              throw Object.assign(new Error("injected partial copy failure"), { code: "EIO" });
+            },
+          },
+        }),
+      ).rejects.toMatchObject({ code: "RR_REGRESSION_PUBLISH" });
+      expect(await readdir(output)).toEqual([]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("removes copied artifacts when manifest-last publication fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-manifest-failure-"));
+    const output = join(root, "generated");
+    try {
+      await expect(
+        compileRegression(failedTrace(), output, {
+          allowedRoot: root,
+          publicationOperations: {
+            link: async () => {
+              throw Object.assign(new Error("hard links unsupported"), { code: "EXDEV" });
+            },
+            copyFileExclusive: async (source, destination) => {
+              if (destination.endsWith("manifest.json")) {
+                throw Object.assign(new Error("injected manifest failure"), { code: "EIO" });
+              }
+              await copyFile(source, destination, constants.COPYFILE_EXCL);
+            },
+          },
+        }),
+      ).rejects.toMatchObject({ code: "RR_REGRESSION_PUBLISH" });
+      expect(await readdir(output)).toEqual([]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("reports cleanup failure without publishing a completion manifest", async () => {
+    const root = await mkdtemp(join(tmpdir(), "resilireplay-regression-cleanup-failure-"));
+    const output = join(root, "generated");
+    try {
+      await expect(
+        compileRegression(failedTrace(), output, {
+          allowedRoot: root,
+          publicationOperations: {
+            link: async () => {
+              throw Object.assign(new Error("hard links unsupported"), { code: "EXDEV" });
+            },
+            copyFileExclusive: async (source, destination) => {
+              if (destination.endsWith("manifest.json")) {
+                throw Object.assign(new Error("injected manifest failure"), { code: "EIO" });
+              }
+              await copyFile(source, destination, constants.COPYFILE_EXCL);
+            },
+            remove: async (path) => {
+              if (path.endsWith("scenario.yaml")) {
+                throw Object.assign(new Error("injected cleanup failure"), { code: "EACCES" });
+              }
+              await rm(path, { force: true });
+            },
+          },
+        }),
+      ).rejects.toMatchObject({ code: "RR_REGRESSION_CLEANUP" });
+      expect(await readdir(output)).toEqual(["scenario.yaml"]);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

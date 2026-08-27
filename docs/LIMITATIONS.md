@@ -23,6 +23,9 @@ ResiliReplay v0.6.0 has these explicit boundaries:
   real-path containment before writes. Node.js does not expose a portable directory-file-descriptor
   write API, so an attacker who can replace checked directories concurrently retains a residual
   time-of-check/time-of-use race. Run in a repository not writable by an untrusted local principal.
+- **Regression publication filesystems:** regression bundles use exclusive hard-link publication or
+  verified `COPYFILE_EXCL` fallback. A filesystem that safely supports neither primitive fails
+  closed. Remote filesystems may not provide the atomicity their local API surface suggests.
 - **MCP side effects:** discovery is read-only; an explicitly allowlisted and confirmed tool can still
   change server state.
 - **Studio exposure:** Studio is loopback-only and assumes the local browser/user account is trusted.
@@ -48,8 +51,8 @@ ResiliReplay v0.6.0 has these explicit boundaries:
   operation and arguments are safe and suitable for one duplicate attempt.
 - **Metrics:** deterministic scoring evaluates declared evidence, not open-ended semantic quality.
   Latency, tokens, cost, side effects, and coverage remain unavailable unless measured.
-- **Trace scale:** one trace is capped at 100,000 events and 32 MiB to bound memory use. Split larger
-  workloads into scenarios or campaigns.
+- **Trace scale:** one trace is capped at 100,000 events, 32 MiB, and 64 JSON nesting levels to bound
+  memory and stack use. Split larger workloads into scenarios or campaigns.
 - **Distribution:** npm publishes the self-contained `resilireplay` CLI. Internal workspace packages
   are not separate public APIs.
 

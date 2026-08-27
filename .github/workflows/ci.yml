@@ -8,66 +8,21 @@ on:
 
 permissions:
   contents: read
-  security-events: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.14.0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm format:check
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm agent:validate
-      - name: Official Claude Code plugin validation
-        run: pnpm dlx @anthropic-ai/claude-code@2.1.222 plugin validate plugins/resilireplay
-      - name: Official Agent Skills reference validation
-        run: |
-          python -m venv .artifacts/skills-ref-venv
-          .artifacts/skills-ref-venv/bin/pip install "git+https://github.com/agentskills/agentskills.git@217be548739f21d6008915c29aefe320ea1a90af#subdirectory=skills-ref"
-          PYTHONUTF8=1 .artifacts/skills-ref-venv/bin/skills-ref validate plugins/resilireplay/skills/resilireplay
-      - run: pnpm field:verify
-      - run: pnpm site:check
-      - name: MCP Inspector config and real HTTP integration
-        run: pnpm exec vitest run tests/mcp-inspector.test.ts
-      - name: Current official MCP Inspector validation
-        run: pnpm mcp:inspector:verify
-      - run: pnpm package:smoke
-      - run: pnpm secret:scan
-      - run: pnpm hygiene:scan
-      - name: No-network deterministic demo
-        run: pnpm demo
-        env:
-          RESILIREPLAY_NO_NETWORK: "1"
-      - name: MCP Inspector stdio and authenticated HTTP demo
-        run: pnpm demo:mcp
-      - name: Studio and campaign fixture demo
-        run: pnpm demo:studio
-      - name: Lifecycle, stress, and package-size gates
-        run: pnpm release:gates
-      - name: Agent hooks, capture limits, and performance gates
-        run: pnpm agent:gates
-      - uses: github/codeql-action/upload-sarif@v4
-        if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
-        with:
-          sarif_file: runs/demo/failed-report/report.sarif
-
-  platform:
+  hardening-matrix:
+    name: Hardening / ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         node: [22, 24]
-    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
@@ -77,31 +32,71 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
+      - name: Record exact toolchain
+        run: |
+          node --version
+          pnpm --version
       - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
       - run: pnpm build
-      - run: pnpm exec vitest run
-      - run: pnpm exec resilireplay test scenarios
-      - name: Windows path and quoting test
-        if: runner.os == 'Windows'
-        run: pnpm exec vitest run tests/mcp.test.ts tests/mcp-inspector.test.ts tests/cli.test.ts
-
-  package:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 10.14.0
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - run: pnpm test
       - run: pnpm package:smoke
+      - name: Focused hardening controls
+        run: >-
+          pnpm exec vitest run
+          tests/events.test.ts
+          tests/security.test.ts
+          tests/trace.test.ts
+          tests/mcp-inspector.test.ts
+          tests/cli.test.ts
+      - name: Full trace-boundary evidence
+        if: matrix.node == 24
+        run: pnpm test:trace-boundaries
+      - name: Install Chromium and Linux dependencies for complete gates
+        if: matrix.node == 24 && runner.os == 'Linux'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Chromium for complete Windows gates
+        if: matrix.node == 24 && runner.os == 'Windows'
+        run: pnpm exec playwright install chromium
+      - name: Full quality gate
+        if: matrix.node == 24
+        run: pnpm quality
+      - name: Agent lifecycle gate
+        if: matrix.node == 24
+        run: pnpm agent:gates
+      - name: Browser end-to-end gate
+        if: matrix.node == 24
+        run: pnpm test:e2e
+      - name: Site accessibility and browser gate
+        if: matrix.node == 24
+        run: pnpm site:test
+      - name: Release lifecycle gate
+        if: matrix.node == 24
+        run: pnpm release:gates
+      - name: Secret scan
+        if: matrix.node == 24
+        run: pnpm secret:scan
+      - name: Repository hygiene scan
+        if: matrix.node == 24
+        run: pnpm hygiene:scan
+      - name: Upload hardening evidence
+        if: ${{ always() && matrix.node == 24 }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: hardening-${{ runner.os }}-node-${{ matrix.node }}
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            .artifacts/hardening/trace-boundaries.json
+            .artifacts/release-gates/report.json
+            .artifacts/agent-release-gates/report.json
 
-  studio-browser:
+  official-reference-validation:
+    name: Official reference validators
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6
@@ -112,6 +107,39 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm site:test
-      - run: pnpm test:e2e
+      - run: pnpm agent:validate
+      - name: Official Claude Code plugin validation
+        run: pnpm dlx @anthropic-ai/claude-code@2.1.222 plugin validate plugins/resilireplay
+      - name: Official Agent Skills reference validation
+        run: |
+          python -m venv .artifacts/skills-ref-venv
+          .artifacts/skills-ref-venv/bin/pip install "git+https://github.com/agentskills/agentskills.git@217be548739f21d6008915c29aefe320ea1a90af#subdirectory=skills-ref"
+          PYTHONUTF8=1 .artifacts/skills-ref-venv/bin/skills-ref validate plugins/resilireplay/skills/resilireplay
+      - run: pnpm mcp:inspector:verify
+
+  sarif:
+    name: Deterministic demo SARIF
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: No-network deterministic demo
+        run: pnpm demo
+        env:
+          RESILIREPLAY_NO_NETWORK: "1"
+      - uses: github/codeql-action/upload-sarif@v4
+        if: ${{ always() && hashFiles('runs/demo/failed-report/report.sarif') != '' }}
+        with:
+          sarif_file: runs/demo/failed-report/report.sarif
