@@ -183,21 +183,25 @@ function preSchemaDiagnostic(bundle) {
   ) {
     return DIAGNOSTICS.SELF_ASSERTED_CLAIM;
   }
-  const negative = evidence?.operations?.find((operation) => operation.kind === "NEGATIVE_CONTROL");
-  const reason = negative?.negativeObservation;
-  if (!negative || !reason) return DIAGNOSTICS.VACUOUS_NEGATIVE_CONTROL;
-  if (!Array.isArray(reason.prerequisitesReached) || reason.prerequisitesReached.length === 0) {
-    return DIAGNOSTICS.NEGATIVE_PREREQUISITE_MISSING;
-  }
-  if (reason.propertyReached !== true) return DIAGNOSTICS.PROPERTY_NOT_REACHED;
-  if (reason.expectedVerdict !== reason.observedVerdict) {
-    return DIAGNOSTICS.VACUOUS_NEGATIVE_CONTROL;
-  }
-  if (reason.expectedStopReason !== reason.observedStopReason) {
-    return DIAGNOSTICS.WRONG_STOP_REASON;
-  }
-  if (reason.mutantId && reason.mutantKilled !== true) {
-    return DIAGNOSTICS.NEGATIVE_MUTANT_SURVIVED;
+  const negatives =
+    evidence?.operations?.filter((operation) => operation.kind === "NEGATIVE_CONTROL") ?? [];
+  if (negatives.length === 0) return DIAGNOSTICS.VACUOUS_NEGATIVE_CONTROL;
+  for (const negative of negatives) {
+    const reason = negative.negativeObservation;
+    if (!reason) return DIAGNOSTICS.VACUOUS_NEGATIVE_CONTROL;
+    if (!Array.isArray(reason.prerequisitesReached) || reason.prerequisitesReached.length === 0) {
+      return DIAGNOSTICS.NEGATIVE_PREREQUISITE_MISSING;
+    }
+    if (reason.propertyReached !== true) return DIAGNOSTICS.PROPERTY_NOT_REACHED;
+    if (reason.expectedVerdict !== reason.observedVerdict) {
+      return DIAGNOSTICS.VACUOUS_NEGATIVE_CONTROL;
+    }
+    if (reason.expectedStopReason !== reason.observedStopReason) {
+      return DIAGNOSTICS.WRONG_STOP_REASON;
+    }
+    if (reason.mutantId && reason.mutantKilled !== true) {
+      return DIAGNOSTICS.NEGATIVE_MUTANT_SURVIVED;
+    }
   }
   return undefined;
 }
@@ -259,21 +263,42 @@ function observationDiagnostic(evidence, integrity) {
     if (referenced.some((artifact) => !artifact)) {
       return DIAGNOSTICS.MISSING_OBSERVATION_ARTIFACT;
     }
+    const material = { ...observation };
+    delete material.observationSha256;
     if (
       observation.observationSha256 !== observationDigest(observation) ||
-      !referenced.some((artifact) => artifact.sha256 === observation.observationSha256)
+      !referenced.some(
+        (artifact) =>
+          artifact.sha256 === observation.observationSha256 &&
+          artifact.bytes === Buffer.byteLength(canonicalize(material)) &&
+          artifact.mediaType === "application/vnd.mcp-res.observation+json",
+      )
     ) {
       return DIAGNOSTICS.OBSERVATION_HASH_MISMATCH;
     }
   }
-  const negative = evidence.operations.find((operation) => operation.kind === "NEGATIVE_CONTROL");
-  if (!artifacts.has(negative.negativeObservation.oracleEvidenceRef)) {
-    return DIAGNOSTICS.MISSING_OBSERVATION_ARTIFACT;
+  for (const negative of evidence.operations.filter(
+    (operation) => operation.kind === "NEGATIVE_CONTROL",
+  )) {
+    const oracle = negative.negativeObservation.oracleEvidenceRef;
+    if (!artifacts.has(oracle)) {
+      return DIAGNOSTICS.MISSING_OBSERVATION_ARTIFACT;
+    }
+    if (
+      !evidence.observations.some(
+        (candidate) =>
+          candidate.type === "VALIDATOR_CHECK" &&
+          candidate.operationRef === negative.operationId &&
+          candidate.artifactRefs.includes(oracle),
+      )
+    ) {
+      return DIAGNOSTICS.OBSERVATION_CAUSAL_MISMATCH;
+    }
   }
   return undefined;
 }
 
-function derivedEvidenceClass(evidence) {
+function derivedEvidenceClass(evidence, integrity) {
   const observed = (type) =>
     evidence.observations.some(
       (observation) =>
@@ -281,8 +306,11 @@ function derivedEvidenceClass(evidence) {
         observation.strength === "INTEGRITY_BOUND" &&
         observation.outcome === "PASS",
     );
+  const artifactPaths = new Set(integrity.artifacts.map((artifact) => artifact.path));
   const hasSource =
-    Array.isArray(evidence.sourceEvidenceRefs) && evidence.sourceEvidenceRefs.length > 0;
+    Array.isArray(evidence.sourceEvidenceRefs) &&
+    evidence.sourceEvidenceRefs.length > 0 &&
+    evidence.sourceEvidenceRefs.every((reference) => artifactPaths.has(reference));
   if (observed("PROCESS_EXECUTION") && observed("PROTOCOL_EXCHANGE") && hasSource) {
     return "GENUINE_RUNTIME";
   }
@@ -376,7 +404,7 @@ function semanticDiagnostic(bundle) {
   const trial = trialDiagnostic(evidence.trialSummary);
   if (trial) return trial;
 
-  const derivedClass = derivedEvidenceClass(evidence);
+  const derivedClass = derivedEvidenceClass(evidence, integrity);
   if (evidence.evidenceClassClaim !== derivedClass || statement.evidenceClass !== derivedClass) {
     return DIAGNOSTICS.EVIDENCE_CLASS_PROMOTION;
   }

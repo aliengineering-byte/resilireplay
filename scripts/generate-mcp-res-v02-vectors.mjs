@@ -325,6 +325,12 @@ const invalidVectors = [
   invalid("wrong-stop-reason", "MCP_RES_WRONG_STOP_REASON", (bundle) => {
     bundle.evidence.operations[1].negativeObservation.observedStopReason = "VERSION_UNSUPPORTED";
   }),
+  invalid("second-negative-wrong-reason", "MCP_RES_WRONG_STOP_REASON", (bundle) => {
+    const second = clone(bundle.evidence.operations[1]);
+    second.operationId = "op-negative-second";
+    second.negativeObservation.observedStopReason = "EARLY_VERSION_GUARD";
+    bundle.evidence.operations.push(second);
+  }),
   invalid("earlier-version-guard", "MCP_RES_PROPERTY_NOT_REACHED", (bundle) => {
     bundle.evidence.operations[1].negativeObservation.propertyReached = false;
     bundle.evidence.operations[1].negativeObservation.observedStopReason = "VERSION_UNSUPPORTED";
@@ -348,6 +354,11 @@ const invalidVectors = [
   invalid("false-runtime-boolean", "MCP_RES_SELF_ASSERTED_CLAIM", (bundle) => {
     bundle.evidence.execution = { actualRuntime: true };
   }),
+  invalid("unbound-source-evidence-promotion", "MCP_RES_EVIDENCE_CLASS_PROMOTION", (bundle) => {
+    bundle.evidence.evidenceClassClaim = "GENUINE_RUNTIME";
+    bundle.statement.evidenceClass = "GENUINE_RUNTIME";
+    bundle.evidence.sourceEvidenceRefs = ["source-evidence/missing.json"];
+  }),
   invalid("missing-observation-artifact", "MCP_RES_MISSING_OBSERVATION_ARTIFACT", (bundle) => {
     bundle.integrity.artifacts = bundle.integrity.artifacts.filter(
       (artifact) => artifact.path !== "observations/obs-protocol.json",
@@ -356,6 +367,14 @@ const invalidVectors = [
   invalid("mismatched-observation-hash", "MCP_RES_OBSERVATION_HASH_MISMATCH", (bundle) => {
     bundle.evidence.observations[1].observationSha256 = "0".repeat(64);
   }),
+  invalid(
+    "cross-operation-oracle-substitution",
+    "MCP_RES_OBSERVATION_CAUSAL_MISMATCH",
+    (bundle) => {
+      bundle.evidence.operations[1].negativeObservation.oracleEvidenceRef =
+        "observations/obs-protocol.json";
+    },
+  ),
   invalid("cross-run-substitution", "MCP_RES_CROSS_RUN_SUBSTITUTION", (bundle) => {
     bundle.evidence.operations[0].runId = "run-v02-foreign-9999";
   }),

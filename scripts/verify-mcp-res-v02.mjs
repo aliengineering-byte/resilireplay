@@ -59,7 +59,7 @@ for (const entry of [...catalog.valid, ...catalog.invalid]) {
   else invalidCount += 1;
 }
 invariant(
-  validCount === 4 && invalidCount === 18,
+  validCount === 4 && invalidCount === 21,
   `Unexpected vector counts ${validCount}/${invalidCount}`,
 );
 

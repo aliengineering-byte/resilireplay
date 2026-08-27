@@ -35,6 +35,12 @@
       "fileSha256": "3dd2f44af7ebe26d1ca2d094972c91f634cd45380c30b81ce45527d2f0529003"
     },
     {
+      "id": "second-negative-wrong-reason",
+      "path": "invalid/second-negative-wrong-reason.json",
+      "expectedDiagnostics": ["MCP_RES_WRONG_STOP_REASON"],
+      "fileSha256": "ce3e94d42fd49f002deccd6a1f5a60ca0509784cf375cd871a4e7e71f18b4933"
+    },
+    {
       "id": "earlier-version-guard",
       "path": "invalid/earlier-version-guard.json",
       "expectedDiagnostics": ["MCP_RES_PROPERTY_NOT_REACHED"],
@@ -77,6 +83,12 @@
       "fileSha256": "c51221e948c93e0f1630976f2b1ede9c85e42cec64478760afae05deec979b09"
     },
     {
+      "id": "unbound-source-evidence-promotion",
+      "path": "invalid/unbound-source-evidence-promotion.json",
+      "expectedDiagnostics": ["MCP_RES_EVIDENCE_CLASS_PROMOTION"],
+      "fileSha256": "912cbe460a938d12bc753e78cda93584505e61eafd91a0a49d737cd6d9fa907f"
+    },
+    {
       "id": "missing-observation-artifact",
       "path": "invalid/missing-observation-artifact.json",
       "expectedDiagnostics": ["MCP_RES_MISSING_OBSERVATION_ARTIFACT"],
@@ -87,6 +99,12 @@
       "path": "invalid/mismatched-observation-hash.json",
       "expectedDiagnostics": ["MCP_RES_OBSERVATION_HASH_MISMATCH"],
       "fileSha256": "216c5b229e8d967bc55f0f62056744f5fda0bd0bd3658a1a17ab879c1df52264"
+    },
+    {
+      "id": "cross-operation-oracle-substitution",
+      "path": "invalid/cross-operation-oracle-substitution.json",
+      "expectedDiagnostics": ["MCP_RES_OBSERVATION_CAUSAL_MISMATCH"],
+      "fileSha256": "54650041a768d580a9203b19736d34fbb86fd9d68fcc5120f17d3c15a71e58fb"
     },
     {
       "id": "cross-run-substitution",
