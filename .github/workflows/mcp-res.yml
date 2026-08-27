@@ -1,0 +1,101 @@
+name: MCP-RES
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/standards/mcp-res/**"
+      - "README.md"
+      - "docs/index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "scripts/check-site.mjs"
+      - "scripts/site-browser-test.mjs"
+      - "scripts/export-mcp-res-reference.mjs"
+      - "scripts/generate-mcp-res-vectors.mjs"
+      - "scripts/package-mcp-res-release.mjs"
+      - "scripts/reference-mcp-res-validator.mjs"
+      - "scripts/verify-mcp-res.mjs"
+      - ".github/workflows/mcp-res.yml"
+  pull_request:
+    paths:
+      - "docs/standards/mcp-res/**"
+      - "README.md"
+      - "docs/index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "scripts/check-site.mjs"
+      - "scripts/site-browser-test.mjs"
+      - "scripts/export-mcp-res-reference.mjs"
+      - "scripts/generate-mcp-res-vectors.mjs"
+      - "scripts/package-mcp-res-release.mjs"
+      - "scripts/reference-mcp-res-validator.mjs"
+      - "scripts/verify-mcp-res.mjs"
+      - ".github/workflows/mcp-res.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-res-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conformance:
+    name: Conformance / ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - name: Record exact toolchain
+        run: |
+          node --version
+          pnpm --version
+      - run: pnpm install --frozen-lockfile
+      - name: Compile schemas and execute conformance/mutation/reference checks
+        run: pnpm mcp-res:validate
+      - name: Build reproducible draft release attachments
+        run: pnpm mcp-res:package
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm package:smoke
+      - name: Build-check Pages content and local links
+        run: pnpm site:check
+      - name: Install Chromium and Linux dependencies
+        if: matrix.node == 24 && runner.os == 'Linux'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Chromium on Windows
+        if: matrix.node == 24 && runner.os == 'Windows'
+        run: pnpm exec playwright install chromium
+      - name: Responsive and WCAG A/AA Pages checks
+        if: matrix.node == 24
+        run: pnpm site:test
+      - name: Upload conformance evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mcp-res-${{ runner.os }}-node-${{ matrix.node }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            .artifacts/mcp-res/verification.json
+            .artifacts/mcp-res-release/**
+            .artifacts/site/mcp-res-*.png
+            docs/standards/mcp-res/v0.1.0/field-evidence/*.json
+            docs/standards/mcp-res/v0.1.0/test-vectors/SHA256SUMS
