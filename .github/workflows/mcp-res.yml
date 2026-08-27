@@ -13,9 +13,11 @@ on:
       - "scripts/site-browser-test.mjs"
       - "scripts/export-mcp-res-reference.mjs"
       - "scripts/generate-mcp-res-vectors.mjs"
+      - "scripts/generate-mcp-res-v02-vectors.mjs"
       - "scripts/package-mcp-res-release.mjs"
       - "scripts/reference-mcp-res-validator.mjs"
       - "scripts/verify-mcp-res.mjs"
+      - "scripts/verify-mcp-res-v02.mjs"
       - ".github/workflows/mcp-res.yml"
   pull_request:
     paths:
@@ -28,9 +30,11 @@ on:
       - "scripts/site-browser-test.mjs"
       - "scripts/export-mcp-res-reference.mjs"
       - "scripts/generate-mcp-res-vectors.mjs"
+      - "scripts/generate-mcp-res-v02-vectors.mjs"
       - "scripts/package-mcp-res-release.mjs"
       - "scripts/reference-mcp-res-validator.mjs"
       - "scripts/verify-mcp-res.mjs"
+      - "scripts/verify-mcp-res-v02.mjs"
       - ".github/workflows/mcp-res.yml"
   workflow_dispatch:
 
@@ -95,7 +99,9 @@ jobs:
           retention-days: 30
           path: |
             .artifacts/mcp-res/verification.json
+            .artifacts/mcp-res-v02/verification.json
             .artifacts/mcp-res-release/**
             .artifacts/site/mcp-res-*.png
             docs/standards/mcp-res/v0.1.0/field-evidence/*.json
             docs/standards/mcp-res/v0.1.0/test-vectors/SHA256SUMS
+            docs/standards/mcp-res/v0.2.0/test-vectors/SHA256SUMS

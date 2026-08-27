@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/observation.schema.json",
+  "title": "MCP-RES observation v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "type",
+    "strength",
+    "producer",
+    "subjectRef",
+    "operationRef",
+    "startedOffsetMs",
+    "durationMs",
+    "outcome",
+    "reasonCode",
+    "artifactRefs",
+    "observationSha256"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.observation/0.2.0" },
+    "id": { "type": "string", "pattern": "^obs-[A-Za-z0-9._:-]+$", "maxLength": 128 },
+    "type": {
+      "enum": [
+        "PROCESS_EXECUTION",
+        "PROTOCOL_EXCHANGE",
+        "FIXTURE_EXECUTION",
+        "INSTALLATION_EXECUTION",
+        "FILESYSTEM_EFFECT",
+        "VALIDATOR_CHECK",
+        "PRIVACY_SCAN",
+        "CLEANUP_CHECK",
+        "REGRESSION_EXECUTION",
+        "TRANSPORT_EVENT",
+        "AUTHORIZATION_EVENT",
+        "CACHE_EVENT"
+      ]
+    },
+    "strength": { "enum": ["INTEGRITY_BOUND", "LEGACY_SELF_ASSERTED"] },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "subjectRef": { "$ref": "#/$defs/sha256" },
+    "operationRef": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+    "startedOffsetMs": { "type": "integer", "minimum": 0, "maximum": 14400000 },
+    "durationMs": { "type": "integer", "minimum": 0, "maximum": 3600000 },
+    "outcome": { "enum": ["PASS", "FAIL", "INCOMPLETE", "NOT_OBSERVED"] },
+    "reasonCode": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]{2,95}$" },
+    "artifactRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]{0,255}$" }
+    },
+    "observationSha256": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

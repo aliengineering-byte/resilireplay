@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "mcp-res.migration-record/0.2.0",
+  "from": "0.1.0",
+  "to": "0.2.0",
+  "historicalTreePolicy": "IMMUTABLE",
+  "canonicalization": {
+    "from": "mcp-res-json-utf16-v1",
+    "to": "mcp-res-json-utf16-v1",
+    "decisionOwner": "PR 2",
+    "historicalDigestsRewritten": false
+  },
+  "changes": [
+    {
+      "id": "MIG-OBS-001",
+      "v01Concept": "execution and completion booleans",
+      "v02Concept": "integrity-bound observations",
+      "automaticStrength": "LEGACY_SELF_ASSERTED",
+      "promotionAllowed": false
+    },
+    {
+      "id": "MIG-NEG-001",
+      "v01Concept": "verdict-only expected failure",
+      "v02Concept": "reason-bound negative observation",
+      "automaticStrength": "INCOMPLETE",
+      "promotionAllowed": false
+    },
+    {
+      "id": "MIG-ID-001",
+      "v01Concept": "run identity",
+      "v02Concept": "scenario fingerprint plus execution instance digest",
+      "automaticStrength": "RECOMPUTE_REQUIRED",
+      "promotionAllowed": false
+    },
+    {
+      "id": "MIG-COV-001",
+      "v01Concept": "implicit harness coverage",
+      "v02Concept": "observation coverage manifest",
+      "automaticStrength": "UNKNOWN",
+      "promotionAllowed": false
+    },
+    {
+      "id": "MIG-TRIAL-001",
+      "v01Concept": "single execution",
+      "v02Concept": "trial summary",
+      "automaticStrength": "SINGLE_OBSERVATION",
+      "promotionAllowed": false
+    }
+  ]
+}

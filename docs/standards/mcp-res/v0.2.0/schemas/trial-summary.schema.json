@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/trial-summary.schema.json",
+  "title": "MCP-RES trial summary v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "plannedTrials",
+    "completedTrials",
+    "seeds",
+    "processCount",
+    "counts",
+    "distinctOutcomeHashes",
+    "durationMs",
+    "environments",
+    "stopRule",
+    "classification"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.trial-summary/0.2.0" },
+    "plannedTrials": { "type": "integer", "minimum": 1, "maximum": 10000 },
+    "completedTrials": { "type": "integer", "minimum": 0, "maximum": 10000 },
+    "seeds": {
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+    },
+    "processCount": { "type": "integer", "minimum": 1, "maximum": 1024 },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["success", "failure", "incomplete"],
+      "properties": {
+        "success": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "failure": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "incomplete": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      }
+    },
+    "distinctOutcomeHashes": {
+      "type": "array",
+      "maxItems": 10000,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "durationMs": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["minimum", "median", "p95"],
+      "properties": {
+        "minimum": { "type": "integer", "minimum": 0, "maximum": 14400000 },
+        "median": { "type": "integer", "minimum": 0, "maximum": 14400000 },
+        "p95": { "type": "integer", "minimum": 0, "maximum": 14400000 }
+      }
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+    },
+    "stopRule": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "classification": {
+      "enum": [
+        "SINGLE_OBSERVATION",
+        "REPEATED_STABLE",
+        "FLAKY",
+        "INCOMPLETE",
+        "ENVIRONMENT_DEPENDENT"
+      ]
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

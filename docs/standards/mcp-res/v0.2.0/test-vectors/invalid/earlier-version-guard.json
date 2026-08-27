@@ -1,0 +1,416 @@
+{
+  "schemaVersion": "mcp-res.conformance-bundle/0.2.0",
+  "evidence": {
+    "schemaVersion": "mcp-res.evidence-envelope/0.2.0",
+    "standardVersion": "0.2.0",
+    "profile": { "id": "mcp-res/server-tool-call/v1", "version": "2.0.0" },
+    "protocolRevision": "2026-07-28",
+    "evidenceClassClaim": "FIXTURE_BACKED_PROTOCOL",
+    "subject": {
+      "subjectType": "MCP_SERVER",
+      "name": "reason-bound-fixture",
+      "version": "1.0.0",
+      "artifactSha256": "a9e95faa2e53a106ea91b8d7484083940cadc41f832cb61080b1e19580c778a2",
+      "identityDigest": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a"
+    },
+    "scenario": {
+      "fingerprint": "af617a946877bcfb5b2a1fc2feb3b353d1ba7f845f301bd70b7cbac65d811123",
+      "descriptor": {
+        "standardVersion": "0.2.0",
+        "profileId": "mcp-res/server-tool-call/v1",
+        "profileVersion": "2.0.0",
+        "protocolRevision": "2026-07-28",
+        "subjectIdentityDigest": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "configurationProfileDigest": "a632c482f55757f672cd77b744ce63ae40f28b2161b02fcd1c7ff3128ebcfddf",
+        "operationClass": "tools/call",
+        "faults": [
+          {
+            "id": "fault/invalid-result-shape",
+            "version": "1.0.0",
+            "method": "FIXTURE_MUTATION",
+            "seed": 1702,
+            "targetOperationClass": "tools/call",
+            "expectedEffect": "INVALID_RESULT_SHAPE",
+            "reproducibilitySha256": "c58c66c840282bcff3fa9759ee3987f15dabad3f605385281c4f0b48be9583b1"
+          }
+        ],
+        "recoveryPolicies": [
+          {
+            "id": "policy/read-only-once",
+            "retryLimit": 1,
+            "maxBackoffMs": 10,
+            "timeLimitMs": 1000,
+            "cancellationBoundary": "operation",
+            "sideEffectModel": "READ_ONLY",
+            "safetyMechanism": null
+          }
+        ],
+        "sideEffectModel": "READ_ONLY",
+        "resourceLimits": {
+          "inputBytes": 1048576,
+          "events": 1000,
+          "retries": 1,
+          "concurrency": 1,
+          "scenarioDurationMs": 10000
+        },
+        "validatorPolicy": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "deterministicSeed": 1702
+      }
+    },
+    "run": {
+      "id": "run-v02-example-0001",
+      "startedAt": "2026-08-27T12:00:00.000Z",
+      "finishedAt": "2026-08-27T12:00:01.000Z",
+      "monotonicDurationMs": 1000,
+      "environment": {
+        "runner": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "os": "synthetic",
+        "architecture": "portable",
+        "environmentDigest": "16f1edbc7aea3c94d0617505869a3b666bbeb4d32251c39cebe739d65898ca21"
+      }
+    },
+    "operations": [
+      {
+        "runId": "run-v02-example-0001",
+        "operationId": "op-clean",
+        "parentOperationId": null,
+        "kind": "CLEAN_CONTROL",
+        "faultId": null,
+        "recoveryPolicyId": null,
+        "attempt": 0,
+        "outcome": "PASS",
+        "startedOffsetMs": 0,
+        "durationMs": 25
+      },
+      {
+        "runId": "run-v02-example-0001",
+        "operationId": "op-negative",
+        "parentOperationId": null,
+        "kind": "NEGATIVE_CONTROL",
+        "faultId": "fault/invalid-result-shape",
+        "recoveryPolicyId": "policy/read-only-once",
+        "attempt": 0,
+        "outcome": "EXPECTED_FAILURE",
+        "startedOffsetMs": 100,
+        "durationMs": 25,
+        "negativeObservation": {
+          "propertyUnderTest": "tools/call result shape validation",
+          "propertyReached": false,
+          "expectedVerdict": "REJECT",
+          "observedVerdict": "REJECT",
+          "expectedStopReason": "INVALID_RESULT_SHAPE",
+          "observedStopReason": "VERSION_UNSUPPORTED",
+          "oracleEvidenceRef": "observations/obs-negative-oracle.json",
+          "prerequisitesReached": ["INITIALIZED", "TOOLS_LISTED", "TOOL_CALLED"]
+        }
+      }
+    ],
+    "observations": [
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-process",
+        "type": "PROCESS_EXECUTION",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": "op-clean",
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "PROCESS_EXITED_CLEANLY",
+        "artifactRefs": ["observations/obs-process.json"],
+        "observationSha256": "06b170564a9e8cef6e8928d78789905860c19efb7852f8f836f7d030a84b2124"
+      },
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-protocol",
+        "type": "PROTOCOL_EXCHANGE",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": "op-clean",
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "MCP_MESSAGES_EXCHANGED",
+        "artifactRefs": ["observations/obs-protocol.json"],
+        "observationSha256": "522ed0d3ae2f1bbceb098c87161f41aa13ec52d6bb8f99f00002960ddc8cf452"
+      },
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-fixture",
+        "type": "FIXTURE_EXECUTION",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": "op-negative",
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "FIXTURE_MUTANT_EXECUTED",
+        "artifactRefs": ["observations/obs-fixture.json"],
+        "observationSha256": "bb3affae0a4c0cccd75c5411349e71581481ecaa1d6047718ca38f953575e35e"
+      },
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-negative-oracle",
+        "type": "VALIDATOR_CHECK",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": "op-negative",
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "INVALID_RESULT_SHAPE_REJECTED",
+        "artifactRefs": ["observations/obs-negative-oracle.json"],
+        "observationSha256": "5c3834cdd6e7d81ed607ea1891afd22eb4ad2c94908d5a428313603b1b8083d3"
+      },
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-privacy",
+        "type": "PRIVACY_SCAN",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": null,
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "PRIVACY_SCAN_CLEAR",
+        "artifactRefs": ["observations/obs-privacy.json"],
+        "observationSha256": "d14f4da94df1f10ee77a0d29473215ec93db8f99fc510efb936561f6383169a2"
+      },
+      {
+        "schemaVersion": "mcp-res.observation/0.2.0",
+        "id": "obs-cleanup",
+        "type": "CLEANUP_CHECK",
+        "strength": "INTEGRITY_BOUND",
+        "producer": {
+          "name": "mcp-res-black-box-validator",
+          "version": "0.2.0-pr1",
+          "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+        },
+        "subjectRef": "b9556404d13de805a962089152d733f08001e603df62bfdee2c59caa739dca5a",
+        "operationRef": null,
+        "startedOffsetMs": 10,
+        "durationMs": 5,
+        "outcome": "PASS",
+        "reasonCode": "CLEANUP_COMPLETE",
+        "artifactRefs": ["observations/obs-cleanup.json"],
+        "observationSha256": "1d62eb7cd142cab653679cd1daf1ad1fbdf1253ad461b3e3f896f5e4fa1a1f7b"
+      }
+    ],
+    "coverage": {
+      "schemaVersion": "mcp-res.observation-coverage/0.2.0",
+      "surfaces": [
+        {
+          "surface": "MCP_WIRE_MESSAGES",
+          "required": true,
+          "status": "INSTRUMENTED",
+          "observationRefs": ["obs-protocol"]
+        },
+        {
+          "surface": "RAW_HTTP_REQUESTS",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "RAW_HTTP_RESPONSES",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "STDIO_INPUT_OUTPUT",
+          "required": true,
+          "status": "INSTRUMENTED",
+          "observationRefs": ["obs-protocol"]
+        },
+        {
+          "surface": "CHILD_PROCESS_LIFECYCLE",
+          "required": true,
+          "status": "INSTRUMENTED",
+          "observationRefs": ["obs-process"]
+        },
+        {
+          "surface": "TRANSPORT_DISCONNECTS",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "RETRIES",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "FILESYSTEM_OUTPUTS",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "CLEANUP",
+          "required": true,
+          "status": "INSTRUMENTED",
+          "observationRefs": ["obs-cleanup"]
+        },
+        {
+          "surface": "GENERATED_REGRESSION_EXECUTION",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "AUTHORIZATION_REDIRECTS",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "TOKEN_ENDPOINT",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "CACHE_BEHAVIOR",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        },
+        {
+          "surface": "SOURCE_EVIDENCE",
+          "required": false,
+          "status": "NOT_APPLICABLE",
+          "observationRefs": []
+        }
+      ]
+    },
+    "trialSummary": {
+      "schemaVersion": "mcp-res.trial-summary/0.2.0",
+      "plannedTrials": 1,
+      "completedTrials": 1,
+      "seeds": [1702],
+      "processCount": 1,
+      "counts": { "success": 1, "failure": 0, "incomplete": 0 },
+      "distinctOutcomeHashes": ["accef121198be3016680cf5353f5d6969d51b8f18b4aa6a1517f068cd49bbfa5"],
+      "durationMs": { "minimum": 1000, "median": 1000, "p95": 1000 },
+      "environments": ["synthetic-portable-environment-v1"],
+      "stopRule": "exactly one bounded trial",
+      "classification": "SINGLE_OBSERVATION"
+    },
+    "supportingArtifactManifestDigest": "e4355709f683eccf6d2bf0a36a093917722548c5f94d50d7541cfd705ce599cb"
+  },
+  "statement": {
+    "schemaVersion": "mcp-res.conformance-statement/0.2.0",
+    "standardVersion": "0.2.0",
+    "profileId": "mcp-res/server-tool-call/v1",
+    "profileVersion": "2.0.0",
+    "protocolRevision": "2026-07-28",
+    "subjectType": "MCP_SERVER",
+    "subjectName": "reason-bound-fixture",
+    "subjectVersion": "1.0.0",
+    "evidenceClass": "FIXTURE_BACKED_PROTOCOL",
+    "result": "PASS",
+    "scenarioFingerprint": "af617a946877bcfb5b2a1fc2feb3b353d1ba7f845f301bd70b7cbac65d811123",
+    "executionInstanceDigest": "b2a6bb75649f441461e8df9c43936d1248126860d4a39ea07f6bc2455ecd4095",
+    "stabilityClassification": "SINGLE_OBSERVATION",
+    "evidenceSha256": "95d8ceb38be1a7e9c5a84cff13e0fc71c842bb0eb50369352f5f3b286f37460c",
+    "validator": {
+      "name": "mcp-res-black-box-validator",
+      "version": "0.2.0-pr1",
+      "sha256": "3f83b73d41c98d953fbfe14992557d12fda170edbcdc9924ce46020a0e4a0094"
+    },
+    "verifiedAt": "2026-08-27T12:01:00.000Z"
+  },
+  "integrity": {
+    "schemaVersion": "mcp-res.integrity-manifest/0.2.0",
+    "canonicalizationAlgorithm": "mcp-res-json-utf16-v1",
+    "hashAlgorithm": "SHA-256",
+    "publication": "MANIFEST_LAST",
+    "complete": true,
+    "artifacts": [
+      {
+        "path": "conformance-statement.json",
+        "mediaType": "application/json",
+        "bytes": 829,
+        "sha256": "56b8733d5c45596e8002fb1117fc8d9640f61c269f068b7a3324f9c1fb7bf740"
+      },
+      {
+        "path": "evidence-envelope.json",
+        "mediaType": "application/json",
+        "bytes": 8676,
+        "sha256": "95d8ceb38be1a7e9c5a84cff13e0fc71c842bb0eb50369352f5f3b286f37460c"
+      },
+      {
+        "path": "observations/obs-cleanup.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 498,
+        "sha256": "1d62eb7cd142cab653679cd1daf1ad1fbdf1253ad461b3e3f896f5e4fa1a1f7b"
+      },
+      {
+        "path": "observations/obs-fixture.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 518,
+        "sha256": "bb3affae0a4c0cccd75c5411349e71581481ecaa1d6047718ca38f953575e35e"
+      },
+      {
+        "path": "observations/obs-negative-oracle.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 538,
+        "sha256": "5c3834cdd6e7d81ed607ea1891afd22eb4ad2c94908d5a428313603b1b8083d3"
+      },
+      {
+        "path": "observations/obs-privacy.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 499,
+        "sha256": "d14f4da94df1f10ee77a0d29473215ec93db8f99fc510efb936561f6383169a2"
+      },
+      {
+        "path": "observations/obs-process.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 514,
+        "sha256": "06b170564a9e8cef6e8928d78789905860c19efb7852f8f836f7d030a84b2124"
+      },
+      {
+        "path": "observations/obs-protocol.json",
+        "mediaType": "application/vnd.mcp-res.observation+json",
+        "bytes": 516,
+        "sha256": "522ed0d3ae2f1bbceb098c87161f41aa13ec52d6bb8f99f00002960ddc8cf452"
+      }
+    ],
+    "bundleDigest": "1155b3cd9ba1a8c5db05add3652b8cb312a6064df71dd81e70cd276ff699573f"
+  }
+}

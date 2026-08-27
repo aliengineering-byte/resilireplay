@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/conformance-statement.schema.json",
+  "title": "MCP-RES conformance statement v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "standardVersion",
+    "profileId",
+    "profileVersion",
+    "protocolRevision",
+    "subjectType",
+    "subjectName",
+    "subjectVersion",
+    "evidenceClass",
+    "result",
+    "scenarioFingerprint",
+    "executionInstanceDigest",
+    "stabilityClassification",
+    "evidenceSha256",
+    "validator",
+    "verifiedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.conformance-statement/0.2.0" },
+    "standardVersion": { "const": "0.2.0" },
+    "profileId": { "type": "string", "pattern": "^mcp-res/[a-z0-9-]+/v[1-9][0-9]*$" },
+    "profileVersion": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$" },
+    "protocolRevision": { "enum": ["2025-11-25", "2026-07-28", "NOT_APPLICABLE"] },
+    "subjectType": {
+      "enum": [
+        "MCP_SERVER",
+        "MCP_CLIENT",
+        "AGENT_RUNTIME",
+        "GATEWAY_PROXY",
+        "ADAPTER",
+        "TRANSPORT_IMPLEMENTATION",
+        "TEST_HARNESS"
+      ]
+    },
+    "subjectName": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "subjectVersion": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "evidenceClass": {
+      "enum": [
+        "GENUINE_RUNTIME",
+        "FIXTURE_BACKED_PROTOCOL",
+        "FIXTURE_VERIFIED",
+        "INSTALLATION_VERIFIED",
+        "DOCUMENTED_ONLY"
+      ]
+    },
+    "result": { "enum": ["PASS", "FAIL", "INCOMPLETE"] },
+    "scenarioFingerprint": { "$ref": "#/$defs/sha256" },
+    "executionInstanceDigest": { "$ref": "#/$defs/sha256" },
+    "stabilityClassification": {
+      "enum": [
+        "SINGLE_OBSERVATION",
+        "REPEATED_STABLE",
+        "FLAKY",
+        "INCOMPLETE",
+        "ENVIRONMENT_DEPENDENT"
+      ]
+    },
+    "evidenceSha256": { "$ref": "#/$defs/sha256" },
+    "validator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "sha256"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "verifiedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
