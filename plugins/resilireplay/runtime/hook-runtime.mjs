@@ -4073,7 +4073,7 @@ function normalize(value) {
   if (Array.isArray(value))
     return value.map(normalize);
   if (typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== void 0).sort(([left], [right]) => left.localeCompare(right)).map(([key, entry]) => [key, normalize(entry)]));
+    return Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== void 0).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0).map(([key, entry]) => [key, normalize(entry)]));
   }
   return String(value);
 }

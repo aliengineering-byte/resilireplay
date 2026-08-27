@@ -36,6 +36,20 @@ export class McpRemoteAuthorizationError extends Error {
 
 export type ImportedValueSource = "literal" | "variable-reference";
 
+export const INSPECTOR_SOURCE_PROFILE = Object.freeze({
+  id: "mcp-inspector/mcp-json",
+  profileVersion: "1.0.0",
+  supportedInspectorVersions: ">=2.0.0 <2.2.0",
+  mode: "read-only",
+} as const);
+
+export const MAX_INSPECTOR_CONFIG_BYTES = 1024 * 1024;
+export const MAX_INSPECTOR_CONFIG_DEPTH = 32;
+export const MAX_INSPECTOR_SERVERS = 128;
+const MAX_DECLARED_VALUES = 128;
+const MAX_STDIO_ARGUMENTS = 256;
+const MAX_IMPORTED_STRING_BYTES = 16 * 1024;
+
 export interface SanitizedDeclaredValue {
   name: string;
   source: ImportedValueSource;
@@ -46,7 +60,8 @@ export interface SanitizedDeclaredValue {
 export interface SanitizedExecutionPlan {
   schemaVersion: "1.0";
   source: "mcp-inspector-mcp-json";
-  compatibility: "MCP Inspector 2.0.0";
+  sourceProfile: typeof INSPECTOR_SOURCE_PROFILE;
+  compatibility: "MCP Inspector >=2.0.0 <2.2.0";
   configSha256: string;
   server: string;
   transport: "stdio" | "streamable-http" | "sse";
@@ -153,7 +168,11 @@ const UNSUPPORTED_EXECUTION_FIELDS = [
 ] as const;
 
 function configError(errorId: string, message: string, cause?: unknown): never {
-  throw new McpInspectorConfigError(message, errorId, cause === undefined ? undefined : { cause });
+  throw new McpInspectorConfigError(
+    sanitize(message),
+    errorId,
+    cause === undefined ? undefined : { cause },
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -200,18 +219,24 @@ class DuplicateKeyScanner {
   constructor(private readonly raw: string) {}
 
   scan(): void {
-    this.value("$");
+    this.value("$", 0);
   }
 
   private whitespace(): void {
     while (/\s/u.test(this.raw[this.index] ?? "")) this.index += 1;
   }
 
-  private value(path: string): void {
+  private value(path: string, depth: number): void {
+    if (depth > MAX_INSPECTOR_CONFIG_DEPTH) {
+      configError(
+        "RR_MCP_CONFIG_TOO_DEEP",
+        `Inspector configuration exceeds ${MAX_INSPECTOR_CONFIG_DEPTH} levels at ${path}`,
+      );
+    }
     this.whitespace();
     const character = this.raw[this.index];
-    if (character === "{") this.object(path);
-    else if (character === "[") this.array(path);
+    if (character === "{") this.object(path, depth);
+    else if (character === "[") this.array(path, depth);
     else if (character === '"') this.string();
     else {
       while (this.index < this.raw.length && !/[\s,}\]]/u.test(this.raw[this.index] ?? "")) {
@@ -221,7 +246,7 @@ class DuplicateKeyScanner {
     this.whitespace();
   }
 
-  private object(path: string): void {
+  private object(path: string, depth: number): void {
     this.index += 1;
     this.whitespace();
     const keys = new Set<string>();
@@ -237,7 +262,7 @@ class DuplicateKeyScanner {
       keys.add(key);
       this.whitespace();
       this.index += 1; // colon; JSON.parse already established syntactic validity.
-      this.value(`${path}.${key}`);
+      this.value(`${path}.${key}`, depth + 1);
       if (this.raw[this.index] === "}") {
         this.index += 1;
         return;
@@ -247,7 +272,7 @@ class DuplicateKeyScanner {
     }
   }
 
-  private array(path: string): void {
+  private array(path: string, depth: number): void {
     this.index += 1;
     this.whitespace();
     if (this.raw[this.index] === "]") {
@@ -256,7 +281,7 @@ class DuplicateKeyScanner {
     }
     let item = 0;
     while (this.index < this.raw.length) {
-      this.value(`${path}[${item}]`);
+      this.value(`${path}[${item}]`, depth + 1);
       item += 1;
       if (this.raw[this.index] === "]") {
         this.index += 1;
@@ -299,6 +324,52 @@ function parseJson(raw: string): Record<string, unknown> {
     configError("RR_MCP_CONFIG_TOP_LEVEL", "Inspector configuration must be a JSON object");
   }
   return parsed;
+}
+
+function validateStringBound(value: string, label: string): void {
+  for (let index = 0; index < value.length; index += 1) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(index + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) {
+        configError("RR_MCP_CONFIG_INVALID_UNICODE", `${label} contains an unpaired surrogate`);
+      }
+      index += 1;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) {
+      configError("RR_MCP_CONFIG_INVALID_UNICODE", `${label} contains an unpaired surrogate`);
+    }
+  }
+  if (Buffer.byteLength(value, "utf8") > MAX_IMPORTED_STRING_BYTES) {
+    configError(
+      "RR_MCP_CONFIG_STRING_TOO_LARGE",
+      `${label} exceeds ${MAX_IMPORTED_STRING_BYTES} UTF-8 bytes`,
+    );
+  }
+}
+
+async function readBoundedConfig(file: string): Promise<string> {
+  let bytes: Buffer;
+  try {
+    bytes = await readFile(file);
+  } catch (error) {
+    configError("RR_MCP_CONFIG_READ", "Inspector configuration file could not be read", error);
+  }
+  if (bytes.length > MAX_INSPECTOR_CONFIG_BYTES) {
+    configError(
+      "RR_MCP_CONFIG_TOO_LARGE",
+      `Inspector configuration exceeds ${MAX_INSPECTOR_CONFIG_BYTES} bytes`,
+    );
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    configError("RR_MCP_CONFIG_BOM", "Inspector configuration must not start with a UTF-8 BOM");
+  }
+  let raw: string;
+  try {
+    raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch (error) {
+    configError("RR_MCP_CONFIG_INVALID_UTF8", "Inspector configuration must be valid UTF-8", error);
+  }
+  return raw;
 }
 
 function validateTimeout(entry: Record<string, unknown>, field: string): number | undefined {
@@ -353,6 +424,12 @@ function parseDeclaredMap(
   }
   const values: Record<string, string> = {};
   const plan: SanitizedDeclaredValue[] = [];
+  if (Object.keys(input).length > MAX_DECLARED_VALUES) {
+    configError(
+      kind === "environment" ? "RR_MCP_CONFIG_ENV" : "RR_MCP_CONFIG_HEADERS",
+      `${kind} exceeds ${MAX_DECLARED_VALUES} entries`,
+    );
+  }
   for (const [name, rawValue] of Object.entries(input)) {
     if (typeof rawValue !== "string") {
       configError(
@@ -360,6 +437,7 @@ function parseDeclaredMap(
         `${kind === "environment" ? "Environment" : "Header"} value for ${name} must be a string`,
       );
     }
+    validateStringBound(rawValue, `${kind} value for ${name}`);
     if (kind === "environment") {
       if (!SAFE_ENV_NAME.test(name)) {
         configError(
@@ -430,7 +508,12 @@ async function resolvePathReference(
   label: string,
 ): Promise<string> {
   const classification = classifyInspectorPath(value);
-  if (classification === "foreign-absolute") return value;
+  if (classification === "foreign-absolute") {
+    configError(
+      "RR_MCP_CONFIG_FOREIGN_PATH",
+      `${label} is absolute for a different operating-system path model`,
+    );
+  }
   const candidate =
     classification === "native-absolute" ? resolve(value) : resolve(configDirectory, value);
   if (!isContained(allowedRoot, candidate)) {
@@ -481,6 +564,7 @@ function validateEntryFields(entry: Record<string, unknown>): void {
   if (entry.note !== undefined && typeof entry.note !== "string") {
     configError("RR_MCP_CONFIG_NOTE", "Inspector note must be a string when present");
   }
+  if (typeof entry.note === "string") validateStringBound(entry.note, "Inspector note");
 }
 
 function parseUrl(value: unknown): URL {
@@ -546,11 +630,17 @@ export async function listInspectorServers(
     if (!information.isFile()) {
       configError("RR_MCP_CONFIG_NOT_FILE", "Inspector configuration path is not a file");
     }
+    if (information.size > MAX_INSPECTOR_CONFIG_BYTES) {
+      configError(
+        "RR_MCP_CONFIG_TOO_LARGE",
+        `Inspector configuration exceeds ${MAX_INSPECTOR_CONFIG_BYTES} bytes`,
+      );
+    }
   } catch (error) {
     if (error instanceof McpInspectorConfigError) throw error;
     configError("RR_MCP_CONFIG_MISSING", "Inspector configuration file was not found", error);
   }
-  const raw = await readFile(file, "utf8");
+  const raw = await readBoundedConfig(file);
   const parsed = parseJson(raw);
   if (!Object.hasOwn(parsed, "mcpServers") || !isRecord(parsed.mcpServers)) {
     configError("RR_MCP_CONFIG_MISSING_SERVERS", "Inspector configuration must contain mcpServers");
@@ -565,7 +655,14 @@ export async function listInspectorServers(
   if (serverNames.length === 0) {
     configError("RR_MCP_CONFIG_ZERO_SERVERS", "Inspector configuration contains zero servers");
   }
+  if (serverNames.length > MAX_INSPECTOR_SERVERS) {
+    configError(
+      "RR_MCP_CONFIG_TOO_MANY_SERVERS",
+      `Inspector configuration exceeds ${MAX_INSPECTOR_SERVERS} servers`,
+    );
+  }
   for (const name of serverNames) {
+    validateStringBound(name, "Inspector server name");
     if (name.trim() === "" || name.length > 128 || containsAsciiControl(name)) {
       configError("RR_MCP_CONFIG_SERVER_NAME", "Inspector server names must be non-empty text");
     }
@@ -609,17 +706,18 @@ export async function loadInspectorConfig(
     if (!info.isFile()) {
       configError("RR_MCP_CONFIG_NOT_FILE", "Inspector configuration path is not a file");
     }
+    if (info.size > MAX_INSPECTOR_CONFIG_BYTES) {
+      configError(
+        "RR_MCP_CONFIG_TOO_LARGE",
+        `Inspector configuration exceeds ${MAX_INSPECTOR_CONFIG_BYTES} bytes`,
+      );
+    }
   } catch (error) {
     if (error instanceof McpInspectorConfigError) throw error;
     configError("RR_MCP_CONFIG_MISSING", "Inspector configuration file was not found", error);
   }
 
-  let raw: string;
-  try {
-    raw = await readFile(file, "utf8");
-  } catch (error) {
-    configError("RR_MCP_CONFIG_READ", "Inspector configuration file could not be read", error);
-  }
+  const raw = await readBoundedConfig(file);
   const parsed = parseJson(raw);
   const topLevelFields = Object.keys(parsed);
   if (!Object.hasOwn(parsed, "mcpServers")) {
@@ -639,7 +737,14 @@ export async function loadInspectorConfig(
   if (names.length === 0) {
     configError("RR_MCP_CONFIG_ZERO_SERVERS", "Inspector configuration contains zero servers");
   }
+  if (names.length > MAX_INSPECTOR_SERVERS) {
+    configError(
+      "RR_MCP_CONFIG_TOO_MANY_SERVERS",
+      `Inspector configuration exceeds ${MAX_INSPECTOR_SERVERS} servers`,
+    );
+  }
   for (const name of names) {
+    validateStringBound(name, "Inspector server name");
     if (name.trim() === "" || name.length > 128 || containsAsciiControl(name)) {
       configError("RR_MCP_CONFIG_SERVER_NAME", "Inspector server names must be non-empty text");
     }
@@ -706,6 +811,7 @@ export async function loadInspectorConfig(
     if (typeof selected.command !== "string" || selected.command.trim() === "") {
       configError("RR_MCP_CONFIG_COMMAND", "Stdio Inspector entry requires a non-empty command");
     }
+    validateStringBound(selected.command, "Stdio command");
     if (
       selected.command.includes(String.fromCharCode(0)) ||
       selected.command.includes("\r") ||
@@ -717,10 +823,16 @@ export async function loadInspectorConfig(
       configError("RR_MCP_CONFIG_ARGS", "Stdio args must be an array of strings");
     }
     const rawArgs = selected.args ?? [];
+    if (rawArgs.length > MAX_STDIO_ARGUMENTS) {
+      configError("RR_MCP_CONFIG_ARGS", `Stdio args exceeds ${MAX_STDIO_ARGUMENTS} entries`);
+    }
     if (rawArgs.some((argument) => typeof argument !== "string")) {
       configError("RR_MCP_CONFIG_ARGS", "Every stdio argument must be a string");
     }
     const args = rawArgs as string[];
+    for (const [index, argument] of args.entries()) {
+      validateStringBound(argument, `Stdio argument ${index + 1}`);
+    }
     if (args.some((argument) => argument.includes(String.fromCharCode(0)))) {
       configError("RR_MCP_CONFIG_ARGS", "Stdio arguments cannot contain NUL characters");
     }
@@ -755,7 +867,8 @@ export async function loadInspectorConfig(
     const plan: SanitizedExecutionPlan = {
       schemaVersion: "1.0",
       source: "mcp-inspector-mcp-json",
-      compatibility: "MCP Inspector 2.0.0",
+      sourceProfile: INSPECTOR_SOURCE_PROFILE,
+      compatibility: "MCP Inspector >=2.0.0 <2.2.0",
       configSha256,
       server: serverName,
       transport: "stdio",
@@ -798,6 +911,7 @@ export async function loadInspectorConfig(
     );
   }
   const url = parseUrl(selected.url);
+  validateStringBound(url.toString(), "MCP server URL");
   const remote = !isLoopbackMcpUrl(url);
   if (remote && !options.allowRemote) throw new McpRemoteAuthorizationError();
   const declaredHeaders = parseDeclaredMap(selected.headers, "headers", environment);
@@ -805,7 +919,8 @@ export async function loadInspectorConfig(
   const plan: SanitizedExecutionPlan = {
     schemaVersion: "1.0",
     source: "mcp-inspector-mcp-json",
-    compatibility: "MCP Inspector 2.0.0",
+    sourceProfile: INSPECTOR_SOURCE_PROFILE,
+    compatibility: "MCP Inspector >=2.0.0 <2.2.0",
     configSha256,
     server: serverName,
     transport,

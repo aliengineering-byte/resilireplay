@@ -1,13 +1,16 @@
 import { spawn } from "node:child_process";
-import { access, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { dirname, join } from "node:path";
 import {
+  OutputContainmentError,
   PRODUCT_VERSION,
   calculateMetrics,
   createEvent,
   injectFaults,
-  safeOutputPath,
+  prepareContainedOutputDirectory,
+  prepareContainedOutputFile,
+  resolveContainedOutputPath,
   sha256,
   stableStringify,
   type EventType,
@@ -228,33 +231,17 @@ async function executeRegression(testPath: string): Promise<void> {
   }
 }
 
-function isContained(root: string, candidate: string): boolean {
-  const relationship = relative(resolve(root), resolve(candidate));
-  return (
-    relationship === "" ||
-    (relationship !== ".." && !relationship.startsWith(`..${sep}`) && !isAbsolute(relationship))
-  );
-}
-
 async function persistentOutputPath(root: string, candidate: string): Promise<string> {
-  const outputPath = safeOutputPath(root, candidate);
-  let ancestor = outputPath;
-  while (
-    !(await access(ancestor).then(
-      () => true,
-      () => false,
-    ))
-  ) {
-    const parent = dirname(ancestor);
-    if (parent === ancestor) break;
-    ancestor = parent;
-  }
-  if (!isContained(root, await realpath(ancestor))) {
+  try {
+    const outputPath = await resolveContainedOutputPath(root, candidate);
+    return prepareContainedOutputDirectory(root, outputPath);
+  } catch (error) {
+    if (!(error instanceof OutputContainmentError)) throw error;
     throw Object.assign(new Error("Demo output resolves outside the current project"), {
       exitCode: DEMO_EXIT_CODES.ARTIFACT,
+      cause: error,
     });
   }
-  return outputPath;
 }
 
 export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
@@ -270,8 +257,8 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     ? await persistentOutputPath(root, options.outputDirectory)
     : undefined;
   const workspace = persistentOutput ?? (await mkdtemp(join(tmpdir(), "resilireplay-demo-")));
+  const outputRoot = persistentOutput ? root : workspace;
   try {
-    await mkdir(workspace, { recursive: true });
     const clean = cleanTrace();
     const recovered = recoveredTrace(seed);
     const negative = negativeTrace(seed);
@@ -290,13 +277,21 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
     }
 
     const evidenceDirectory = join(workspace, "evidence");
-    await mkdir(evidenceDirectory, { recursive: true });
+    await prepareContainedOutputDirectory(outputRoot, evidenceDirectory);
     await Promise.all([
-      writeTrace(join(evidenceDirectory, "clean-control.jsonl"), clean),
-      writeTrace(join(evidenceDirectory, "recovered-failure.jsonl"), recovered),
-      writeTrace(join(evidenceDirectory, "expected-negative-control.jsonl"), negative),
+      writeTrace(join(evidenceDirectory, "clean-control.jsonl"), clean, {
+        allowedRoot: outputRoot,
+      }),
+      writeTrace(join(evidenceDirectory, "recovered-failure.jsonl"), recovered, {
+        allowedRoot: outputRoot,
+      }),
+      writeTrace(join(evidenceDirectory, "expected-negative-control.jsonl"), negative, {
+        allowedRoot: outputRoot,
+      }),
     ]);
-    const regression = await compileRegression(negative, join(workspace, "regression"));
+    const regression = await compileRegression(negative, join(workspace, "regression"), {
+      allowedRoot: outputRoot,
+    });
     await executeRegression(regression.testPath);
 
     const canonical = {
@@ -336,7 +331,11 @@ export async function runDemo(options: DemoOptions = {}): Promise<DemoResult> {
       nextCommand: "npx --yes resilireplay@0.6.0 adopt --config ./mcp.json --dry-run",
     };
     if (persistentOutput) {
-      await writeFile(join(workspace, "demo-summary.json"), `${stableStringify(result)}\n`, "utf8");
+      const summaryPath = await prepareContainedOutputFile(
+        outputRoot,
+        join(workspace, "demo-summary.json"),
+      );
+      await writeFile(summaryPath, `${stableStringify(result)}\n`, "utf8");
     }
     return result;
   } catch (error) {

@@ -1,7 +1,9 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { basename, resolve } from "node:path";
+import { constants } from "node:fs";
+import { copyFile, link, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
 import {
   calculateMetrics,
+  prepareContainedOutputDirectory,
   PRODUCT_VERSION,
   safeOutputPath,
   sha256,
@@ -25,6 +27,148 @@ export interface RegressionArtifacts {
   firstCriticalStep: string;
   minimizedEventCount: number;
   sourceEventCount: number;
+}
+
+export interface CompileRegressionOptions {
+  allowedRoot?: string;
+  /** @internal Dependency injection for deterministic publication-failure tests. */
+  publicationOperations?: Partial<RegressionPublicationOperations>;
+}
+
+export interface RegressionPublicationOperations {
+  link(source: string, destination: string): Promise<void>;
+  copyFileExclusive(source: string, destination: string): Promise<void>;
+  readText(path: string): Promise<string>;
+  remove(path: string): Promise<void>;
+  size(path: string): Promise<number>;
+}
+
+export class RegressionPublicationError extends Error {
+  readonly code:
+    | "RR_REGRESSION_CONFLICT"
+    | "RR_REGRESSION_INTEGRITY"
+    | "RR_REGRESSION_PUBLISH"
+    | "RR_REGRESSION_CLEANUP";
+
+  constructor(code: RegressionPublicationError["code"], message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "RegressionPublicationError";
+    this.code = code;
+  }
+}
+
+const DEFAULT_PUBLICATION_OPERATIONS: RegressionPublicationOperations = {
+  link,
+  copyFileExclusive: async (source, destination) =>
+    copyFile(source, destination, constants.COPYFILE_EXCL),
+  readText: (path) => readFile(path, "utf8"),
+  remove: (path) => rm(path, { force: true }),
+  size: async (path) => (await stat(path)).size,
+};
+
+const HARD_LINK_UNAVAILABLE = new Set([
+  "EACCES",
+  "EPERM",
+  "EXDEV",
+  "ENOSYS",
+  "ENOTSUP",
+  "EOPNOTSUPP",
+]);
+
+function errno(error: unknown): string | undefined {
+  return (error as NodeJS.ErrnoException).code;
+}
+
+async function acceptIdenticalExisting(
+  artifact: { finalPath: string; content: string },
+  operations: RegressionPublicationOperations,
+  cause: unknown,
+): Promise<void> {
+  const existing = await operations.readText(artifact.finalPath).catch(() => undefined);
+  if (existing === artifact.content) return;
+  throw new RegressionPublicationError(
+    "RR_REGRESSION_CONFLICT",
+    `Regression artifact conflict; refusing to overwrite: ${artifact.finalPath}`,
+    { cause },
+  );
+}
+
+async function verifyExclusiveCopy(
+  source: string,
+  artifact: { finalPath: string; content: string },
+  operations: RegressionPublicationOperations,
+): Promise<void> {
+  const [sourceSize, destinationSize, destination] = await Promise.all([
+    operations.size(source),
+    operations.size(artifact.finalPath),
+    operations.readText(artifact.finalPath),
+  ]);
+  const expectedSize = Buffer.byteLength(artifact.content, "utf8");
+  if (
+    sourceSize !== expectedSize ||
+    destinationSize !== expectedSize ||
+    sha256(destination) !== sha256(artifact.content)
+  ) {
+    throw new RegressionPublicationError(
+      "RR_REGRESSION_INTEGRITY",
+      `Exclusive-copy verification failed: ${artifact.finalPath}`,
+    );
+  }
+}
+
+async function publishArtifact(
+  source: string,
+  artifact: { finalPath: string; content: string },
+  operations: RegressionPublicationOperations,
+  published: string[],
+): Promise<void> {
+  try {
+    await operations.link(source, artifact.finalPath);
+    published.push(artifact.finalPath);
+    return;
+  } catch (error) {
+    if (errno(error) === "EEXIST") {
+      await acceptIdenticalExisting(artifact, operations, error);
+      return;
+    }
+    if (!HARD_LINK_UNAVAILABLE.has(errno(error) ?? "")) {
+      throw new RegressionPublicationError(
+        "RR_REGRESSION_PUBLISH",
+        `Unable to publish regression artifact exclusively: ${artifact.finalPath}`,
+        { cause: error },
+      );
+    }
+  }
+
+  try {
+    await operations.copyFileExclusive(source, artifact.finalPath);
+    published.push(artifact.finalPath);
+    await verifyExclusiveCopy(source, artifact, operations);
+  } catch (error) {
+    if (errno(error) === "EEXIST") {
+      await acceptIdenticalExisting(artifact, operations, error);
+      return;
+    }
+    // COPYFILE_EXCL proves the destination was absent when the operation began. A failing
+    // implementation may still leave a partial destination, so record it for guarded cleanup.
+    if (!published.includes(artifact.finalPath)) published.push(artifact.finalPath);
+    if (error instanceof RegressionPublicationError) throw error;
+    throw new RegressionPublicationError(
+      "RR_REGRESSION_PUBLISH",
+      `Exclusive-copy publication failed: ${artifact.finalPath}`,
+      { cause: error },
+    );
+  }
+}
+
+async function cleanupPublished(
+  paths: readonly string[],
+  operations: RegressionPublicationOperations,
+): Promise<unknown[]> {
+  const results = await Promise.allSettled(paths.map((path) => operations.remove(path)));
+  return results
+    .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+    .map((result) => result.reason);
 }
 
 function causalSlice(events: readonly TraceEvent[], critical: TraceEvent): TraceEvent[] {
@@ -112,6 +256,7 @@ export function identifyFirstCriticalEvent(events: readonly TraceEvent[]): Trace
 export async function compileRegression(
   source: readonly TraceEvent[],
   outputDirectoryInput: string,
+  options: CompileRegressionOptions = {},
 ): Promise<RegressionArtifacts> {
   const sourceSerialized = serializeTrace(source);
   const sourceTraceHash = sha256(sourceSerialized);
@@ -123,7 +268,8 @@ export async function compileRegression(
   }
 
   const outputDirectory = resolve(outputDirectoryInput);
-  await mkdir(outputDirectory, { recursive: true });
+  const allowedRoot = resolve(options.allowedRoot ?? dirname(outputDirectory));
+  await prepareContainedOutputDirectory(allowedRoot, outputDirectory);
   const scenarioPath = safeOutputPath(outputDirectory, "scenario.yaml");
   const fixturePath = safeOutputPath(outputDirectory, "replay.fixture.jsonl");
   const testPath = safeOutputPath(outputDirectory, "regression.test.mjs");
@@ -161,6 +307,7 @@ export async function compileRegression(
   const scenarioHash = sha256(scenario);
   const manifest = {
     schemaVersion: "1.0",
+    status: "complete",
     product: "ResiliReplay",
     productVersion: PRODUCT_VERSION,
     sourceTraceSha256: sourceTraceHash,
@@ -173,12 +320,59 @@ export async function compileRegression(
     scenarioSha256: scenarioHash,
   };
 
-  await Promise.all([
-    writeFile(scenarioPath, scenario, "utf8"),
-    writeFile(fixturePath, fixture, "utf8"),
-    writeFile(testPath, testSource, "utf8"),
-    writeFile(manifestPath, `${stableStringify(manifest)}\n`, "utf8"),
-  ]);
+  const stagingDirectory = await mkdtemp(join(outputDirectory, ".resilireplay-regression-"));
+  const staged = [
+    { name: basename(scenarioPath), finalPath: scenarioPath, content: scenario },
+    { name: basename(fixturePath), finalPath: fixturePath, content: fixture },
+    { name: basename(testPath), finalPath: testPath, content: testSource },
+    {
+      name: basename(manifestPath),
+      finalPath: manifestPath,
+      content: `${stableStringify(manifest)}\n`,
+    },
+  ];
+  const operations: RegressionPublicationOperations = {
+    ...DEFAULT_PUBLICATION_OPERATIONS,
+    ...options.publicationOperations,
+  };
+  const published: string[] = [];
+  let publicationError: unknown;
+  try {
+    await Promise.all(
+      staged.map((artifact) =>
+        writeFile(join(stagingDirectory, artifact.name), artifact.content, {
+          encoding: "utf8",
+          flag: "wx",
+          flush: true,
+        }),
+      ),
+    );
+    for (const artifact of staged) {
+      await publishArtifact(join(stagingDirectory, artifact.name), artifact, operations, published);
+    }
+  } catch (error) {
+    publicationError = error;
+    const cleanupErrors = await cleanupPublished(published, operations);
+    if (cleanupErrors.length > 0) {
+      publicationError = new RegressionPublicationError(
+        "RR_REGRESSION_CLEANUP",
+        `Regression publication failed and cleanup could not remove ${cleanupErrors.length} artifact(s)`,
+        { cause: new AggregateError([error, ...cleanupErrors]) },
+      );
+    }
+  }
+  try {
+    await rm(stagingDirectory, { recursive: true, force: true });
+  } catch (error) {
+    if (!publicationError) {
+      publicationError = new RegressionPublicationError(
+        "RR_REGRESSION_CLEANUP",
+        "Regression staging cleanup failed",
+        { cause: error },
+      );
+    }
+  }
+  if (publicationError) throw publicationError;
   return {
     outputDirectory,
     scenarioPath,

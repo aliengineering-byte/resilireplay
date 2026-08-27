@@ -1,11 +1,12 @@
-# The MCP Reliability Standard
+# ResiliReplay MCP Reliability Evidence Profile
 
-Status: public working standard, revision 0.1 (2026-08-08).
+Status: project-defined working profile, revision 0.1 (2026-08-08).
 
-The MCP Reliability Standard defines the minimum evidence needed to make a bounded, reproducible
-claim about how an MCP server behaves under failure. It is an open testing convention maintained in
-the ResiliReplay repository. It is not part of the Model Context Protocol specification, a security
-standard, a certification program, or an endorsement of any server.
+This profile defines the minimum evidence ResiliReplay requires for a bounded, reproducible claim
+about how an MCP server behaves under failure. It is an open testing convention maintained in the
+ResiliReplay repository. It is not part of the Model Context Protocol specification, an official or
+community-wide standard, a security standard, a certification program, or an endorsement of any
+server.
 
 ## Minimum claim
 
@@ -91,7 +92,7 @@ machine-readable `campaign-run.json` remains the source of truth.
 
 Substantive changes begin in a public GitHub Discussion and identify the new minimum evidence,
 compatibility impact, migration path, and negative control. Changes land through reviewed pull
-requests. Existing results keep the revision they declared; the standard does not retroactively
+requests. Existing results keep the revision they declared; the profile does not retroactively
 upgrade evidence.
 
 Questions for the first RFC:

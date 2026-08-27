@@ -67,7 +67,7 @@ def render(lines: list[str], step: int, caption: str) -> Image.Image:
     draw.rectangle((24, 64, WIDTH - 24, 84), fill="#182538")
     for x, dot in ((52, "#ff5f57"), (80, "#febc2e"), (108, "#28c840")):
         draw.ellipse((x - 7, 54 - 7, x + 7, 54 + 7), fill=dot)
-    draw.text((142, 38), "MCP Reliability Standard - public v0.6.0 run", font=SANS_BOLD, fill="#f0f6fc")
+    draw.text((142, 38), "ResiliReplay MCP Evidence Profile - public v0.6.0 run", font=SANS_BOLD, fill="#f0f6fc")
     draw.rounded_rectangle((1010, 36, 1150, 74), radius=18, fill="#17385d")
     draw.text((1030, 42), f"{step}/4", font=MONO_BOLD, fill="#79c0ff")
     draw.text((52, 112), caption, font=SANS, fill="#a9bad0")
@@ -101,7 +101,7 @@ def main() -> int:
         optimize=True,
         disposal=2,
     )
-    print("Rendered 32-second MCP standard demo from verified transcript.")
+    print("Rendered 32-second MCP evidence profile demo from verified transcript.")
     return 0
 
 

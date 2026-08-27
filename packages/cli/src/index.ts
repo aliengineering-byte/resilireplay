@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { access, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
@@ -12,6 +12,9 @@ import {
   FaultScenarioSchema,
   calculateMetrics,
   injectFaults,
+  prepareContainedOutputDirectory,
+  prepareContainedOutputFile,
+  resolveContainedOutputPath,
   safeOutputPath,
   stableStringify,
   type FaultScenario,
@@ -85,6 +88,14 @@ async function exists(path: string): Promise<boolean> {
 
 function boundedPath(candidate: string): string {
   return safeOutputPath(process.cwd(), candidate);
+}
+
+async function boundedOutputDirectory(candidate: string): Promise<string> {
+  return prepareContainedOutputDirectory(process.cwd(), candidate);
+}
+
+async function boundedOutputFile(candidate: string): Promise<string> {
+  return prepareContainedOutputFile(process.cwd(), candidate);
 }
 
 async function persistedRunPath(input: string): Promise<string> {
@@ -427,7 +438,7 @@ export function createProgram(): Command {
     .action(async (id: string, options: { output?: string }) => {
       const selected = templateById(id);
       if (!selected) throw new Error(`Unknown template ${id}`);
-      const output = boundedPath(options.output ?? `${id}.template.json`);
+      const output = await boundedOutputFile(options.output ?? `${id}.template.json`);
       const rendered = renderTemplateArtifact(selected, `${id}.template.json`);
       await writeFile(output, `${rendered}\n`, "utf8");
       console.log(`Wrote template ${output}`);
@@ -636,8 +647,7 @@ export function createProgram(): Command {
     .action(async (runInput: string, options: { output: string }) => {
       const run = await loadCampaignRun(await persistedRunPath(runInput));
       const baseline = approveCampaignBaseline(run);
-      const output = boundedPath(options.output);
-      await mkdir(dirname(output), { recursive: true });
+      const output = await boundedOutputFile(options.output);
       await writeCampaignBaseline(baseline, output);
       console.log(`Approved baseline ${output}`);
       console.log(`Baseline hash ${baseline.baselineHash}`);
@@ -654,9 +664,9 @@ export function createProgram(): Command {
       const run = await loadCampaignRun(runPath);
       const baseline = await loadCampaignBaseline(boundedPath(options.baseline));
       const comparison = compareCampaignRun(run, baseline);
-      const output = options.output
-        ? boundedPath(options.output)
-        : safeOutputPath(dirname(runPath), "comparison");
+      const output = await boundedOutputDirectory(
+        options.output ?? safeOutputPath(dirname(runPath), "comparison"),
+      );
       await writeCampaignComparisonReports(comparison, output);
       console.log(comparisonTerminalReport(comparison));
       console.log(`Comparison reports ${output}`);
@@ -677,8 +687,8 @@ export function createProgram(): Command {
     .option("--timeout <ms>", "Subprocess timeout", "30000")
     .allowUnknownOption(true)
     .action(async (command: string[], options: { output: string; timeout: string }) => {
-      const output = boundedPath(options.output);
-      const result = await recordCommand(command, output, Number(options.timeout));
+      const output = await boundedOutputFile(options.output);
+      const result = await recordCommand(command, output, Number(options.timeout), process.cwd());
       console.log(`\nRecorded ${result.events.length} events to ${output}`);
       if (result.exitCode !== 0) process.exitCode = result.exitCode;
     });
@@ -697,9 +707,10 @@ export function createProgram(): Command {
         options.seed === undefined ? undefined : Number(options.seed),
       );
       const result = injectFaults(source, scenario);
-      await writeTrace(boundedPath(options.output), result.events);
+      const output = await boundedOutputFile(options.output);
+      await writeTrace(output, result.events, { allowedRoot: process.cwd() });
       console.log(
-        `Applied ${result.applied.length} deterministic fault(s); trace ${result.traceHash.slice(0, 12)} → ${boundedPath(options.output)}`,
+        `Applied ${result.applied.length} deterministic fault(s); trace ${result.traceHash.slice(0, 12)} → ${output}`,
       );
     });
 
@@ -715,7 +726,10 @@ export function createProgram(): Command {
       console.log(terminalReport(metrics));
       console.log(`Replay seed     ${Number(options.seed)}`);
       if (options.reportDir) {
-        const report = await writeReportBundle(events, boundedPath(options.reportDir));
+        const report = await writeReportBundle(
+          events,
+          await boundedOutputDirectory(options.reportDir),
+        );
         console.log(`Reports         ${report.directory}`);
       }
       if (!metrics.passed) process.exitCode = 1;
@@ -729,7 +743,8 @@ export function createProgram(): Command {
     .option("--verify", "Execute the generated test immediately", true)
     .action(async (options: { trace: string; output: string; verify: boolean }) => {
       const events = await readTrace(boundedPath(options.trace));
-      const artifacts = await compileRegression(events, boundedPath(options.output));
+      const output = await resolveContainedOutputPath(process.cwd(), options.output);
+      const artifacts = await compileRegression(events, output, { allowedRoot: process.cwd() });
       if (options.verify) await executeGeneratedTest(artifacts.testPath);
       console.log(
         `Generated regression: ${artifacts.sourceEventCount} → ${artifacts.minimizedEventCount} events; first critical ${artifacts.firstCriticalStep}`,
@@ -756,9 +771,9 @@ export function createProgram(): Command {
       const input = boundedPath(pathInput);
       const tracePath =
         (await exists(input)) && extname(input) === ".jsonl" ? input : join(input, "trace.jsonl");
-      const output = options.output
-        ? boundedPath(options.output)
-        : join(dirname(tracePath), "report");
+      const output = await boundedOutputDirectory(
+        options.output ?? join(dirname(tracePath), "report"),
+      );
       const bundle = await writeReportBundle(await readTrace(tracePath), output);
       console.log(bundle.terminal);
       console.log(`HTML ${bundle.htmlPath}`);
@@ -838,6 +853,9 @@ export function createProgram(): Command {
             "RR_MCP_TIMEOUT",
           );
         }
+        const plannedOutput = options.dryRun
+          ? undefined
+          : await resolveContainedOutputPath(process.cwd(), options.output);
 
         let imported: ImportedInspectorServer | undefined;
         if (options.inspectorConfig) {
@@ -890,9 +908,10 @@ export function createProgram(): Command {
               }
             : {}),
         });
-        const output = boundedPath(options.output);
-        await mkdir(output, { recursive: true });
-        await writeTrace(join(output, "trace.jsonl"), result.events);
+        const output = await boundedOutputDirectory(plannedOutput!);
+        await writeTrace(join(output, "trace.jsonl"), result.events, {
+          allowedRoot: process.cwd(),
+        });
         await writeMcpCertification(result, output);
         const report = await writeReportBundle(result.events, output);
         console.log(report.terminal);

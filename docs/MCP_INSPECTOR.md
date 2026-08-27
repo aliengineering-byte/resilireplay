@@ -6,8 +6,9 @@ definition to introduce controlled failures, score recovery, preserve replay evi
 an executable regression. The projects are complementary. Compatibility does not imply an official
 partnership, endorsement, or certification.
 
-This integration was audited against MCP Inspector `2.0.0` at commit
-`7aebf168e6277ea26b1f04a7987a1cd11328ec83` and MCP protocol revision `2026-07-28`.
+This integration implements the versioned, read-only `mcp-inspector/mcp-json` source profile `1.0.0`
+for MCP Inspector `>=2.0.0 <2.2.0`. It was revalidated against MCP Inspector `2.1.0` at commit
+`c7bccd477d38c2c17afb4878bcca8ee5f563c5d2` and MCP protocol revision `2026-07-28`.
 
 ## Quick start
 
@@ -52,6 +53,8 @@ pnpm exec resilireplay mcp audit \
 
 The importer never writes or migrates the Inspector file. Exactly one entry is auto-selected; two
 or more entries require `--server`, matching the Inspector CLI's unambiguous selection behavior.
+Input is bounded to 1 MiB of strict UTF-8 JSON, 32 container levels, 128 servers, 256 arguments per
+server, 128 environment or header entries, and 16 KiB per imported string.
 
 ## Stdio
 
@@ -100,7 +103,7 @@ or header value is a string. It reads exactly one process environment variable. 
 command substitutions, backticks, pipes, semicolons, and other shell expressions are never
 expanded. Inspector's ordinary string values remain literals.
 
-Legacy `type: "sse"` entries are accepted for backwards compatibility because Inspector 2.0.0 still
+Legacy `type: "sse"` entries are accepted for backwards compatibility because Inspector 2.1.0 still
 supports them, although Streamable HTTP is the current standard transport.
 
 ## Secrets and execution plans

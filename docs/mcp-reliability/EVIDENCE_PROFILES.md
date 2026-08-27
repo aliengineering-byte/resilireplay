@@ -1,7 +1,8 @@
 # MCP reliability evidence profiles
 
 Profiles describe where evidence came from. Levels in the
-[MCP Reliability Standard](MCP_RELIABILITY_STANDARD.md) describe how far a result progressed. Always
+[ResiliReplay MCP Reliability Evidence Profile](MCP_RELIABILITY_STANDARD.md) describe how far a
+result progressed. Always
 publish both; for example, `PUBLIC_LOCAL_SERVER / M4 REGRESSION_VERIFIED / stdio`.
 
 ## Profiles
