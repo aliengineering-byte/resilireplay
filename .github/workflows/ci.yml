@@ -107,6 +107,7 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - run: pnpm agent:validate
       - name: Official Claude Code plugin validation
         run: pnpm dlx @anthropic-ai/claude-code@2.1.222 plugin validate plugins/resilireplay
