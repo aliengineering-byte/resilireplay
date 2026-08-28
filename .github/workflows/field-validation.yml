@@ -31,7 +31,7 @@ jobs:
             confirmation: 360bcce3d129bbe3f3631980300929b35a86ba5a0772db3b1d2dab60db92136e
             browser: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
         with:
           version: 10.14.0
