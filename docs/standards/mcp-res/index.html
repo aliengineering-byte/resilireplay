@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MCP-RES Draft v0.1.0 — reliability evidence for MCP</title>
+    <title>MCP-RES Draft v0.2.0 — reliability evidence for MCP</title>
     <meta
       name="description"
       content="The project-defined, vendor-neutral MCP Reliability Evidence Standard draft, schemas, profiles, vectors, and black-box validator."
@@ -11,7 +11,7 @@
     <meta name="theme-color" content="#10232a" />
     <meta name="color-scheme" content="light" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MCP Reliability Evidence Standard — Draft v0.1.0" />
+    <meta property="og:title" content="MCP Reliability Evidence Standard — Draft v0.2.0" />
     <meta
       property="og:description"
       content="Executable, profile-specific reliability evidence for MCP ecosystem participants."
@@ -29,7 +29,7 @@
       href="https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/"
     />
     <link rel="icon" href="../../favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="../../site.css?v=mcpres010" />
+    <link rel="stylesheet" href="../../site.css?v=mcpres020" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'none'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
@@ -55,38 +55,43 @@
     <main id="main">
       <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow">Project draft · v0.1.0 · executable</p>
+          <p class="eyebrow">Project draft · v0.2.0 · prerelease</p>
           <h1>Reliability claims.<br />Bound to evidence.</h1>
           <p class="hero-statement">
             MCP-RES defines a portable way to show the exact subject, clean control, deterministic
-            fault, bounded recovery, expected failure, privacy boundary, integrity, and cleanup
-            behind an MCP reliability claim.
+            fault, reason-bound negative control, observation coverage, bounded recovery,
+            authenticity boundary, and cleanup behind an MCP reliability claim.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#validate">Validate in five minutes</a>
-            <a class="button secondary" href="v0.1.0/MCP_RES.md">Read the draft</a>
+            <a class="button secondary" href="v0.2.0/MCP_RES.md">Read the v0.2 draft</a>
+            <a
+              class="button secondary"
+              href="https://github.com/aliengineering-byte/resilireplay/releases/tag/mcp-res-v0.2.0-draft.1"
+              >Get the prerelease</a
+            >
           </div>
         </div>
         <aside class="signal-card" aria-label="Draft status and scope">
           <div class="signal-topline"><span>MCP-RES</span><span class="status">DRAFT</span></div>
-          <p class="signal-number">0.1</p>
+          <p class="signal-number">0.2</p>
           <p class="signal-label">open evidence contract</p>
           <dl>
             <div>
               <dt>Schemas</dt>
-              <dd>9</dd>
+              <dd>17</dd>
             </div>
             <div>
-              <dt>Valid vectors</dt>
-              <dd>7</dd>
+              <dt>Profiles</dt>
+              <dd>12</dd>
             </div>
             <div>
-              <dt>Invalid vectors</dt>
-              <dd>18</dd>
+              <dt>Field subjects</dt>
+              <dd>4</dd>
             </div>
             <div>
-              <dt>Certification</dt>
-              <dd>NO</dd>
+              <dt>External adopters</dt>
+              <dd>0</dd>
             </div>
           </dl>
         </aside>
@@ -122,9 +127,9 @@
         <div>
           <h3>Initial profiles</h3>
           <ul>
-            <li><code>server-tool-call/v1</code> — normative within this project draft</li>
-            <li><code>client-config-source/v1</code> — provisional</li>
-            <li><code>agent-tool-recovery/v1</code> — provisional</li>
+            <li>8 provisional protocol, async, transport, OAuth, and operational profiles</li>
+            <li>4 experimental identity-extension profiles</li>
+            <li>Every profile binds schema/vector digests and lifecycle status</li>
           </ul>
           <p>
             A subject is never simply “MCP-RES compliant.” Every result names a profile/version,
@@ -140,12 +145,12 @@
         </div>
         <div class="code-wrap">
           <pre tabindex="0"><code>pnpm install --frozen-lockfile
-node docs/standards/mcp-res/v0.1.0/conformance-kit/validate.mjs docs/standards/mcp-res/v0.1.0/examples/hand-authored-valid.json
+node docs/standards/mcp-res/v0.2.0/conformance-kit/validate.mjs docs/standards/mcp-res/v0.2.0/test-vectors/valid/reason-bound-negative.json
 pnpm mcp-res:validate</code></pre>
         </div>
         <div class="quick-links">
-          <a href="v0.1.0/FIVE_MINUTES.md">Exact output →</a>
-          <a href="v0.1.0/test-vectors/catalog.json">Vector catalog →</a>
+          <a href="v0.2.0/IMPLEMENTER_KIT.md">Implementer guide →</a>
+          <a href="v0.2.0/test-vectors/catalog.json">Vector catalog →</a>
         </div>
       </section>
       <section class="section" id="reproduce">
@@ -160,17 +165,17 @@ pnpm mcp-res:validate</code></pre>
           </p>
         </div>
         <div class="docs-grid">
-          <a href="v0.1.0/schemas/conformance-bundle.schema.json"
-            ><strong>Bundle schema</strong><span>Closed portable record</span></a
+          <a href="v0.2.0/schemas/evidence-envelope.schema.json"
+            ><strong>Evidence schema</strong><span>Observation-bound portable record</span></a
           >
-          <a href="v0.1.0/test-vectors/SHA256SUMS"
+          <a href="v0.2.0/test-vectors/SHA256SUMS"
             ><strong>Vector hashes</strong><span>Exact published bytes</span></a
           >
-          <a href="v0.1.0/conformance-kit/README.md"
-            ><strong>Independent validator</strong><span>No ResiliReplay package import</span></a
+          <a href="v0.2.0/conformance-kit/python/README.md"
+            ><strong>Python validator</strong><span>No JavaScript or ResiliReplay import</span></a
           >
-          <a href="v0.1.0/FIELD_EVIDENCE.md"
-            ><strong>Field evidence</strong><span>Two pinned local stdio subjects</span></a
+          <a href="v0.2.0/field-evidence/FIELD_CORPUS.json"
+            ><strong>Field evidence</strong><span>Four pinned local subject artifacts</span></a
           >
         </div>
       </section>
@@ -183,8 +188,8 @@ pnpm mcp-res:validate</code></pre>
           <p>
             ResiliReplay maps completed runs through a boundary exporter. The standard schemas and
             black-box validator require none of its campaign, trace, agent, or reporter internals. A
-            second implementation should be able to produce the same portable records from its own
-            engine.
+            Python validator uses only public specification inputs. It is a second implementation,
+            but same-project authorship means it is not external independence.
           </p>
           <p>Testing a public package does not make that package an adopter.</p>
         </div>
@@ -205,13 +210,18 @@ pnpm mcp-res:validate</code></pre>
           <div class="hero-actions">
             <a class="button primary" href="GOVERNANCE.md">Governance</a>
             <a class="button primary" href="STATUS.md">Draft status</a>
-            <a class="button primary" href="v0.1.0/RESEARCH.md">Source ledger</a>
+            <a class="button primary" href="v0.2.0/RESEARCH.md">Source ledger</a>
+            <a
+              class="button primary"
+              href="https://github.com/aliengineering-byte/resilireplay/discussions/49"
+              >RFC Discussion</a
+            >
           </div>
         </div>
       </section>
     </main>
     <footer class="site-footer">
-      <p>MCP-RES Draft v0.1.0 · project-defined reliability evidence</p>
+      <p>MCP-RES Draft v0.2.0 · project-defined reliability evidence</p>
       <p>Not official MCP · not certification · no analytics</p>
     </footer>
   </body>
