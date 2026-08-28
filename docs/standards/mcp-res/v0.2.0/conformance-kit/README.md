@@ -10,7 +10,7 @@ Exit status is `0` for valid, `1` for a conformant input with a failing diagnost
 
 The JavaScript and dependency-free Python validators:
 
-- compile all thirteen JSON Schema 2020-12 schemas;
+- compile all sixteen JSON Schema 2020-12 schemas;
 - recomputes observation, scenario, execution, evidence, statement, artifact-manifest, and bundle digests;
 - derives evidence class, cleanup, privacy, and coverage rather than trusting booleans;
 - rejects wrong-reason/vacuous negative controls, cross-run substitutions, parent cycles, impossible time, excess retry attempts, and false stability summaries;
@@ -22,6 +22,10 @@ Additional entry points validate the optional DSSE/in-toto-informed attestation 
 node validate-attestation.mjs attested.json --trust-policy policy.json
 node validate-migration.mjs migrated.json
 python python/mcp_res_validator.py validate ../test-vectors/valid/reason-bound-negative.json
+node validate-official-conformance.mjs official-attachment.json
+node validate-profile.mjs profile-evaluation.json
+python python/mcp_res_validator.py official official-attachment.json
+python python/mcp_res_validator.py profile profile-evaluation.json
 ```
 
 Attestation tests create disposable Ed25519 keys only in memory. The dependency-free Python implementation contains its own schema evaluator, canonicalizer, semantic rules, and Ed25519 verifier. CI requires exact JavaScript/Python decision, diagnostic-family, canonical-byte, and digest agreement.

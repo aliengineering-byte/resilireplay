@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/stdio-transport/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28/basic/transports.mdx"
+  ],
+  "requiredChecks": [
+    "released-message-framing",
+    "stdout-protocol-purity",
+    "stderr-diagnostics",
+    "shell-free-argument-boundaries",
+    "executable-identity",
+    "startup-timeout",
+    "silent-process",
+    "malformed-output",
+    "partial-line",
+    "oversized-line",
+    "process-exit",
+    "child-tree-cleanup",
+    "backpressure",
+    "concurrent-requests",
+    "interruption",
+    "no-process-as-conversation",
+    "discovery-versus-legacy-initialization"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Framing follows the named released revision. Process lifetime is never treated as conversation identity."
+}

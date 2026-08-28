@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/reliability-profile-manifest.schema.json",
+  "title": "MCP-RES reliability profile manifest v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "status",
+    "protocolRevisions",
+    "sourceRefs",
+    "requiredChecks",
+    "conditionalChecks",
+    "experimentalChecks",
+    "remotePolicy",
+    "compositionBoundary"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.reliability-profile-manifest/0.2.0" },
+    "id": { "type": "string", "pattern": "^mcp-res/[a-z0-9-]+/v1$" },
+    "version": { "const": "1.0.0" },
+    "status": { "enum": ["PROVISIONAL", "EXPERIMENTAL"] },
+    "protocolRevisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "enum": ["2025-11-25", "2026-07-28"] }
+    },
+    "sourceRefs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": { "type": "string", "format": "uri", "maxLength": 512 }
+    },
+    "requiredChecks": { "$ref": "#/$defs/checkIds" },
+    "conditionalChecks": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "protocolRevisions"],
+        "properties": {
+          "id": { "$ref": "#/$defs/checkId" },
+          "protocolRevisions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 2,
+            "uniqueItems": true,
+            "items": { "enum": ["2025-11-25", "2026-07-28"] }
+          }
+        }
+      }
+    },
+    "experimentalChecks": { "$ref": "#/$defs/checkIds" },
+    "remotePolicy": { "const": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY" },
+    "compositionBoundary": { "type": "string", "minLength": 1, "maxLength": 1024 }
+  },
+  "$defs": {
+    "checkId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,95}$" },
+    "checkIds": {
+      "type": "array",
+      "maxItems": 128,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/checkId" }
+    }
+  }
+}

@@ -5,6 +5,8 @@
 ```bash
 python mcp_res_validator.py validate ../../test-vectors/valid/reason-bound-negative.json
 python mcp_res_validator.py canonicalize ../../test-vectors/valid/reason-bound-negative.json
+python mcp_res_validator.py official official-attachment.json
+python mcp_res_validator.py profile profile-evaluation.json
 python mcp_res_validator.py attestation attested.json --trust-policy policy.json
 python mcp_res_validator.py migration migration-result.json
 ```

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/extension-boundary/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28",
+    "https://github.com/modelcontextprotocol/ext-apps/tree/92f46a574568a3ddac7600343b7d3c4c4ed7b588"
+  ],
+  "requiredChecks": [
+    "extension-identifier",
+    "extension-version",
+    "extension-capability-declaration",
+    "unsupported-extension",
+    "unknown-extension-result",
+    "generic-json-rpc-fallback-when-allowed",
+    "core-extension-schema-separation",
+    "extension-version-skew",
+    "malformed-extension-settings",
+    "extension-data-limits"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [
+    "apps-sandbox-startup",
+    "apps-host-message-binding",
+    "apps-capability-consent",
+    "apps-contained-resources",
+    "apps-teardown",
+    "apps-malformed-postmessage",
+    "apps-oversized-message",
+    "apps-stale-identity"
+  ],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Core and extensions keep separate schema/status identities. MCP Apps checks are experimental observable reliability boundaries and are not application security certification."
+}

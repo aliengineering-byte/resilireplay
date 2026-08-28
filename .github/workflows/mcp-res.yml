@@ -23,6 +23,9 @@ on:
       - "scripts/verify-mcp-res-v02.mjs"
       - "scripts/verify-mcp-res-attestations.mjs"
       - "scripts/verify-mcp-res-migration.mjs"
+      - "scripts/verify-mcp-res-official-conformance.mjs"
+      - "scripts/verify-mcp-res-profiles.mjs"
+      - "scripts/verify-mcp-res-protocol-field.mjs"
       - "scripts/verify-mcp-res-python.mjs"
       - "scripts/verify-mcp-res-provenance.mjs"
       - ".github/workflows/mcp-res.yml"
@@ -48,6 +51,9 @@ on:
       - "scripts/verify-mcp-res-v02.mjs"
       - "scripts/verify-mcp-res-attestations.mjs"
       - "scripts/verify-mcp-res-migration.mjs"
+      - "scripts/verify-mcp-res-official-conformance.mjs"
+      - "scripts/verify-mcp-res-profiles.mjs"
+      - "scripts/verify-mcp-res-protocol-field.mjs"
       - "scripts/verify-mcp-res-python.mjs"
       - "scripts/verify-mcp-res-provenance.mjs"
       - ".github/workflows/mcp-res.yml"
@@ -120,6 +126,9 @@ jobs:
             .artifacts/mcp-res/verification.json
             .artifacts/mcp-res-v02/verification.json
             .artifacts/mcp-res-v02/python-verification.json
+            .artifacts/mcp-res-v02/pr3-field-verification.json
+            .artifacts/mcp-res-v02/official-conformance-corpus/**
+            .artifacts/mcp-res-v02/profile-corpus/**
             .artifacts/mcp-res-release/**
             .artifacts/mcp-res-v02-release/**
             .artifacts/site/mcp-res-*.png
