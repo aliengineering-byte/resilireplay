@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/enterprise-managed-authorization/v1",
+  "version": "1.0.0",
+  "status": "EXPERIMENTAL",
+  "protocolRevisions": ["2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/ext-auth/tree/fb374c7db2b34f18ca9183882e0beecdf661892b/specification/2026-07-28/enterprise-managed-authorization"
+  ],
+  "requiredChecks": [
+    "extension-negotiated",
+    "enterprise-policy-identity",
+    "authorization-server-selection",
+    "policy-failure-reason"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "experimentalProvenance": {
+    "proposalVersion": "MCP authorization extension 2026-07-28",
+    "upstreamStatus": "released extension, separate from core authorization",
+    "exactSource": "https://github.com/modelcontextprotocol/ext-auth/tree/fb374c7db2b34f18ca9183882e0beecdf661892b/specification/2026-07-28/enterprise-managed-authorization",
+    "observedAt": "2026-08-27T00:00:00.000Z",
+    "knownIncompatibilities": [
+      "Requires explicit extension negotiation",
+      "Enterprise policy trust roots are deployment-specific"
+    ],
+    "removalMigrationPath": "Retire this experimental MCP-RES identifier after a public draft cycle if a separately versioned provisional extension profile supersedes it."
+  },
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Extension negotiation and observable policy selection only; enterprise trust correctness is not certified."
+}

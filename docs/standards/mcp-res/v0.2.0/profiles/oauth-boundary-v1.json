@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/oauth-boundary/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28/basic",
+    "https://www.rfc-editor.org/rfc/rfc8707",
+    "https://www.rfc-editor.org/rfc/rfc9700",
+    "https://www.rfc-editor.org/rfc/rfc9728",
+    "https://www.rfc-editor.org/rfc/rfc8414"
+  ],
+  "requiredChecks": [
+    "protected-resource-metadata-discovery",
+    "authorization-server-metadata",
+    "issuer-binding",
+    "authorization-request-resource",
+    "token-request-resource",
+    "access-token-audience",
+    "wrong-resource-token-rejection",
+    "token-passthrough-prohibited",
+    "pkce-s256",
+    "pkce-downgrade-refused",
+    "exact-redirect-uri",
+    "state-binding",
+    "mix-up-resistance",
+    "authorization-code-binding",
+    "token-endpoint-identity",
+    "cimd-identity",
+    "cimd-trust-policy-recorded",
+    "scope-minimization",
+    "token-storage-omission",
+    "sanitized-authorization-errors",
+    "bounded-redirects",
+    "ssrf-resistant-metadata-resolution",
+    "loopback-redirect-collision",
+    "proxy-consent-client-binding"
+  ],
+  "conditionalChecks": [
+    {
+      "id": "refresh-token-rotation-when-claimed",
+      "protocolRevisions": ["2025-11-25", "2026-07-28"]
+    }
+  ],
+  "experimentalChecks": [],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Observable authorization reliability only. Synthetic credentials and local or authenticated loopback fixtures are mandatory. This profile is not security certification."
+}

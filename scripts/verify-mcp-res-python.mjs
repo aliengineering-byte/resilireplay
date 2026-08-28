@@ -170,6 +170,7 @@ for (const script of [
   "verify-mcp-res-official-conformance.mjs",
   "verify-mcp-res-profiles.mjs",
   "verify-mcp-res-protocol-field.mjs",
+  "verify-mcp-res-oauth.mjs",
 ]) {
   const generated = spawnSync(process.execPath, [join(root, "scripts", script)], {
     cwd: root,
@@ -271,6 +272,40 @@ for (const [index, row] of field.rows.entries()) {
   fieldProfileAgreements += 1;
 }
 
+const oauthDirectory = join(artifacts, "oauth-corpus");
+const oauthCatalog = JSON.parse(await readFile(join(oauthDirectory, "catalog.json"), "utf8"));
+let oauthAgreements = 0;
+for (const entry of oauthCatalog.valid) {
+  const independent = runPython([
+    "oauth",
+    join(oauthDirectory, entry.file),
+    "--schemas",
+    schemas,
+    "--profiles",
+    join(standard, "profiles"),
+  ]);
+  invariant(
+    independent.output.valid === true && independent.output.result === entry.expectedResult,
+    `OAuth agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  oauthAgreements += 1;
+}
+for (const entry of oauthCatalog.invalid) {
+  const independent = runPython([
+    "oauth",
+    join(oauthDirectory, entry.file),
+    "--schemas",
+    schemas,
+    "--profiles",
+    join(standard, "profiles"),
+  ]);
+  invariant(
+    JSON.stringify(independent.output.diagnostics) === JSON.stringify(entry.expectedDiagnostics),
+    `OAuth diagnostic agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  oauthAgreements += 1;
+}
+
 const verification = {
   implementation: "python-stdlib-second-implementation-validator",
   pythonVersion: (pythonVersion.stdout || pythonVersion.stderr).trim(),
@@ -287,6 +322,7 @@ const verification = {
   officialConformanceAgreements,
   profileAgreements,
   fieldProfileAgreements,
+  oauthAgreements,
   unsafeIntegerRejectedByBoth: true,
   loneSurrogateRejectedByBoth: true,
   externalIndependenceClaim: false,

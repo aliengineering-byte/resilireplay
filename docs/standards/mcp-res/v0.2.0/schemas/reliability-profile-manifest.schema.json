@@ -57,6 +57,31 @@
       }
     },
     "experimentalChecks": { "$ref": "#/$defs/checkIds" },
+    "experimentalProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposalVersion",
+        "upstreamStatus",
+        "exactSource",
+        "observedAt",
+        "knownIncompatibilities",
+        "removalMigrationPath"
+      ],
+      "properties": {
+        "proposalVersion": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "upstreamStatus": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "exactSource": { "type": "string", "format": "uri", "maxLength": 512 },
+        "observedAt": { "type": "string", "format": "date-time" },
+        "knownIncompatibilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "type": "string", "minLength": 1, "maxLength": 512 }
+        },
+        "removalMigrationPath": { "type": "string", "minLength": 1, "maxLength": 1024 }
+      }
+    },
     "remotePolicy": { "const": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY" },
     "compositionBoundary": { "type": "string", "minLength": 1, "maxLength": 1024 }
   },

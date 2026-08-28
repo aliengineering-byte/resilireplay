@@ -79,6 +79,7 @@ const attachments = new Map([
     "mcp-res-v0.2.0-official-conformance-fixtures.json",
     await aggregate(join(versionRoot, "official-conformance")),
   ],
+  ["mcp-res-v0.2.0-field-fixtures.json", await aggregate(join(versionRoot, "field-fixtures"))],
 ]);
 for (const [name, content] of attachments) {
   await writeFile(join(output, name), content, { encoding: "utf8", flag: "wx" });

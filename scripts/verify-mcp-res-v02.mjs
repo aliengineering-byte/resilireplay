@@ -40,7 +40,7 @@ invariant(
 );
 
 const compiled = await loadSchemaValidator(schemas);
-invariant(compiled.count === 16, `Expected 16 v0.2 schemas, got ${compiled.count}`);
+invariant(compiled.count === 17, `Expected 17 v0.2 schemas, got ${compiled.count}`);
 
 const catalog = JSON.parse(await readFile(join(vectors, "catalog.json"), "utf8"));
 let validCount = 0;

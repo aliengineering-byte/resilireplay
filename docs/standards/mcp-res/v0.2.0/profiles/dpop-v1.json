@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/dpop/v1",
+  "version": "1.0.0",
+  "status": "EXPERIMENTAL",
+  "protocolRevisions": ["2026-07-28"],
+  "sourceRefs": ["https://www.rfc-editor.org/rfc/rfc9449"],
+  "requiredChecks": [
+    "capability-explicit",
+    "proof-key-binding",
+    "http-method-uri-binding",
+    "nonce-replay-rejection"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "experimentalProvenance": {
+    "proposalVersion": "RFC 9449",
+    "upstreamStatus": "published OAuth standard; no released core MCP DPoP profile",
+    "exactSource": "https://www.rfc-editor.org/rfc/rfc9449",
+    "observedAt": "2026-08-27T00:00:00.000Z",
+    "knownIncompatibilities": [
+      "MCP SDK support is incomplete",
+      "No released core MCP negotiation rule"
+    ],
+    "removalMigrationPath": "Replace with a new profile version only after released MCP negotiation exists; never promote experimental observations in place."
+  },
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "RFC-level proof observations only; not released MCP behavior and not proof of endpoint security."
+}
