@@ -1,0 +1,33 @@
+name: MCP-RES RFC
+description: Propose a bounded normative or governance change.
+title: "[MCP-RES RFC]: "
+labels: ["mcp-res"]
+body:
+  - type: textarea
+    id: problem
+    attributes: { label: Falsifiable problem, description: State the failure mode and non-goals. }
+    validations: { required: true }
+  - type: textarea
+    id: evidence
+    attributes:
+      {
+        label: Evidence and controls,
+        description: Name positive,
+        wrong-reason negative,
+        mutation,
+        and cleanup evidence.,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: compatibility
+    attributes: { label: Compatibility, privacy, and migration }
+    validations: { required: true }
+  - type: checkboxes
+    id: disclosures
+    attributes:
+      label: Disclosures
+      options:
+        - label: I disclose any vendor, employment, financial, or implementation interest relevant to this proposal.
+          required: true
+        - label: I understand contributions are licensed under the repository's Apache-2.0 license.
+          required: true

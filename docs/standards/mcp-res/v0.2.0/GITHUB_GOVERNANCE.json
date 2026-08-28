@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "mcp-res.github-governance-audit/0.2.0",
+  "observedAt": "2026-08-28T02:21:20Z",
+  "repository": "aliengineering-byte/resilireplay",
+  "apiEnforcementAvailable": true,
+  "mainRuleset": {
+    "id": 21699385,
+    "name": "Protect main reliability evidence",
+    "enforcement": "active",
+    "target": "branch",
+    "include": ["~DEFAULT_BRANCH"],
+    "pullRequestRequired": true,
+    "requiredApprovals": 0,
+    "approvalRationale": "Single-maintainer repository; mandatory cross-platform status checks and conversation resolution are enforced without fabricating an independent reviewer.",
+    "dismissStaleApprovals": true,
+    "conversationResolutionRequired": true,
+    "allowedMergeMethods": ["squash"],
+    "linearHistoryRequired": true,
+    "deletionBlocked": true,
+    "forcePushBlocked": true,
+    "requiredStatusChecks": [
+      "Hardening / ubuntu-latest / Node 22",
+      "Hardening / ubuntu-latest / Node 24",
+      "Hardening / windows-latest / Node 22",
+      "Hardening / windows-latest / Node 24",
+      "Official reference validators"
+    ],
+    "bypassActors": []
+  },
+  "tagRuleset": {
+    "id": 21699386,
+    "name": "Protect release and MCP-RES tags",
+    "enforcement": "active",
+    "target": "tag",
+    "include": ["refs/tags/v*", "refs/tags/mcp-res-v*"],
+    "deletionBlocked": true,
+    "forceUpdateBlocked": true,
+    "creationAllowed": true,
+    "bypassActors": []
+  },
+  "releaseEnvironment": {
+    "id": 20754735190,
+    "name": "mcp-res-release",
+    "workflowBound": ".github/workflows/mcp-res-release.yml",
+    "customDeploymentBranchPolicy": true,
+    "policyId": 58445894,
+    "allowedRefPattern": "mcp-res-v*",
+    "platformAdministratorsCanBypass": true
+  },
+  "npmBoundary": {
+    "standardsTagsAccepted": false,
+    "packageReleasePrefix": "v",
+    "standardReleasePrefix": "mcp-res-v"
+  },
+  "limitations": [
+    "The hosting platform reports that administrators can bypass environment protections.",
+    "Approval count is zero because the repository has one maintainer; this is not independent review.",
+    "Ruleset settings may drift and must be re-audited through the GitHub API."
+  ]
+}

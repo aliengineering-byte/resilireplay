@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { validateBundle } from "./lib.mjs";
+import { readInertJson } from "./safe-json.mjs";
 
 const [input] = process.argv.slice(2);
 if (!input) {
@@ -10,7 +10,7 @@ if (!input) {
 } else {
   try {
     const file = resolve(input);
-    const bundle = JSON.parse(await readFile(file, "utf8"));
+    const bundle = await readInertJson(file);
     const result = await validateBundle(bundle);
     process.stdout.write(`${JSON.stringify({ file, ...result })}\n`);
     process.exitCode = result.valid ? 0 : 1;

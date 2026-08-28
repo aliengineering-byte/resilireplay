@@ -1,6 +1,6 @@
 # MCP-RES draft v0.2.0
 
-Status: **development draft**. This directory is additive. MCP-RES v0.1.0 remains immutable and continues to be validated by its v0.1 validator.
+Status: **draft prerelease candidate**. This directory is additive. MCP-RES v0.1.0 remains immutable and continues to be validated by its v0.1 validator.
 
 The v0.2 work is split into five reviewable changes:
 
@@ -10,7 +10,7 @@ The v0.2 work is split into five reviewable changes:
 4. authorization-boundary reliability;
 5. operational resilience, field evidence, and governance.
 
-PR 1 defines reason-bound negative observations, integrity-bound observations, scenario and execution identities, observation coverage, and trial summaries. Profiles added by later PRs remain provisional until their own tests and field evidence land.
+All five review themes are implemented. Profiles remain provisional or experimental exactly as recorded in the registry; a prerelease does not promote them.
 
 ## Current documents
 
@@ -26,6 +26,11 @@ PR 1 defines reason-bound negative observations, integrity-bound observations, s
 - [Protocol field matrix](PR3_FIELD_MATRIX.md)
 - [OAuth authorization boundary](AUTHORIZATION.md)
 - [Future identity extension register](FUTURE_IDENTITY.md)
+- [Operational resilience and recovery/canonicalization boundary](OPERATIONAL_RESILIENCE.md)
+- [Versioned fault taxonomy](FAULT_TAXONOMY.json)
+- [Machine-readable profile registry](PROFILE_REGISTRY.json)
+- [Public field corpus](field-evidence/FIELD_CORPUS.json)
+- [Five-minute implementer kit](IMPLEMENTER_KIT.md)
 - [Conformance kit](conformance-kit/README.md)
 
 MCP-RES is project-defined. It is not the MCP specification, an official MCP certification, or an endorsement by the MCP project or any evaluated implementation.

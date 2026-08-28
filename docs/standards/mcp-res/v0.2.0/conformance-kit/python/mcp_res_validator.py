@@ -29,6 +29,12 @@ def _reject_constant(value: str) -> None:
 
 
 def load_json(path: Path) -> Any:
+    metadata = path.lstat()
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("MCP_RES_INPUT_INVALID: input must be a regular non-symlink file")
+    if metadata.st_size > 16 * 1024 * 1024:
+        raise ValueError("MCP_RES_INPUT_INVALID: byte limit exceeded")
+
     def no_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
         result: dict[str, Any] = {}
         for key, value in pairs:
@@ -37,11 +43,36 @@ def load_json(path: Path) -> Any:
             result[key] = value
         return result
 
-    return json.loads(
+    value = json.loads(
         path.read_text(encoding="utf-8"),
         object_pairs_hook=no_duplicates,
         parse_constant=_reject_constant,
     )
+    stack: list[tuple[Any, int]] = [(value, 0)]
+    nodes = 0
+    while stack:
+        current, depth = stack.pop()
+        nodes += 1
+        if depth > 128 or nodes > 250_000:
+            raise ValueError("MCP_RES_INPUT_INVALID: structure limit exceeded")
+        if isinstance(current, str):
+            if len(current) > 1_048_576:
+                raise ValueError("MCP_RES_INPUT_INVALID: string limit exceeded")
+            _reject_surrogates(current)
+        elif isinstance(current, bool) or current is None:
+            continue
+        elif isinstance(current, int):
+            if abs(current) > 9_007_199_254_740_991:
+                raise ValueError("MCP_RES_INPUT_INVALID: non-safe integer")
+        elif isinstance(current, float):
+            raise ValueError("MCP_RES_INPUT_INVALID: floating point rejected")
+        elif isinstance(current, dict):
+            for key, child in current.items():
+                stack.append((key, depth + 1))
+                stack.append((child, depth + 1))
+        elif isinstance(current, list):
+            stack.extend((child, depth + 1) for child in current)
+    return value
 
 
 def _reject_surrogates(value: str) -> None:

@@ -1,0 +1,53 @@
+name: MCP-RES official source drift
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: mcp-res-source-drift
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+      - id: drift
+        name: Check only the bounded official-source allowlist
+        shell: bash
+        run: |
+          node scripts/check-mcp-res-source-drift.mjs
+          echo "review_required=$(node -p \"require('./.artifacts/mcp-res-v02/source-drift.json').reviewRequired\")" >> "$GITHUB_OUTPUT"
+      - name: Upload point-in-time report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mcp-res-source-drift-${{ github.run_id }}
+          path: .artifacts/mcp-res-v02/source-drift.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Open or update only the project-owned drift issue
+        if: steps.drift.outputs.review_required == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title='[MCP-RES] Official source drift review required'
+          issue_number="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number,title --jq ".[] | select(.title == \"$title\") | .number" | head -n1)"
+          body="$(jq -r '.results[] | select(.status != "UNCHANGED") | "- \(.id): \(.status); pinned=\(.pinned); observed=\(.observed // "unavailable")"' .artifacts/mcp-res-v02/source-drift.json)"
+          content=$'A bounded scheduled observation found source drift or an incomplete check. This issue does not change normative requirements or promote profiles.\n\n'"$body"$'\n\nWorkflow: '"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [[ -n "$issue_number" ]]; then
+            gh issue edit "$issue_number" --repo "$GITHUB_REPOSITORY" --body "$content"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$content"
+          fi

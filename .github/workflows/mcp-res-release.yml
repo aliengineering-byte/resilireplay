@@ -10,6 +10,7 @@ permissions:
 jobs:
   build-and-attest:
     runs-on: ubuntu-latest
+    environment: mcp-res-release
     permissions:
       contents: read
       id-token: write

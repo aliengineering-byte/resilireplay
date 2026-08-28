@@ -1,0 +1,29 @@
+name: MCP-RES change disposition
+description: Record acceptance, deferral, rejection, or external-dependency disposition.
+title: "[MCP-RES disposition]: "
+labels: ["mcp-res"]
+body:
+  - type: input
+    id: change
+    attributes: { label: RFC, issue, profile, or requirement ID }
+    validations: { required: true }
+  - type: dropdown
+    id: disposition
+    attributes:
+      {
+        label: Disposition,
+        options:
+          [
+            FIXED,
+            PROFILED_PROVISIONALLY,
+            DEFERRED_NORMATIVE_DEPENDENCY,
+            EXTERNAL_INDEPENDENCE_REQUIRED,
+            OUT_OF_SCOPE_SECURITY,
+            REJECTED_WITH_REASON,
+          ],
+      }
+    validations: { required: true }
+  - type: textarea
+    id: rationale
+    attributes: { label: Evidence, rationale, residual risk, and reconsideration trigger }
+    validations: { required: true }

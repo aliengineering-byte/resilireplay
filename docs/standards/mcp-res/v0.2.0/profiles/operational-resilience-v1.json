@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/operational-resilience/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28"
+  ],
+  "requiredChecks": [
+    "cold-start",
+    "warm-start",
+    "bounded-concurrency",
+    "queue-saturation",
+    "backpressure",
+    "overload-rejection",
+    "rate-limiting",
+    "retry-after",
+    "timeout",
+    "partial-outage",
+    "process-crash",
+    "restart",
+    "rolling-version-skew",
+    "downstream-failure",
+    "disk-full",
+    "permission-failure",
+    "malformed-flood",
+    "oversized-input",
+    "duplicate-delivery",
+    "graceful-shutdown",
+    "forced-shutdown",
+    "memory-resource-leak",
+    "listener-leak",
+    "child-process-leak",
+    "bounded-soak",
+    "cleanup"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Local, workload-declared operational evidence only. No universal performance threshold, exactly-once claim, external adoption claim, or security certification follows from this profile."
+}
