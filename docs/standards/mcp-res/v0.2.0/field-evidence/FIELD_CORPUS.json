@@ -11,7 +11,7 @@
     },
     {
       "name": "operational-field-verification.json",
-      "sha256": "958ad7df41f30406801954aa96be693081541fdd56daa6427cd922793209b0bc",
+      "sha256": "dfad9a449fa744d55487f254c9a322b8d063aa6d3316eed6ed8508be39976725",
       "workflowRunId": null,
       "source": "current verification run"
     },
@@ -181,8 +181,8 @@
       "sideEffectModel": "IDEMPOTENCY_GUARDED_SYNTHETIC_EFFECT",
       "evidenceClass": "GENUINE_RUNTIME",
       "result": "PASS",
-      "evidenceSha256": "786a4df72e23dd17948ebc84581967832fbef223c6e05093d0f144c75a36c57f",
-      "artifactSha256": "958ad7df41f30406801954aa96be693081541fdd56daa6427cd922793209b0bc",
+      "evidenceSha256": "aa2b2ca633c53c01200e8b22da70f470b5fc2b7da52aff574d0bf2e69009f7d5",
+      "artifactSha256": "dfad9a449fa744d55487f254c9a322b8d063aa6d3316eed6ed8508be39976725",
       "limitations": "Local synthetic fixture only; No universal latency or throughput claim; No statistical confidence interval; Disk-full and permission faults are deterministic fixture injection, not host mutation; Soak is a bounded smoke interval, not long-duration production soak"
     },
     {

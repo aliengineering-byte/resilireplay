@@ -36,6 +36,11 @@ function handles() {
     ? process._getActiveHandles().length
     : null;
 }
+function activeHandleTypes() {
+  return typeof process._getActiveHandles === "function"
+    ? process._getActiveHandles().map((handle) => handle.constructor?.name ?? "Unknown")
+    : [];
+}
 async function startWorker() {
   const started = performance.now();
   const child = spawn(process.execPath, [worker], {
@@ -169,7 +174,12 @@ const warm = await call(restarted.port, { idempotencyKey: "restart", revision: "
 invariant(warm.status === 200, "restart did not recover");
 const forced = await stopWorker(restarted, true);
 invariant(forced.signal !== null || forced.code !== 0, "forced shutdown was not observed");
+await new Promise((resolveWait) => setTimeout(resolveWait, 250));
 const afterHandles = handles();
+const afterHandleTypes = activeHandleTypes();
+const listenerLeakObserved = afterHandleTypes.includes("Server");
+const childProcessLeakObserved = afterHandleTypes.includes("ChildProcess");
+const cleanupObserved = !listenerLeakObserved && !childProcessLeakObserved;
 const afterRss = process.memoryUsage().rss;
 const workerDigest = rawDigest(await readFile(worker));
 const checkArtifact = sha256({
@@ -224,10 +234,16 @@ const evaluation = finalizeEvaluation({
   checks,
   cleanup: {
     required: true,
-    observed: afterHandles <= beforeHandles + 1,
-    observationSha256: sha256({ beforeHandles, afterHandles }),
+    observed: cleanupObserved,
+    observationSha256: sha256({
+      beforeHandles,
+      afterHandles,
+      afterHandleTypes,
+      listenerLeakObserved,
+      childProcessLeakObserved,
+    }),
   },
-  result: afterHandles <= beforeHandles + 1 ? "PASS" : "FAIL",
+  result: cleanupObserved ? "PASS" : "FAIL",
 });
 const validated = await validateProfileEvaluation(evaluation, {
   schemaDirectory: join(standard, "schemas"),
@@ -273,8 +289,9 @@ const report = {
     rssAfterBytes: afterRss,
     handlesBefore: beforeHandles,
     handlesAfter: afterHandles,
-    listenerLeakObserved: false,
-    childProcessLeakObserved: false,
+    activeHandleTypesAfter: afterHandleTypes,
+    listenerLeakObserved,
+    childProcessLeakObserved,
   },
   startup: { coldMs: first.startMs, warmRestartMs: restarted.startMs },
   recovery: {
