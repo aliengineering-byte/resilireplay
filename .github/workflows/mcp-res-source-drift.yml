@@ -27,7 +27,8 @@ jobs:
         shell: bash
         run: |
           node scripts/check-mcp-res-source-drift.mjs
-          echo "review_required=$(node -p \"require('./.artifacts/mcp-res-v02/source-drift.json').reviewRequired\")" >> "$GITHUB_OUTPUT"
+          review_required="$(jq -r '.reviewRequired' .artifacts/mcp-res-v02/source-drift.json)"
+          echo "review_required=$review_required" >> "$GITHUB_OUTPUT"
       - name: Upload point-in-time report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
