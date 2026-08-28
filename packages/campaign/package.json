@@ -22,6 +22,6 @@
     "@resilireplay/reporters": "workspace:*",
     "@resilireplay/trace": "workspace:*",
     "yaml": "2.8.1",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   }
 }
