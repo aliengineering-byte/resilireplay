@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/attested-conformance-bundle.schema.json",
+  "title": "MCP-RES attested conformance bundle v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "bundle", "authenticity"],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.attested-conformance-bundle/0.2.0" },
+    "bundle": { "$ref": "conformance-bundle.schema.json" },
+    "authenticity": { "$ref": "authenticity-record.schema.json" }
+  }
+}

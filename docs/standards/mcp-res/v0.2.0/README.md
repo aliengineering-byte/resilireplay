@@ -18,6 +18,9 @@ PR 1 defines reason-bound negative observations, integrity-bound observations, s
 - [Research ledger](RESEARCH.md)
 - [Master gap ledger](GAP_LEDGER.md)
 - [Machine-readable v0.1-to-v0.2 change record](MIGRATION_RECORD.json)
+- [Authenticity and offline trust](AUTHENTICITY.md)
+- [Deterministic migration](MIGRATION.md)
+- [Release provenance](RELEASE_PROVENANCE.md)
 - [Conformance kit](conformance-kit/README.md)
 
 MCP-RES is project-defined. It is not the MCP specification, an official MCP certification, or an endorsement by the MCP project or any evaluated implementation.

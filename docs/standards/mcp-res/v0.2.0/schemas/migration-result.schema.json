@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/migration-result.schema.json",
+  "title": "MCP-RES v0.1 to v0.2 migration result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "source", "target", "migration", "report", "originalBundle"],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.migration-result/0.2.0" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["standardVersion", "evidenceSha256", "bundleFileSha256"],
+      "properties": {
+        "standardVersion": { "const": "0.1.0" },
+        "evidenceSha256": { "$ref": "#/$defs/sha256" },
+        "bundleFileSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "standardVersion",
+        "status",
+        "evidenceClass",
+        "authenticityClassification",
+        "stabilityClassification",
+        "legacyAssertions",
+        "unresolvedRequirements"
+      ],
+      "properties": {
+        "standardVersion": { "const": "0.2.0" },
+        "status": { "const": "INCOMPLETE" },
+        "evidenceClass": {
+          "enum": [
+            "GENUINE_RUNTIME",
+            "FIXTURE_BACKED_PROTOCOL",
+            "FIXTURE_VERIFIED",
+            "INSTALLATION_VERIFIED",
+            "DOCUMENTED_ONLY"
+          ]
+        },
+        "authenticityClassification": { "const": "UNSIGNED_INTEGRITY_ONLY" },
+        "stabilityClassification": { "const": "SINGLE_OBSERVATION" },
+        "legacyAssertions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "value", "strength"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1, "maxLength": 96 },
+              "value": { "type": "boolean" },
+              "strength": { "const": "LEGACY_SELF_ASSERTED" }
+            }
+          }
+        },
+        "unresolvedRequirements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "tool", "inputOverwritten", "fabricatedEvidence"],
+      "properties": {
+        "from": { "const": "0.1.0" },
+        "to": { "const": "0.2.0" },
+        "tool": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "version", "sha256"],
+          "properties": {
+            "name": { "const": "mcp-res-migrate" },
+            "version": { "const": "0.2.0" },
+            "sha256": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "inputOverwritten": { "const": false },
+        "fabricatedEvidence": { "const": false }
+      }
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "preservedEvidenceSha256",
+        "preservedEvidenceClass",
+        "legacyAssertionCount",
+        "unresolvedRequirements",
+        "warnings"
+      ],
+      "properties": {
+        "status": { "const": "INCOMPLETE" },
+        "preservedEvidenceSha256": { "$ref": "#/$defs/sha256" },
+        "preservedEvidenceClass": {
+          "enum": [
+            "GENUINE_RUNTIME",
+            "FIXTURE_BACKED_PROTOCOL",
+            "FIXTURE_VERIFIED",
+            "INSTALLATION_VERIFIED",
+            "DOCUMENTED_ONLY"
+          ]
+        },
+        "legacyAssertionCount": { "type": "integer", "minimum": 1, "maximum": 64 },
+        "unresolvedRequirements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 128 }
+        },
+        "warnings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+        }
+      }
+    },
+    "originalBundle": {
+      "type": "object",
+      "required": ["schemaVersion", "evidence", "statement", "integrity"],
+      "properties": {
+        "schemaVersion": { "const": "mcp-res.conformance-bundle/0.1.0" },
+        "evidence": { "type": "object" },
+        "statement": { "type": "object" },
+        "integrity": { "type": "object" }
+      }
+    }
+  },
+  "$defs": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}

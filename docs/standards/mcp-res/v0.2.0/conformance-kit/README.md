@@ -8,12 +8,22 @@ node validate.mjs ../test-vectors/valid/reason-bound-negative.json
 
 Exit status is `0` for valid, `1` for a conformant input with a failing diagnostic, and `2` for unreadable/invalid input. Output is one JSON object.
 
-The validator:
+The JavaScript and dependency-free Python validators:
 
-- compiles all seven JSON Schema 2020-12 schemas;
+- compile all thirteen JSON Schema 2020-12 schemas;
 - recomputes observation, scenario, execution, evidence, statement, artifact-manifest, and bundle digests;
 - derives evidence class, cleanup, privacy, and coverage rather than trusting booleans;
 - rejects wrong-reason/vacuous negative controls, cross-run substitutions, parent cycles, impossible time, excess retry attempts, and false stability summaries;
 - does not contact a network or execute a subject.
 
-This validator is a project implementation, not an official MCP validator. The independent second-language implementation is intentionally owned by PR 2.
+Additional entry points validate the optional DSSE/in-toto-informed attestation wrapper and deterministic migration result:
+
+```bash
+node validate-attestation.mjs attested.json --trust-policy policy.json
+node validate-migration.mjs migrated.json
+python python/mcp_res_validator.py validate ../test-vectors/valid/reason-bound-negative.json
+```
+
+Attestation tests create disposable Ed25519 keys only in memory. The dependency-free Python implementation contains its own schema evaluator, canonicalizer, semantic rules, and Ed25519 verifier. CI requires exact JavaScript/Python decision, diagnostic-family, canonical-byte, and digest agreement.
+
+These validators are project implementations, not official MCP validators. The Python implementation is a second implementation maintained by this project; it is not an independent external implementation/adopter for the 1.0 criterion.
