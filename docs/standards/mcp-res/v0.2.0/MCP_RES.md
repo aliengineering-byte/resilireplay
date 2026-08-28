@@ -109,3 +109,17 @@ The registered profiles and composition boundaries are in [PROTOCOL_PROFILES.md]
 ## 14. Protocol field evidence
 
 **MCPRES-FIELD-001.** A field claim MUST name the OS, runtime, language, subject digest, protocol revision, transport, profile digest, bounded check set, clean path, expected failure, wrong-reason control, interruption behavior, cleanup, and evaluation integrity. CI matrix aggregation MUST retain each leg rather than collapsing heterogeneous environments into one pass.
+
+## 15. Authorization-boundary reliability
+
+**MCPRES-OAUTH-001.** `mcp-res/oauth-boundary/v1` evaluations MUST use synthetic credentials and local or authenticated loopback fixtures, record zero real authorization providers and zero external-network requests, and MUST NOT claim security certification.
+
+**MCPRES-OAUTH-002.** A full evaluation MUST cover PRM and authorization-server metadata, issuer/resource/audience binding, PKCE S256 and downgrade refusal, exact redirect/state/mix-up/code/token-endpoint binding, CIMD identity and trust policy, scope minimization, refresh rotation when claimed, token-storage omission, sanitized errors, bounded redirects, exact-origin metadata resolution, loopback collision, proxy consent/client identity, and token-passthrough prohibition.
+
+**MCPRES-OAUTH-003.** Every rejection path MUST include a reached property-specific negative and a wrong-reason mutant. Rejection at an earlier syntax guard MUST NOT satisfy audience, PKCE, discovery, redirect, state, mix-up, or other downstream property coverage. Raw credential material MUST NOT appear in evidence.
+
+[AUTHORIZATION.md](AUTHORIZATION.md) defines the complete observable boundary.
+
+## 16. Future identity extensions
+
+**MCPRES-OAUTH-004.** Client credentials, enterprise-managed authorization, DPoP, and token exchange remain separately versioned `EXPERIMENTAL` profiles. Each MUST pin upstream status, exact source, observation date, incompatibilities, and removal/migration path. Workload identity, delegated agent identity, and human-presence attestation remain deferred until released official MCP contracts exist. Roadmap or proposal behavior MUST NOT be represented as released core MCP behavior.

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/token-exchange/v1",
+  "version": "1.0.0",
+  "status": "EXPERIMENTAL",
+  "protocolRevisions": ["2026-07-28"],
+  "sourceRefs": ["https://www.rfc-editor.org/rfc/rfc8693"],
+  "requiredChecks": [
+    "capability-explicit",
+    "subject-token-binding",
+    "requested-resource-binding",
+    "delegation-chain-bounded"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "experimentalProvenance": {
+    "proposalVersion": "RFC 8693",
+    "upstreamStatus": "published OAuth standard; no released core MCP token-exchange profile",
+    "exactSource": "https://www.rfc-editor.org/rfc/rfc8693",
+    "observedAt": "2026-08-27T00:00:00.000Z",
+    "knownIncompatibilities": [
+      "No released core MCP negotiation rule",
+      "Agent delegation semantics remain under development"
+    ],
+    "removalMigrationPath": "Replace with a new version after released MCP delegation semantics; experimental results stay experimental."
+  },
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "RFC token-exchange observations only; does not establish workload or delegated-agent identity."
+}

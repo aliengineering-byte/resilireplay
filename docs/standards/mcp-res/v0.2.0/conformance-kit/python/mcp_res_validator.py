@@ -972,6 +972,10 @@ def validate_profile(
             manifest = load_json(path)
             if schemas.errors(manifest, manifest_schema):
                 return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
+            if (manifest["status"] == "EXPERIMENTAL") != bool(
+                manifest.get("experimentalProvenance")
+            ):
+                return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
             registered = _profile_registered(manifest)
             if len(set(registered)) != len(registered) or manifest["id"] in manifests:
                 return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
@@ -1049,13 +1053,121 @@ def validate_profile(
     }
 
 
+def _oauth_reason(check_id: str, branch: str) -> str:
+    return f"MCP_RES_OAUTH_{check_id.replace('-', '_').upper()}_{branch}"
+
+
+def validate_oauth(
+    evaluation: Any, schemas: SchemaSet, profile_directory: Path
+) -> dict[str, Any]:
+    schema = schemas.get(
+        "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/oauth-boundary-evaluation.schema.json"
+    )
+    schema_errors = schemas.errors(evaluation, schema)
+    if schema_errors:
+        return _invalid("MCP_RES_OAUTH_SCHEMA_INVALID", schema_errors)
+    manifest_path = profile_directory / "oauth-boundary-v1.json"
+    try:
+        manifest = load_json(manifest_path)
+        manifest_schema = schemas.get(
+            "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/reliability-profile-manifest.schema.json"
+        )
+        if schemas.errors(manifest, manifest_schema) or manifest["status"] != "PROVISIONAL":
+            return _invalid("MCP_RES_OAUTH_MANIFEST_INVALID")
+    except (OSError, ValueError):
+        return _invalid("MCP_RES_OAUTH_MANIFEST_INVALID")
+    revision = evaluation["profile"]["protocolRevision"]
+    if revision not in manifest["protocolRevisions"]:
+        return _invalid("MCP_RES_OAUTH_REVISION_UNSUPPORTED")
+    if sha256(manifest) != evaluation["profile"]["manifestSha256"]:
+        return _invalid("MCP_RES_OAUTH_MANIFEST_DIGEST_MISMATCH")
+    material = dict(evaluation)
+    material.pop("evaluationSha256", None)
+    if sha256(material) != evaluation["evaluationSha256"]:
+        return _invalid("MCP_RES_OAUTH_DIGEST_MISMATCH")
+    required = _profile_applicable(manifest, revision)
+    observed = sorted(item["id"] for item in evaluation["cases"])
+    if len(set(observed)) != len(observed) or observed != required:
+        return _invalid("MCP_RES_OAUTH_COVERAGE_MISMATCH")
+    fixture = evaluation["fixture"]
+    if (
+        not fixture["loopbackOnly"]
+        or fixture["realAuthorizationProvidersContacted"] != 0
+        or fixture["externalNetworkRequests"] != 0
+    ):
+        return _invalid("MCP_RES_OAUTH_EXTERNAL_PROVIDER_CONTACT")
+    if not fixture["syntheticCredentials"]:
+        return _invalid("MCP_RES_OAUTH_NON_SYNTHETIC_CREDENTIAL")
+    for case in evaluation["cases"]:
+        if (
+            case["positive"]["expectedReasonCode"]
+            != _oauth_reason(case["id"], "ACCEPTED")
+            or case["negative"]["expectedReasonCode"]
+            != _oauth_reason(case["id"], "REJECTED")
+        ):
+            return _invalid("MCP_RES_OAUTH_WRONG_REASON")
+        for observation in (case["positive"], case["negative"]):
+            if not observation["propertyReached"]:
+                return _invalid("MCP_RES_OAUTH_PROPERTY_NOT_REACHED")
+            if (
+                observation["observedOutcome"] == "NOT_OBSERVED"
+                or observation["observedOutcome"] != observation["expectedOutcome"]
+            ):
+                return _invalid("MCP_RES_OAUTH_OUTCOME_MISMATCH")
+            if observation["observedReasonCode"] != observation["expectedReasonCode"]:
+                return _invalid("MCP_RES_OAUTH_WRONG_REASON")
+        mutant = case["wrongReasonMutant"]
+        if (
+            not mutant["propertyReached"]
+            or mutant["observedReasonCode"] == case["negative"]["expectedReasonCode"]
+            or mutant["observedReasonCode"] != "MCP_RES_OAUTH_EARLY_SYNTAX_REJECTION"
+            or mutant["expectedDiagnostic"] != "MCP_RES_OAUTH_WRONG_REASON"
+        ):
+            return _invalid("MCP_RES_OAUTH_WRONG_REASON_CONTROL_MISSING")
+    privacy = evaluation["privacy"]
+    if privacy["tokenMaterialPersisted"] or privacy["evidenceContainsCredentialMaterial"]:
+        return _invalid("MCP_RES_OAUTH_SECRET_PERSISTED")
+    if not privacy["authorizationErrorsSanitized"]:
+        return _invalid("MCP_RES_OAUTH_UNSANITIZED_ERROR")
+    if not evaluation["cleanup"]["listenerClosed"] or not evaluation["cleanup"][
+        "redirectListenerReleased"
+    ]:
+        return _invalid("MCP_RES_OAUTH_CLEANUP_INCOMPLETE")
+    fixture_only = any(
+        case["evidenceSource"] == "TEST_FIXTURE" for case in evaluation["cases"]
+    )
+    derived = "INCOMPLETE" if fixture_only else "PASS"
+    if derived != evaluation["result"]:
+        return _invalid(
+            "MCP_RES_OAUTH_TEST_FIXTURE_OVERCLAIM"
+            if fixture_only and evaluation["result"] == "PASS"
+            else "MCP_RES_OAUTH_RESULT_MISMATCH"
+        )
+    return {
+        "valid": True,
+        "diagnostics": [],
+        "schemaErrors": [],
+        "result": derived,
+        "securityCertificationClaim": False,
+        "realAuthorizationProvidersContacted": 0,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Second-implementation MCP-RES v0.2 Python validator"
     )
     parser.add_argument(
         "mode",
-        choices=["validate", "attestation", "migration", "official", "profile", "canonicalize"],
+        choices=[
+            "validate",
+            "attestation",
+            "migration",
+            "official",
+            "profile",
+            "oauth",
+            "canonicalize",
+        ],
     )
     parser.add_argument("input", type=Path)
     parser.add_argument("--schemas", type=Path)
@@ -1085,6 +1197,9 @@ def main() -> int:
                 result = validate_migration(value, schemas, SchemaSet(v01_path))
             elif arguments.mode == "official":
                 result = validate_official(value, schemas, arguments.original_result)
+            elif arguments.mode == "oauth":
+                profile_path = arguments.profiles or schemas_path.parent / "profiles"
+                result = validate_oauth(value, schemas, profile_path)
             else:
                 profile_path = arguments.profiles or schemas_path.parent / "profiles"
                 result = validate_profile(value, schemas, profile_path)

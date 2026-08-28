@@ -24,6 +24,8 @@ PR 1 defines reason-bound negative observations, integrity-bound observations, s
 - [Official MCP conformance attachment](OFFICIAL_CONFORMANCE.md)
 - [Provisional protocol profiles](PROTOCOL_PROFILES.md)
 - [Protocol field matrix](PR3_FIELD_MATRIX.md)
+- [OAuth authorization boundary](AUTHORIZATION.md)
+- [Future identity extension register](FUTURE_IDENTITY.md)
 - [Conformance kit](conformance-kit/README.md)
 
 MCP-RES is project-defined. It is not the MCP specification, an official MCP certification, or an endorsement by the MCP project or any evaluated implementation.

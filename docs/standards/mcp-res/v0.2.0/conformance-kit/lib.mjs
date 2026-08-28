@@ -95,6 +95,7 @@ const SCHEMA_NAMES = [
   "official-conformance-attachment.schema.json",
   "profile-evaluation.schema.json",
   "reliability-profile-manifest.schema.json",
+  "oauth-boundary-evaluation.schema.json",
 ];
 
 async function compileSchemas(schemaDirectory) {

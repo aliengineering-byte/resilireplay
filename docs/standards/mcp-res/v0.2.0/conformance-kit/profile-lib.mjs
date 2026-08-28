@@ -63,6 +63,9 @@ export async function loadProfileManifests(profileDirectory, options = {}) {
       error.schemaErrors = schemaErrors(validate);
       throw error;
     }
+    if ((manifest.status === "EXPERIMENTAL") !== Boolean(manifest.experimentalProvenance)) {
+      throw new Error(`Experimental provenance/status mismatch in ${name}`);
+    }
     const registered = registeredCheckIds(manifest);
     if (new Set(registered).size !== registered.length || manifests.has(manifest.id)) {
       throw new Error(`Duplicate profile/check identity in ${name}`);
