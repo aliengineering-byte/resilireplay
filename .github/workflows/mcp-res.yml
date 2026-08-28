@@ -15,10 +15,18 @@ on:
       - "scripts/generate-mcp-res-vectors.mjs"
       - "scripts/generate-mcp-res-v02-vectors.mjs"
       - "scripts/package-mcp-res-release.mjs"
+      - "scripts/package-mcp-res-v02-release.mjs"
+      - "scripts/generate-mcp-res-sbom.mjs"
+      - "scripts/migrate-mcp-res-v01-to-v02.mjs"
       - "scripts/reference-mcp-res-validator.mjs"
       - "scripts/verify-mcp-res.mjs"
       - "scripts/verify-mcp-res-v02.mjs"
+      - "scripts/verify-mcp-res-attestations.mjs"
+      - "scripts/verify-mcp-res-migration.mjs"
+      - "scripts/verify-mcp-res-python.mjs"
+      - "scripts/verify-mcp-res-provenance.mjs"
       - ".github/workflows/mcp-res.yml"
+      - ".github/workflows/mcp-res-release.yml"
   pull_request:
     paths:
       - "docs/standards/mcp-res/**"
@@ -32,10 +40,18 @@ on:
       - "scripts/generate-mcp-res-vectors.mjs"
       - "scripts/generate-mcp-res-v02-vectors.mjs"
       - "scripts/package-mcp-res-release.mjs"
+      - "scripts/package-mcp-res-v02-release.mjs"
+      - "scripts/generate-mcp-res-sbom.mjs"
+      - "scripts/migrate-mcp-res-v01-to-v02.mjs"
       - "scripts/reference-mcp-res-validator.mjs"
       - "scripts/verify-mcp-res.mjs"
       - "scripts/verify-mcp-res-v02.mjs"
+      - "scripts/verify-mcp-res-attestations.mjs"
+      - "scripts/verify-mcp-res-migration.mjs"
+      - "scripts/verify-mcp-res-python.mjs"
+      - "scripts/verify-mcp-res-provenance.mjs"
       - ".github/workflows/mcp-res.yml"
+      - ".github/workflows/mcp-res-release.yml"
   workflow_dispatch:
 
 permissions:
@@ -56,14 +72,17 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node: [22, 24]
     steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
         with:
           version: 10.14.0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: ${{ matrix.node }}
           cache: pnpm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
       - name: Record exact toolchain
         run: |
           node --version
@@ -92,7 +111,7 @@ jobs:
         run: pnpm site:test
       - name: Upload conformance evidence
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mcp-res-${{ runner.os }}-node-${{ matrix.node }}
           if-no-files-found: error
@@ -100,7 +119,9 @@ jobs:
           path: |
             .artifacts/mcp-res/verification.json
             .artifacts/mcp-res-v02/verification.json
+            .artifacts/mcp-res-v02/python-verification.json
             .artifacts/mcp-res-release/**
+            .artifacts/mcp-res-v02-release/**
             .artifacts/site/mcp-res-*.png
             docs/standards/mcp-res/v0.1.0/field-evidence/*.json
             docs/standards/mcp-res/v0.1.0/test-vectors/SHA256SUMS

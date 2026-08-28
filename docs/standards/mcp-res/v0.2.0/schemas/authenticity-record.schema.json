@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/authenticity-record.schema.json",
+  "title": "MCP-RES authenticity record v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "claimedClassification", "envelopes"],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.authenticity/0.2.0" },
+    "claimedClassification": {
+      "enum": [
+        "UNSIGNED_INTEGRITY_ONLY",
+        "SIGNED",
+        "SIGNED_WITH_IDENTITY",
+        "WITNESSED",
+        "TRANSPARENCY_RECORDED"
+      ]
+    },
+    "envelopes": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "$ref": "dsse-envelope.schema.json" }
+    }
+  }
+}

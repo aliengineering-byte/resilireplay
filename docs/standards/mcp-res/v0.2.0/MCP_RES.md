@@ -70,8 +70,24 @@ All operation IDs MUST be unique. Every operation MUST name the current run. Par
 
 A conformance statement binds the standard/profile/protocol versions, exact subject, derived evidence class, result, scenario fingerprint, execution digest, stability classification, evidence digest, and validator identity. The integrity manifest lists canonical byte length and SHA-256 for the evidence and statement plus all supporting artifacts, rejects duplicate paths, and binds the sorted artifact list in `bundleDigest`.
 
-Draft v0.2 continues to use `mcp-res-json-utf16-v1` while the dual-hash migration decision remains owned by PR 2. No v0.1 digest is rewritten.
+Draft v0.2 deliberately continues to use the explicit `mcp-res-json-utf16-v1` algorithm so scenario, execution, and evidence digests remain reproducible across the two implementations. Both validators reject unsafe integers and lone surrogates instead of silently normalizing language differences. RFC 8785 remains a candidate for a future, separately versioned dual-hash profile; no v0.1 digest is rewritten.
 
 ## 9. Limits of a result
 
 `PASS` means only that the exact pinned subject and scenario satisfied this version and profile with the recorded coverage. It does not prove unobserved paths, unrelated protocol behavior, security, production availability, interoperability outside the matrix, or independent adoption.
+
+## 10. Authenticity and trust
+
+**MCPRES-AUTHN-001.** Content integrity, producer authenticity, trust in the producer, the reliability result, and security certification are separate dimensions. An implementation MUST NOT upgrade evidence class or change a failing reliability result because an attestation is present.
+
+**MCPRES-AUTHN-002.** An optional `mcp-res.attested-conformance-bundle/0.2.0` MAY classify authenticity as `UNSIGNED_INTEGRITY_ONLY`, `SIGNED`, `SIGNED_WITH_IDENTITY`, `WITNESSED`, or `TRANSPARENCY_RECORDED`. A claimed level MUST NOT exceed the validator-derived level. Trust evaluation MUST name an explicit policy and MUST fail for expired policy, revoked key, duplicate witness, or signer/key identity mismatch.
+
+**MCPRES-AUTHN-003.** A signed envelope MUST bind the in-toto statement/predicate types, subject digest, evidence bundle digest, scenario fingerprint, execution digest, profile, validator, signer/key identity, signature algorithm, signing time, trust-policy ID, and any transparency reference through DSSE pre-authentication encoding. Draft v0.2 supports Ed25519. Offline validation MUST NOT require a network or cloud account.
+
+The detailed classification and envelope rules are in [AUTHENTICITY.md](AUTHENTICITY.md).
+
+## 11. Migration
+
+**MCPRES-MIG-001.** A v0.1-to-v0.2 migration MUST preserve the original bundle and evidence digest, record the migration tool digest, preserve evidence class, label producer assertions `LEGACY_SELF_ASSERTED`, emit `INCOMPLETE`, and MUST NOT fabricate observations, reason-bound failures, signatures, trial repetition, scenario identity, or execution identity.
+
+Migration output is a `mcp-res.migration-result/0.2.0` report, not a v0.2 conformance result. [MIGRATION.md](MIGRATION.md) defines the command, containment, conflict, dry-run, and idempotency behavior.

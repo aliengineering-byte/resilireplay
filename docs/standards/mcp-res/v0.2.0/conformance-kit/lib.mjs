@@ -86,6 +86,12 @@ const SCHEMA_NAMES = [
   "evidence-envelope.schema.json",
   "conformance-statement.schema.json",
   "conformance-bundle.schema.json",
+  "attestation-statement.schema.json",
+  "dsse-envelope.schema.json",
+  "authenticity-record.schema.json",
+  "trust-policy.schema.json",
+  "attested-conformance-bundle.schema.json",
+  "migration-result.schema.json",
 ];
 
 async function compileSchemas(schemaDirectory) {

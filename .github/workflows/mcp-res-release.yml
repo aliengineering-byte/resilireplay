@@ -1,0 +1,72 @@
+name: MCP-RES release provenance
+
+on:
+  push:
+    tags: ["mcp-res-v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-attest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6
+        with:
+          version: 10.14.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm mcp-res:validate
+      - run: node scripts/package-mcp-res-v02-release.mjs .artifacts/mcp-res-v02-release
+      - name: Bind local metadata to the tag commit
+        shell: bash
+        run: test "$(jq -r .sourceCommit .artifacts/mcp-res-v02-release/release-metadata.json)" = "$GITHUB_SHA"
+      - name: Upload exact release assets for clean-job verification
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: mcp-res-v0.2.0-release-assets
+          path: .artifacts/mcp-res-v02-release/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Attest build provenance for every checksummed release asset
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: .artifacts/mcp-res-v02-release/*
+      - name: Attest the SPDX SBOM for every checksummed release asset
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: .artifacts/mcp-res-v02-release/*
+          sbom-path: .artifacts/mcp-res-v02-release/mcp-res-v0.2.0.spdx.json
+
+  verify-clean:
+    needs: build-and-attest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      attestations: read
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: mcp-res-v0.2.0-release-assets
+          path: .artifacts/mcp-res-v02-release
+      - name: Verify checksums and GitHub-hosted provenance from a clean job
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd .artifacts/mcp-res-v02-release
+          sha256sum --check SHA256SUMS
+          while read -r _ asset; do
+            gh attestation verify "$asset" --repo "$GITHUB_REPOSITORY"
+          done < SHA256SUMS
+          gh attestation verify SHA256SUMS --repo "$GITHUB_REPOSITORY"

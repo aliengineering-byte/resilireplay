@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/trust-policy.schema.json",
+  "title": "MCP-RES offline trust policy v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "validFrom",
+    "validUntil",
+    "requiredAlgorithm",
+    "trustedSigners",
+    "revokedKeyFingerprints"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.trust-policy/0.2.0" },
+    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "version": { "type": "string", "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$" },
+    "validFrom": { "type": "string", "format": "date-time" },
+    "validUntil": { "type": "string", "format": "date-time" },
+    "requiredAlgorithm": { "const": "Ed25519" },
+    "trustedSigners": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["keyFingerprint", "signerIdentity"],
+        "properties": {
+          "keyFingerprint": { "$ref": "#/$defs/sha256" },
+          "signerIdentity": { "type": "string", "minLength": 1, "maxLength": 256 }
+        }
+      }
+    },
+    "revokedKeyFingerprints": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    }
+  },
+  "$defs": { "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+}
