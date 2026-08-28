@@ -166,6 +166,111 @@ for (const entry of migrationCatalog.cases) {
   migrationAgreements += 1;
 }
 
+for (const script of [
+  "verify-mcp-res-official-conformance.mjs",
+  "verify-mcp-res-profiles.mjs",
+  "verify-mcp-res-protocol-field.mjs",
+]) {
+  const generated = spawnSync(process.execPath, [join(root, "scripts", script)], {
+    cwd: root,
+    encoding: "utf8",
+    windowsHide: true,
+    maxBuffer: 32 * 1024 * 1024,
+    env: { ...process.env, MCP_RES_PYTHON: python },
+  });
+  invariant(
+    generated.status === 0,
+    `${script} corpus generation failed: ${generated.stderr || generated.stdout}`,
+  );
+}
+
+const officialDirectory = join(artifacts, "official-conformance-corpus");
+const officialCatalog = JSON.parse(await readFile(join(officialDirectory, "catalog.json"), "utf8"));
+let officialConformanceAgreements = 0;
+for (const entry of officialCatalog.valid) {
+  const independent = runPython([
+    "official",
+    join(officialDirectory, entry.file),
+    "--schemas",
+    schemas,
+  ]);
+  invariant(
+    independent.output.valid === true && independent.output.importStatus === entry.expectedStatus,
+    `Official attachment agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  officialConformanceAgreements += 1;
+}
+for (const entry of officialCatalog.invalid) {
+  const args = ["official", join(officialDirectory, entry.file), "--schemas", schemas];
+  if (entry.id === "altered-output") {
+    const altered = join(officialDirectory, "altered-original-result.json");
+    await writeFile(altered, "[] ", "utf8");
+    args.push("--original-result", altered);
+  }
+  const independent = runPython(args);
+  invariant(
+    JSON.stringify(independent.output.diagnostics) === JSON.stringify(entry.expectedDiagnostics),
+    `Official attachment diagnostic agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  officialConformanceAgreements += 1;
+}
+
+const profileDirectory = join(artifacts, "profile-corpus");
+const profileCatalog = JSON.parse(await readFile(join(profileDirectory, "catalog.json"), "utf8"));
+let profileAgreements = 0;
+for (const entry of profileCatalog.valid) {
+  const independent = runPython([
+    "profile",
+    join(profileDirectory, entry.file),
+    "--schemas",
+    schemas,
+    "--profiles",
+    join(standard, "profiles"),
+  ]);
+  invariant(
+    independent.output.valid === true && independent.output.result === entry.expectedResult,
+    `Profile agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  profileAgreements += 1;
+}
+for (const entry of profileCatalog.invalid) {
+  const independent = runPython([
+    "profile",
+    join(profileDirectory, entry.file),
+    "--schemas",
+    schemas,
+    "--profiles",
+    join(standard, "profiles"),
+  ]);
+  invariant(
+    JSON.stringify(independent.output.diagnostics) === JSON.stringify(entry.expectedDiagnostics),
+    `Profile diagnostic agreement failed for ${entry.id}: ${JSON.stringify(independent.output)}`,
+  );
+  profileAgreements += 1;
+}
+
+const field = JSON.parse(await readFile(join(artifacts, "pr3-field-verification.json"), "utf8"));
+const fieldEvaluations = join(artifacts, "python-field-evaluations");
+await mkdir(fieldEvaluations, { recursive: true });
+let fieldProfileAgreements = 0;
+for (const [index, row] of field.rows.entries()) {
+  const file = join(fieldEvaluations, `${String(index).padStart(2, "0")}.json`);
+  await writeFile(file, `${JSON.stringify(row.evaluation, null, 2)}\n`, "utf8");
+  const independent = runPython([
+    "profile",
+    file,
+    "--schemas",
+    schemas,
+    "--profiles",
+    join(standard, "profiles"),
+  ]);
+  invariant(
+    independent.output.valid === true && independent.output.result === "PASS",
+    `Runtime field profile agreement failed for row ${index}: ${JSON.stringify(independent.output)}`,
+  );
+  fieldProfileAgreements += 1;
+}
+
 const verification = {
   implementation: "python-stdlib-second-implementation-validator",
   pythonVersion: (pythonVersion.stdout || pythonVersion.stderr).trim(),
@@ -179,6 +284,9 @@ const verification = {
   digestAgreementPercent: 100,
   attestationAgreements,
   migrationAgreements,
+  officialConformanceAgreements,
+  profileAgreements,
+  fieldProfileAgreements,
   unsafeIntegerRejectedByBoth: true,
   loneSurrogateRejectedByBoth: true,
   externalIndependenceClaim: false,

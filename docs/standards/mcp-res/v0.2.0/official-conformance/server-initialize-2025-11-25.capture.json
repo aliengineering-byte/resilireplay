@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "mcp-res.official-conformance-capture-metadata/0.2.0",
+  "capturedAt": "2026-08-28T00:48:04.860Z",
+  "source": {
+    "packageName": "@modelcontextprotocol/conformance",
+    "packageVersion": "0.2.0-alpha.11",
+    "packageSha256": "7d8c8944755949749b62c568e72facebcc52bcfdeaa1ce7641af1d0baf900d0d",
+    "repository": "https://github.com/modelcontextprotocol/conformance",
+    "repositoryCommit": "74edef34d674f563537be8c6587cebaa58e830ca"
+  },
+  "protocolRevision": "2025-11-25",
+  "requirementSet": {
+    "revision": "2025-11-25",
+    "sha256": "f33a304dfa2cbd999c24026a3453a64f377bba0c8aa80addadaf05862d212371"
+  },
+  "originalResultArtifact": {
+    "sha256": "ce9fdea45efa73f1052fdf05ff887bc9ec477ac9c5fea303d1e1c64b3b0c1c55",
+    "bytes": 1579,
+    "retainedPublicly": false,
+    "reason": "The committed derivative removes an ephemeral loopback port and session identifier."
+  },
+  "sanitization": {
+    "applied": true,
+    "fields": ["/0/details/serverUrl", "/1/details/sessionId"]
+  },
+  "execution": {
+    "mode": "server",
+    "suite": "server-initialize",
+    "scenario": "server-initialize",
+    "serverFixture": "official TypeScript SDK Everything server",
+    "checksCompleted": 3,
+    "harnessExitCode": -1073740791,
+    "warnings": [
+      "After writing all three check results, the Windows process terminated with libuv assertion !(handle->flags & UV_HANDLE_CLOSING) in src/win/async.c:94. The attachment is therefore INCOMPLETE, not a conformance pass."
+    ]
+  },
+  "claimBoundary": "This is a sanitized official-tool output attachment. It is not MCP certification, an MCP-RES PASS, or evidence of adoption by the MCP project."
+}

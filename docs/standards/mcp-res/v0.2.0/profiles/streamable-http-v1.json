@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/streamable-http/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28/basic/transports.mdx"
+  ],
+  "requiredChecks": [
+    "authenticated-loopback-http",
+    "request-response-binding",
+    "json-versus-sse-response",
+    "long-lived-response-stream",
+    "buffering-detection",
+    "keepalive",
+    "transport-header-message-metadata-separation",
+    "status-code-consistency",
+    "content-type",
+    "interrupted-body",
+    "early-close",
+    "timeout",
+    "retry",
+    "duplicate-delivery",
+    "cancellation-by-stream-close",
+    "malformed-chunk",
+    "oversized-event",
+    "slow-consumer",
+    "backpressure",
+    "proxy-added-headers",
+    "no-unauthorized-redirect",
+    "listener-cleanup",
+    "socket-cleanup"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": [],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Default evaluation is authenticated loopback only. Remote HTTP requires explicit opt-in, an allowlist digest, and an exact reviewed target digest with separate claim scope."
+}

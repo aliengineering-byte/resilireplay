@@ -92,6 +92,9 @@ const SCHEMA_NAMES = [
   "trust-policy.schema.json",
   "attested-conformance-bundle.schema.json",
   "migration-result.schema.json",
+  "official-conformance-attachment.schema.json",
+  "profile-evaluation.schema.json",
+  "reliability-profile-manifest.schema.json",
 ];
 
 async function compileSchemas(schemaDirectory) {

@@ -91,3 +91,21 @@ The detailed classification and envelope rules are in [AUTHENTICITY.md](AUTHENTI
 **MCPRES-MIG-001.** A v0.1-to-v0.2 migration MUST preserve the original bundle and evidence digest, record the migration tool digest, preserve evidence class, label producer assertions `LEGACY_SELF_ASSERTED`, emit `INCOMPLETE`, and MUST NOT fabricate observations, reason-bound failures, signatures, trial repetition, scenario identity, or execution identity.
 
 Migration output is a `mcp-res.migration-result/0.2.0` report, not a v0.2 conformance result. [MIGRATION.md](MIGRATION.md) defines the command, containment, conflict, dry-run, and idempotency behavior.
+
+## 12. Official conformance attachment
+
+**MCPRES-OFFICIAL-001.** An official MCP conformance output MAY be attached only with the exact package artifact, repository commit, protocol revision, requirement-set digest, mode, legs, suite, scenarios, declared checks, emitted outcomes, warning/skip/untestable/pending/not-scored inventories, baseline, observation coverage, original result digest, and harness outcome.
+
+Official failures and warnings MUST retain their official outcome. Expected failures MUST NOT be rewritten as success. Missing declared checks MUST be pending, stale baseline entries force `INCOMPLETE`, a dishonest stale inventory is invalid, and an unexecuted active leg prevents validation. The attachment MUST set `officialCertificationClaim` to false and MUST NOT acquire an MCP-RES evidence class without a separately specified explicit mapping. [OFFICIAL_CONFORMANCE.md](OFFICIAL_CONFORMANCE.md) defines the complete boundary.
+
+## 13. Provisional protocol profiles
+
+**MCPRES-PROFILE-001.** A reliability-profile evaluation MUST bind an exact manifest, subject, revision, target, claimed check set, positive and reason-bound negative observation for every check, cleanup, and evaluation digest. A full claim MUST cover every required and revision-applicable conditional check. A fixture observation can produce only `INCOMPLETE`.
+
+**MCPRES-PROFILE-002.** Remote HTTP evaluation is denied by default and requires explicit opt-in, an allowlist digest, and an exact reviewed target digest. Protocol revisions MUST NOT be compared as equivalent. Experimental cache ETag and MCP Apps checks remain outside provisional full-profile scoring.
+
+The registered profiles and composition boundaries are in [PROTOCOL_PROFILES.md](PROTOCOL_PROFILES.md).
+
+## 14. Protocol field evidence
+
+**MCPRES-FIELD-001.** A field claim MUST name the OS, runtime, language, subject digest, protocol revision, transport, profile digest, bounded check set, clean path, expected failure, wrong-reason control, interruption behavior, cleanup, and evaluation integrity. CI matrix aggregation MUST retain each leg rather than collapsing heterogeneous environments into one pass.

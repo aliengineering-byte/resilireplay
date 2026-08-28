@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/cache-behavior/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28",
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/d8fdc88fb970313247d8a180ac1ec3f6a10a8885/docs/development/roadmap.mdx"
+  ],
+  "requiredChecks": [
+    "ttl-ms",
+    "cache-scope",
+    "cache-key-identity",
+    "protocol-revision-keying",
+    "subject-version-keying",
+    "user-tenant-separation",
+    "stale-result",
+    "expiry",
+    "list-resource-consistency",
+    "negative-caching",
+    "cache-poisoning-boundary",
+    "capability-change-invalidation",
+    "personalized-data-not-public"
+  ],
+  "conditionalChecks": [],
+  "experimentalChecks": ["etag-revalidation"],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "Only released ttlMs and cacheScope behavior is provisional. ETag revalidation is roadmap-derived and remains experimental and unscored."
+}

@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/official-conformance-attachment.schema.json",
+  "title": "MCP-RES official conformance attachment v0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "protocolRevision",
+    "requirementSet",
+    "mode",
+    "suite",
+    "legs",
+    "scenarios",
+    "checks",
+    "inventories",
+    "expectedFailureBaseline",
+    "staleExpectedFailures",
+    "observationCoverage",
+    "originalResultArtifact",
+    "harness",
+    "mappingBoundary",
+    "importStatus"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "mcp-res.official-conformance-attachment/0.2.0" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packageName",
+        "packageVersion",
+        "packageSha256",
+        "repository",
+        "repositoryCommit"
+      ],
+      "properties": {
+        "packageName": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "packageVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "packageSha256": { "$ref": "#/$defs/sha256" },
+        "repository": { "type": "string", "format": "uri", "maxLength": 512 },
+        "repositoryCommit": { "$ref": "#/$defs/gitSha" }
+      }
+    },
+    "protocolRevision": { "enum": ["2025-11-25", "2026-07-28"] },
+    "requirementSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "sha256"],
+      "properties": {
+        "revision": { "enum": ["2025-11-25", "2026-07-28"] },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "mode": { "enum": ["client", "server"] },
+    "suite": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "legs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["client", "server"],
+      "properties": {
+        "client": { "$ref": "#/$defs/leg" },
+        "server": { "$ref": "#/$defs/leg" }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 512,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 192 }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "scenarioId",
+          "checkId",
+          "outcome",
+          "wireSchema",
+          "baselineExpected",
+          "detailsSha256"
+        ],
+        "properties": {
+          "scenarioId": { "type": "string", "minLength": 1, "maxLength": 192 },
+          "checkId": { "type": "string", "minLength": 1, "maxLength": 192 },
+          "outcome": { "enum": ["SUCCESS", "FAILURE", "WARNING", "SKIPPED", "INFO"] },
+          "wireSchema": { "type": "boolean" },
+          "baselineExpected": { "type": "boolean" },
+          "untestable": { "type": "boolean" },
+          "errorMessage": { "type": "string", "maxLength": 2048 },
+          "detailsSha256": { "$ref": "#/$defs/sha256" }
+        }
+      }
+    },
+    "inventories": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "declared",
+        "executed",
+        "wireSchema",
+        "warnings",
+        "skipped",
+        "untestable",
+        "pending",
+        "notScored"
+      ],
+      "properties": {
+        "declared": { "$ref": "#/$defs/checkRefs" },
+        "executed": { "$ref": "#/$defs/checkRefs" },
+        "wireSchema": { "$ref": "#/$defs/checkRefs" },
+        "warnings": { "$ref": "#/$defs/checkRefs" },
+        "skipped": { "$ref": "#/$defs/checkRefs" },
+        "untestable": { "$ref": "#/$defs/checkRefs" },
+        "pending": { "$ref": "#/$defs/checkRefs" },
+        "notScored": { "$ref": "#/$defs/checkRefs" }
+      }
+    },
+    "expectedFailureBaseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "sha256"],
+      "properties": {
+        "entries": { "$ref": "#/$defs/checkRefs" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "staleExpectedFailures": { "$ref": "#/$defs/checkRefs" },
+    "observationCoverage": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["surface", "status"],
+        "properties": {
+          "surface": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "status": {
+            "enum": [
+              "INSTRUMENTED",
+              "OBSERVED_INDIRECTLY",
+              "BYPASSED_INTENTIONALLY",
+              "UNINSTRUMENTED",
+              "UNKNOWN",
+              "NOT_APPLICABLE"
+            ]
+          }
+        }
+      }
+    },
+    "originalResultArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "bytes", "sanitization"],
+      "properties": {
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": { "type": "integer", "minimum": 2, "maximum": 67108864 },
+        "sanitization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["applied", "fields"],
+          "properties": {
+            "applied": { "type": "boolean" },
+            "fields": {
+              "type": "array",
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 256 }
+            }
+          }
+        }
+      }
+    },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exitCode", "warnings"],
+      "properties": {
+        "exitCode": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
+        "warnings": {
+          "type": "array",
+          "maxItems": 64,
+          "items": { "type": "string", "minLength": 1, "maxLength": 2048 }
+        }
+      }
+    },
+    "mappingBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "officialResultPreserved",
+        "explicitMapping",
+        "mcpResEvidenceClass",
+        "officialCertificationClaim"
+      ],
+      "properties": {
+        "officialResultPreserved": { "const": true },
+        "explicitMapping": { "type": "boolean" },
+        "mcpResEvidenceClass": {
+          "type": ["string", "null"],
+          "enum": [
+            null,
+            "GENUINE_RUNTIME",
+            "FIXTURE_BACKED_PROTOCOL",
+            "FIXTURE_VERIFIED",
+            "INSTALLATION_VERIFIED",
+            "DOCUMENTED_ONLY"
+          ]
+        },
+        "officialCertificationClaim": { "const": false }
+      }
+    },
+    "importStatus": { "enum": ["COMPLETE", "INCOMPLETE", "INVALID"] }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "gitSha": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "leg": { "enum": ["EXECUTED", "NOT_EXECUTED", "UNTESTABLE"] },
+    "checkRefs": {
+      "type": "array",
+      "maxItems": 4096,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^.{1,192}:.{1,192}$" }
+    }
+  }
+}

@@ -825,14 +825,243 @@ def validate_migration(result: Any, schemas: SchemaSet, v01_schemas: SchemaSet) 
     return {"valid": True, "diagnostics": [], "schemaErrors": []}
 
 
+def _check_ref(check: dict[str, Any]) -> str:
+    return f"{check['scenarioId']}:{check['checkId']}"
+
+
+def _official_status(attachment: dict[str, Any]) -> str:
+    if any(
+        check["outcome"] in {"FAILURE", "WARNING"} and not check["baselineExpected"]
+        for check in attachment["checks"]
+    ):
+        return "INVALID"
+    inventories = attachment["inventories"]
+    if (
+        attachment["staleExpectedFailures"]
+        or inventories["skipped"]
+        or inventories["untestable"]
+        or inventories["pending"]
+        or inventories["notScored"]
+        or attachment["harness"]["exitCode"] != 0
+        or any(
+            item["status"] in {"UNINSTRUMENTED", "UNKNOWN"}
+            for item in attachment["observationCoverage"]
+        )
+    ):
+        return "INCOMPLETE"
+    return "COMPLETE"
+
+
+def validate_official(
+    attachment: Any, schemas: SchemaSet, original_result: Path | None = None
+) -> dict[str, Any]:
+    schema = schemas.get(
+        "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/official-conformance-attachment.schema.json"
+    )
+    schema_errors = schemas.errors(attachment, schema)
+    if schema_errors:
+        return _invalid("MCP_RES_OFFICIAL_ATTACHMENT_SCHEMA_INVALID", schema_errors)
+    if attachment["protocolRevision"] != attachment["requirementSet"]["revision"]:
+        return _invalid("MCP_RES_OFFICIAL_REQUIREMENT_REVISION_MISMATCH")
+    if attachment["legs"][attachment["mode"]] != "EXECUTED":
+        return _invalid("MCP_RES_OFFICIAL_LEG_NOT_EXECUTED")
+    checks = attachment["checks"]
+    refs = [_check_ref(check) for check in checks]
+    inventories = attachment["inventories"]
+    expected_wire = sorted(_check_ref(check) for check in checks if check["wireSchema"])
+    expected_warnings = sorted(
+        _check_ref(check) for check in checks if check["outcome"] == "WARNING"
+    )
+    expected_skipped = sorted(
+        _check_ref(check) for check in checks if check["outcome"] == "SKIPPED"
+    )
+    expected_untestable = sorted(
+        _check_ref(check) for check in checks if check.get("untestable") is True
+    )
+    expected_pending = sorted(ref for ref in inventories["declared"] if ref not in refs)
+    if (
+        len(set(refs)) != len(refs)
+        or sorted(refs) != inventories["executed"]
+        or any(ref not in inventories["declared"] for ref in refs)
+        or expected_wire != inventories["wireSchema"]
+        or expected_warnings != inventories["warnings"]
+        or expected_skipped != inventories["skipped"]
+        or expected_untestable != inventories["untestable"]
+        or expected_pending != inventories["pending"]
+    ):
+        return _invalid("MCP_RES_OFFICIAL_INVENTORY_MISMATCH")
+    baseline = attachment["expectedFailureBaseline"]["entries"]
+    if sha256(baseline) != attachment["expectedFailureBaseline"]["sha256"]:
+        return _invalid("MCP_RES_OFFICIAL_INVENTORY_MISMATCH")
+    for check in checks:
+        expected = (
+            _check_ref(check) in baseline and check["outcome"] in {"FAILURE", "WARNING"}
+        )
+        if check["baselineExpected"] != expected:
+            return _invalid("MCP_RES_OFFICIAL_EXPECTED_FAILURE_REWRITTEN")
+    failures = {
+        _check_ref(check)
+        for check in checks
+        if check["outcome"] in {"FAILURE", "WARNING"}
+    }
+    stale = [ref for ref in baseline if ref not in failures]
+    if stale != attachment["staleExpectedFailures"]:
+        return _invalid("MCP_RES_OFFICIAL_STALE_BASELINE_MISMATCH")
+    if original_result is not None:
+        material = original_result.read_bytes()
+        if (
+            hashlib.sha256(material).hexdigest()
+            != attachment["originalResultArtifact"]["sha256"]
+            or len(material) != attachment["originalResultArtifact"]["bytes"]
+        ):
+            return _invalid("MCP_RES_OFFICIAL_RESULT_DIGEST_MISMATCH")
+    boundary = attachment["mappingBoundary"]
+    if not boundary["explicitMapping"] and boundary["mcpResEvidenceClass"] is not None:
+        return _invalid("MCP_RES_OFFICIAL_MAPPING_OVERCLAIM")
+    if _official_status(attachment) != attachment["importStatus"]:
+        return _invalid("MCP_RES_OFFICIAL_STATUS_MISMATCH")
+    return {
+        "valid": True,
+        "diagnostics": [],
+        "schemaErrors": [],
+        "importStatus": attachment["importStatus"],
+        "officialCertificationClaim": False,
+    }
+
+
+def _profile_registered(manifest: dict[str, Any]) -> list[str]:
+    return sorted(
+        manifest["requiredChecks"]
+        + [item["id"] for item in manifest["conditionalChecks"]]
+        + manifest["experimentalChecks"]
+    )
+
+
+def _profile_applicable(manifest: dict[str, Any], revision: str) -> list[str]:
+    return sorted(
+        manifest["requiredChecks"]
+        + [
+            item["id"]
+            for item in manifest["conditionalChecks"]
+            if revision in item["protocolRevisions"]
+        ]
+    )
+
+
+def _profile_digest(evaluation: dict[str, Any]) -> str:
+    material = dict(evaluation)
+    material.pop("evaluationSha256", None)
+    return sha256(material)
+
+
+def validate_profile(
+    evaluation: Any, schemas: SchemaSet, profile_directory: Path
+) -> dict[str, Any]:
+    schema = schemas.get(
+        "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json"
+    )
+    schema_errors = schemas.errors(evaluation, schema)
+    if schema_errors:
+        return _invalid("MCP_RES_PROFILE_SCHEMA_INVALID", schema_errors)
+    manifest_schema = schemas.get(
+        "https://aliengineering-byte.github.io/resilireplay/standards/mcp-res/v0.2.0/schemas/reliability-profile-manifest.schema.json"
+    )
+    manifests: dict[str, dict[str, Any]] = {}
+    try:
+        for path in sorted(profile_directory.glob("*.json")):
+            manifest = load_json(path)
+            if schemas.errors(manifest, manifest_schema):
+                return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
+            registered = _profile_registered(manifest)
+            if len(set(registered)) != len(registered) or manifest["id"] in manifests:
+                return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
+            manifests[manifest["id"]] = manifest
+    except (OSError, ValueError):
+        return _invalid("MCP_RES_PROFILE_MANIFEST_INVALID")
+    reference = evaluation["profile"]
+    manifest = manifests.get(reference["id"])
+    if manifest is None or manifest["version"] != reference["version"]:
+        return _invalid("MCP_RES_PROFILE_MANIFEST_UNKNOWN")
+    revision = reference["protocolRevision"]
+    if revision not in manifest["protocolRevisions"]:
+        return _invalid("MCP_RES_PROFILE_REVISION_UNSUPPORTED")
+    if sha256(manifest) != reference["manifestSha256"]:
+        return _invalid("MCP_RES_PROFILE_MANIFEST_DIGEST_MISMATCH")
+    if _profile_digest(evaluation) != evaluation["evaluationSha256"]:
+        return _invalid("MCP_RES_PROFILE_DIGEST_MISMATCH")
+    claimed = sorted(evaluation["scope"]["claimedCheckIds"])
+    observed = sorted(check["id"] for check in evaluation["checks"])
+    registered = set(_profile_registered(manifest))
+    if (
+        len(set(observed)) != len(observed)
+        or claimed != observed
+        or any(check_id not in registered for check_id in claimed)
+        or (
+            evaluation["scope"]["claim"] == "FULL_PROFILE"
+            and claimed != _profile_applicable(manifest, revision)
+        )
+    ):
+        return _invalid("MCP_RES_PROFILE_COVERAGE_MISMATCH")
+    scope = evaluation["scope"]
+    if scope["targetKind"] == "REMOTE_HTTP" and (
+        not scope["remoteOptIn"]
+        or not scope.get("allowlistSha256")
+        or not scope.get("reviewedTargetSha256")
+        or scope.get("reviewedTargetSha256") != scope["targetSha256"]
+    ):
+        return _invalid("MCP_RES_PROFILE_REMOTE_TARGET_UNREVIEWED")
+    for check in evaluation["checks"]:
+        for branch, negative in ((check["positive"], False), (check["negativeControl"], True)):
+            if not branch["propertyReached"]:
+                return _invalid("MCP_RES_PROFILE_PROPERTY_NOT_REACHED")
+            if (
+                branch["observedOutcome"] == "NOT_OBSERVED"
+                or branch["expectedOutcome"] != branch["observedOutcome"]
+            ):
+                return _invalid(
+                    "MCP_RES_PROFILE_NEGATIVE_CONTROL_MISSING"
+                    if negative
+                    else "MCP_RES_PROFILE_OUTCOME_MISMATCH"
+                )
+            if branch["expectedReasonCode"] != branch["observedReasonCode"]:
+                return _invalid("MCP_RES_PROFILE_WRONG_REASON")
+    if evaluation["cleanup"]["required"] and not evaluation["cleanup"]["observed"]:
+        return _invalid("MCP_RES_PROFILE_CLEANUP_INCOMPLETE")
+    fixture_only = any(
+        branch["source"] == "TEST_FIXTURE"
+        for check in evaluation["checks"]
+        for branch in (check["positive"], check["negativeControl"])
+    )
+    derived = "INCOMPLETE" if fixture_only else "PASS"
+    if evaluation["result"] != derived:
+        return _invalid(
+            "MCP_RES_PROFILE_TEST_FIXTURE_OVERCLAIM"
+            if fixture_only and evaluation["result"] == "PASS"
+            else "MCP_RES_PROFILE_RESULT_MISMATCH"
+        )
+    return {
+        "valid": True,
+        "diagnostics": [],
+        "schemaErrors": [],
+        "result": derived,
+        "profileStatus": manifest["status"],
+        "claimScope": evaluation["scope"]["claim"],
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Second-implementation MCP-RES v0.2 Python validator"
     )
-    parser.add_argument("mode", choices=["validate", "attestation", "migration", "canonicalize"])
+    parser.add_argument(
+        "mode",
+        choices=["validate", "attestation", "migration", "official", "profile", "canonicalize"],
+    )
     parser.add_argument("input", type=Path)
     parser.add_argument("--schemas", type=Path)
     parser.add_argument("--trust-policy", type=Path)
+    parser.add_argument("--profiles", type=Path)
+    parser.add_argument("--original-result", type=Path)
     parser.add_argument("--evaluated-at", default="2026-08-27T18:05:00.000Z")
     arguments = parser.parse_args()
     schemas_path = arguments.schemas or Path(__file__).resolve().parents[2] / "schemas"
@@ -851,9 +1080,14 @@ def main() -> int:
             elif arguments.mode == "attestation":
                 policy = load_json(arguments.trust_policy) if arguments.trust_policy else None
                 result = validate_attestation(value, schemas, policy, arguments.evaluated_at)
-            else:
+            elif arguments.mode == "migration":
                 v01_path = schemas_path.parents[1] / "v0.1.0" / "schemas"
                 result = validate_migration(value, schemas, SchemaSet(v01_path))
+            elif arguments.mode == "official":
+                result = validate_official(value, schemas, arguments.original_result)
+            else:
+                profile_path = arguments.profiles or schemas_path.parent / "profiles"
+                result = validate_profile(value, schemas, profile_path)
         print(json.dumps(result, separators=(",", ":"), ensure_ascii=False))
         return 0 if result.get("valid", True) else 1
     except Exception as error:  # Fail closed at the CLI boundary.

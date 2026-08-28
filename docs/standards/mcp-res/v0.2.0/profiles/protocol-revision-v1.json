@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "mcp-res.reliability-profile-manifest/0.2.0",
+  "id": "mcp-res/protocol-revision/v1",
+  "version": "1.0.0",
+  "status": "PROVISIONAL",
+  "protocolRevisions": ["2025-11-25", "2026-07-28"],
+  "sourceRefs": [
+    "https://github.com/modelcontextprotocol/modelcontextprotocol/tree/5f5440bb26a62e2cf3440b92da5a667efa03b267/docs/specification/2026-07-28",
+    "https://github.com/modelcontextprotocol/conformance/tree/74edef34d674f563537be8c6587cebaa58e830ca"
+  ],
+  "requiredChecks": [
+    "explicit-protocol-revision",
+    "supported-version-advertisement",
+    "unsupported-version-failure",
+    "modern-legacy-auto-behavior",
+    "stdio-backward-compatibility",
+    "request-identity-metadata",
+    "result-identity-metadata",
+    "capability-declaration",
+    "extension-declaration",
+    "json-schema-dialect-identity",
+    "safe-integer-constraints",
+    "interleaved-unrelated-requests",
+    "no-connection-as-conversation"
+  ],
+  "conditionalChecks": [
+    { "id": "stateless-request-metadata", "protocolRevisions": ["2026-07-28"] },
+    { "id": "server-discover", "protocolRevisions": ["2026-07-28"] },
+    { "id": "no-session-id-assumption", "protocolRevisions": ["2026-07-28"] },
+    { "id": "required-result-type", "protocolRevisions": ["2026-07-28"] }
+  ],
+  "experimentalChecks": [],
+  "remotePolicy": "DENY_BY_DEFAULT_REVIEWED_ALLOWLIST_ONLY",
+  "compositionBoundary": "This profile distinguishes the released 2025-11-25 and 2026-07-28 semantics. Draft behavior after 2026-07-28 is excluded."
+}
