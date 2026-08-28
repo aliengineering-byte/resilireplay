@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "command": "npx --yes resilireplay@latest mcp demo",
+  "package": "resilireplay-0.7.0.tgz",
+  "tarballSha256": "1160a4c66615b31ce7f67935d3618fe76d876c34ed6184e62c82e6af315c0f70",
+  "outputSha256": "a5bd9fbb292baebc884c1d5164a9becf6502562da0a20f6fbd395b326b226031",
+  "durationMs": 821,
+  "source": "packed-npm-tarball"
+}

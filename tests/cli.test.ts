@@ -15,7 +15,7 @@ describe("CLI end to end and subprocess safety", () => {
       windowsHide: true,
     });
     expect(version.status).toBe(0);
-    expect(version.stdout.trim()).toBe("0.6.0");
+    expect(version.stdout.trim()).toBe("0.7.0");
     const faults = spawnSync(process.execPath, [cli, "faults"], {
       encoding: "utf8",
       windowsHide: true,
@@ -145,7 +145,7 @@ describe("CLI end to end and subprocess safety", () => {
         { encoding: "utf8", windowsHide: true, timeout: 30_000 },
       );
       expect(run.status, `${run.stdout}\n${run.stderr}`).toBe(0);
-      expect(run.stdout).toContain("ResiliReplay Campaign v0.6.0");
+      expect(run.stdout).toContain("ResiliReplay Campaign v0.7.0");
       expect(run.stdout).toContain("Scenarios       4/4");
 
       const baseline = join(output, "baseline.json");

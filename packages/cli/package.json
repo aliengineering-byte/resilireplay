@@ -1,9 +1,16 @@
 {
   "name": "resilireplay",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "license": "Apache-2.0",
-  "description": "Turn reviewed MCP failures into deterministic recovery evidence and executable regression tests.",
+  "description": "Inject deterministic MCP failures, verify bounded recovery, and generate executable regression tests.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "reliability-testing",
+    "fault-injection",
+    "regression-testing"
+  ],
   "author": "Ali <268342250+aliengineering-byte@users.noreply.github.com>",
   "bin": {
     "resilireplay": "./bin/resilireplay.mjs"
@@ -21,6 +28,7 @@
   "files": [
     "bin/resilireplay.mjs",
     "dist/resilireplay.js",
+    "fixtures/demo-mcp-server.mjs",
     "portable-skill",
     "README.md",
     "LICENSE"
@@ -40,7 +48,7 @@
     "@resilireplay/trace": "workspace:*",
     "@resilireplay/studio": "workspace:*",
     "commander": "14.0.0",
-    "yaml": "2.8.1",
+    "yaml": "2.8.3",
     "zod": "3.25.76"
   },
   "engines": {

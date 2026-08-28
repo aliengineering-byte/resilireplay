@@ -191,6 +191,16 @@ function isContained(base: string, candidate: string): boolean {
   );
 }
 
+async function canonicalizeExistingRoot(root: string): Promise<string> {
+  try {
+    return await realpath(root);
+  } catch (error) {
+    // Preserve the existing missing-config error path when the parent does not exist.
+    if (isRecord(error) && error.code === "ENOENT") return root;
+    configError("RR_MCP_CONFIG_ROOT", "Unable to resolve the allowed repository root", error);
+  }
+}
+
 async function verifyContainedExistingPath(
   base: string,
   candidate: string,
@@ -610,13 +620,14 @@ export async function listInspectorServers(
   options: Pick<LoadInspectorConfigOptions, "allowedRoot"> = {},
 ): Promise<InspectorConfigSummary> {
   const unresolvedFile = resolve(fileInput);
-  const allowedRoot = resolve(options.allowedRoot ?? dirname(unresolvedFile));
-  if (!isContained(allowedRoot, unresolvedFile)) {
+  const lexicalAllowedRoot = resolve(options.allowedRoot ?? dirname(unresolvedFile));
+  if (!isContained(lexicalAllowedRoot, unresolvedFile)) {
     configError(
       "RR_MCP_CONFIG_PATH_ESCAPE",
       "Inspector configuration path escapes the allowed repository root",
     );
   }
+  const allowedRoot = await canonicalizeExistingRoot(lexicalAllowedRoot);
   let file: string;
   try {
     file = await realpath(unresolvedFile);
@@ -685,13 +696,14 @@ export async function loadInspectorConfig(
   options: LoadInspectorConfigOptions = {},
 ): Promise<ImportedInspectorServer> {
   const unresolvedFile = resolve(fileInput);
-  const allowedRoot = resolve(options.allowedRoot ?? dirname(unresolvedFile));
-  if (!isContained(allowedRoot, unresolvedFile)) {
+  const lexicalAllowedRoot = resolve(options.allowedRoot ?? dirname(unresolvedFile));
+  if (!isContained(lexicalAllowedRoot, unresolvedFile)) {
     configError(
       "RR_MCP_CONFIG_PATH_ESCAPE",
       "Inspector configuration path escapes the allowed repository root",
     );
   }
+  const allowedRoot = await canonicalizeExistingRoot(lexicalAllowedRoot);
 
   let file: string;
   try {

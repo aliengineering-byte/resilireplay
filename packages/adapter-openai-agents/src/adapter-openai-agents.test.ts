@@ -17,6 +17,7 @@ import {
 } from "@openai/agents";
 import {
   createEvent,
+  createV1Event,
   validateV1Event,
   type EventEnvelopeV1,
   type EventType,
@@ -428,6 +429,49 @@ describe.sequential("OpenAI Agents SDK 0.14.3 adapter checkpoint", () => {
     } finally {
       await rm(workspace, { recursive: true, force: true });
     }
+  });
+
+  it("[GENUINE_RUNTIME] rejects duplicate effects and interleaved event order", async () => {
+    const model = new ScriptedModel([textResponse("runtime evidence")]);
+    const adapter = createOpenAIAgentsAdapter();
+    const capture = await adapter.captureRun({
+      agent: agent(model),
+      input: "adversarial replay",
+      model,
+      context: runContext(),
+    });
+    const source = capture.events.slice(0, 2);
+    const duplicated = source.map((event, sequence) => {
+      const {
+        schemaVersion: _schema,
+        envelopeVersion: _envelope,
+        payloadDigest: _digest,
+        ...input
+      } = event;
+      return createV1Event({
+        ...input,
+        eventId: `duplicate-effect-${sequence}`,
+        sequence,
+        sideEffect: {
+          id: "shared-runtime-effect",
+          kind: "tool-call",
+          status: "applied",
+          classification: "non-idempotent",
+          deterministic: true,
+          reversible: false,
+        },
+      });
+    });
+    const duplicateReplay = await adapter.replay(duplicated);
+    expect(duplicateReplay.passed).toBe(false);
+    expect(duplicateReplay.duplicateSideEffects).toBe(1);
+
+    const interleaved = [
+      createV1Event({ ...duplicated[0]!, eventId: "interleaved-late", sequence: 2 }),
+      createV1Event({ ...duplicated[1]!, eventId: "interleaved-early", sequence: 1 }),
+    ];
+    const interleavedReplay = await adapter.replay(interleaved);
+    expect(interleavedReplay.passed).toBe(false);
   });
 
   it("[GENUINE_RUNTIME] cleanup leaves no adapter run state or process listeners", async () => {

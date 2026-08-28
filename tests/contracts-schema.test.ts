@@ -35,7 +35,7 @@ describe("contract schemas", () => {
       framework: "schema",
       frameworkVersion: "1.0.0",
       adapter: "resili-unit",
-      adapterVersion: "0.6.0",
+      adapterVersion: "0.7.0",
       operation: "run",
       boundary: "framework",
       phase: "start",

@@ -29,6 +29,11 @@ const personalEmail = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/giu;
 const windowsUserPath = /\b[A-Z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s]+/giu;
 const posixUserPath = /(?:^|[\s"'(])\/(?:Users|home)\/[^/\s"'()]+/gmu;
 const repositoryUrl = /https:\/\/github\.com\/([^/\s]+)\/resilireplay\b/giu;
+const provenanceBoilerplate = new RegExp(
+  `(?:${["Codex", "Assistant"].join(" ")}|${["assistant", "resilireplay.local"].join("@")}|
+generated (?:by|with) (?:AI|Codex)|${["AI", "generated"].join("-")})`.replace("\n", ""),
+  "iu",
+);
 
 function allowedEmail(value) {
   return (
@@ -51,6 +56,9 @@ function inspectText(name, content) {
     if (match[1]?.toLowerCase() !== expectedOwner) {
       findings.push(`${name}: non-canonical ResiliReplay repository owner`);
     }
+  }
+  if (provenanceBoilerplate.test(content)) {
+    findings.push(`${name}: AI/Codex provenance boilerplate`);
   }
 }
 
@@ -88,11 +96,27 @@ async function inspectGenerated(directory) {
 await inspectGenerated(join(root, "runs"));
 await inspectGenerated(join(root, "docs", "assets"));
 
+try {
+  const newCommitMetadata = execFileSync(
+    "git",
+    ["log", "origin/main..HEAD", "--format=%an <%ae>%n%B"],
+    { cwd: root, encoding: "utf8" },
+  );
+  if (
+    provenanceBoilerplate.test(newCommitMetadata) ||
+    /co-authored-by:.*\b(?:AI|Codex)\b/iu.test(newCommitMetadata)
+  ) {
+    findings.push("new commits: AI/Codex author or co-author attribution");
+  }
+} catch {
+  findings.push("git history: unable to audit new commit attribution against origin/main");
+}
+
 if (findings.length > 0) {
   console.error(findings.join("\n"));
   process.exitCode = 1;
 } else {
   console.log(
-    "Hygiene scan passed: tracked content and generated reports contain no personal emails, user paths, private artifacts, or stale repository-owner links.",
+    "Hygiene scan passed: no personal paths, private artifacts, stale owner links, or AI/Codex provenance attribution was found in current surfaces or new commits.",
   );
 }

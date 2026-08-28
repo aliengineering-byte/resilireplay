@@ -7,7 +7,7 @@ import {
 
 export const OPENAI_AGENTS_ADAPTER_ID = "openai-agents" as const;
 export const OPENAI_AGENTS_ADAPTER_NAME = "@resilireplay/adapter-openai-agents" as const;
-export const OPENAI_AGENTS_ADAPTER_VERSION = "0.6.0" as const;
+export const OPENAI_AGENTS_ADAPTER_VERSION = "0.7.0" as const;
 export const OPENAI_AGENTS_FRAMEWORK_VERSION = "0.14.3" as const;
 export const OPENAI_AGENTS_FRAMEWORK_VERSION_RANGE = ">=0.14.3 <0.15.0" as const;
 

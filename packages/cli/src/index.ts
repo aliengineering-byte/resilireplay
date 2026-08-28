@@ -22,6 +22,7 @@ import {
 import {
   auditMcp,
   loadInspectorConfig,
+  metadataOnlyMcpEvidence,
   MCP_EXIT_CODES,
   MCP_FAULT_TYPES,
   McpInspectorConfigError,
@@ -62,6 +63,13 @@ import {
   templateById,
 } from "@resilireplay/adapter-sdk";
 import { demoTerminalReport, runDemo } from "./demo.js";
+import {
+  MCP_TEST_SAFETY_CLASSES,
+  mcpTestPlanReport,
+  mcpTestTerminalReport,
+  planMcpTest,
+  runMcpTest,
+} from "./mcp-test.js";
 import { adoptTerminalReport, runAdopt, type AdoptOptions } from "./adopt.js";
 import {
   captureLast,
@@ -186,29 +194,126 @@ async function runScenarioDirectory(directoryInput: string): Promise<{
 export function createProgram(): Command {
   const program = new Command()
     .name("resilireplay")
-    .description(
-      "Crash-test AI agents and MCP servers, replay failures, and generate regression tests.",
-    )
+    .description("Test MCP failure recovery and turn failures into executable regressions.")
     .version(PRODUCT_VERSION);
 
-  program
-    .command("demo")
-    .description("Run a zero-configuration deterministic recovery demo.")
-    .option("--json", "Print one machine-readable JSON result")
-    .option("-o, --output <directory>", "Keep generated evidence and regression artifacts")
-    .option("--no-color", "Disable ANSI color")
-    .option("--seed <number>", "Deterministic seed", "42")
-    .action(async (options: { json?: boolean; output?: string; color: boolean; seed: string }) => {
-      const result = await runDemo({
-        seed: Number(options.seed),
-        ...(options.output ? { outputDirectory: options.output } : {}),
-      });
-      console.log(
-        options.json
-          ? stableStringify(result)
-          : demoTerminalReport(result, options.color && process.env.NO_COLOR === undefined),
+  const addDemoCommand = (parent: Command, hidden = false): void => {
+    parent
+      .command("demo", hidden ? { hidden: true } : {})
+      .description("Try a deterministic local MCP reliability test.")
+      .option("--json", "Print one machine-readable JSON result")
+      .option("-o, --output <directory>", "Keep generated evidence and regression artifacts")
+      .option("--keep", "Keep artifacts under .resilireplay/demo")
+      .option("--no-color", "Disable ANSI color")
+      .option("--seed <number>", "Deterministic seed", "42")
+      .action(
+        async (options: {
+          json?: boolean;
+          output?: string;
+          keep?: boolean;
+          color: boolean;
+          seed: string;
+        }) => {
+          if (options.keep && options.output) {
+            throw Object.assign(new Error("Use either --keep or --output, not both"), {
+              exitCode: 2,
+            });
+          }
+          const result = await runDemo({
+            seed: Number(options.seed),
+            ...(options.output
+              ? { outputDirectory: options.output }
+              : options.keep
+                ? { outputDirectory: ".resilireplay/demo" }
+                : {}),
+          });
+          console.log(
+            options.json
+              ? stableStringify(result)
+              : demoTerminalReport(result, options.color && process.env.NO_COLOR === undefined),
+          );
+        },
       );
+  };
+
+  const mcp = program
+    .command("mcp")
+    .description("Test bounded recovery and regression evidence for MCP servers.");
+  addDemoCommand(mcp);
+  mcp
+    .command("test")
+    .description("Test one reviewed MCP tool with a bounded fault and recovery.")
+    .requiredOption("--config <path>", "Reviewed Inspector-compatible mcp.json file")
+    .option("--server <name>", "Named mcpServers entry")
+    .option("--tool <name>", "One reviewed tool allowlist entry")
+    .option(
+      "--safety <classification>",
+      `Tool classification: ${MCP_TEST_SAFETY_CLASSES.join(", ")}`,
+    )
+    .option("--dry-run", "Print a value-free plan without starting or writing anything")
+    .option("--approve <sha256>", "Exact plan digest required for execution")
+    .option("--fault <name>", `Controlled MCP mutation: ${MCP_FAULT_TYPES.join(", ")}`)
+    .option("--retries <number>", "Bounded recovery retry count", "1")
+    .option("--timeout <ms>", "Connection and request timeout", "10000")
+    .option("-o, --output <directory>", "Evidence directory", ".resilireplay/mcp-test")
+    .option("--no-regression", "Do not generate and execute a regression")
+    .option("--json", "Print one machine-readable JSON result")
+    .action(
+      async (options: {
+        config: string;
+        server?: string;
+        tool?: string;
+        safety?: (typeof MCP_TEST_SAFETY_CLASSES)[number];
+        dryRun?: boolean;
+        approve?: string;
+        fault?: (typeof MCP_FAULT_TYPES)[number];
+        retries: string;
+        timeout: string;
+        output: string;
+        regression: boolean;
+        json?: boolean;
+      }) => {
+        const result = await runMcpTest({
+          config: options.config,
+          ...(options.server ? { server: options.server } : {}),
+          ...(options.tool ? { tool: options.tool } : {}),
+          ...(options.safety ? { safety: options.safety } : {}),
+          dryRun: options.dryRun ?? false,
+          ...(options.approve ? { approve: options.approve } : {}),
+          ...(options.fault ? { fault: options.fault } : {}),
+          retries: Number(options.retries),
+          timeoutMs: Number(options.timeout),
+          outputDirectory: options.output,
+          regression: options.regression,
+          json: options.json ?? false,
+        });
+        console.log(
+          options.json
+            ? stableStringify(result)
+            : "result" in result
+              ? mcpTestTerminalReport(result)
+              : mcpTestPlanReport(result, options.config),
+        );
+        if ("result" in result && result.result !== "PASS") process.exitCode = 1;
+      },
+    );
+  mcp
+    .command("validate")
+    .description("Validate an MCP test configuration without starting the target.")
+    .requiredOption("--config <path>", "Reviewed Inspector-compatible mcp.json file")
+    .option("--server <name>", "Named mcpServers entry")
+    .option("--tool <name>", "Optional reviewed tool allowlist entry")
+    .option("--json", "Print one machine-readable JSON plan")
+    .action(async (options: { config: string; server?: string; tool?: string; json?: boolean }) => {
+      const plan = await planMcpTest({
+        config: options.config,
+        ...(options.server ? { server: options.server } : {}),
+        ...(options.tool ? { tool: options.tool } : {}),
+        dryRun: true,
+      });
+      console.log(options.json ? stableStringify(plan) : mcpTestPlanReport(plan, options.config));
     });
+  addDemoCommand(program, true);
 
   program
     .command("adopt")
@@ -779,9 +884,6 @@ export function createProgram(): Command {
       console.log(`HTML ${bundle.htmlPath}`);
     });
 
-  const mcp = program
-    .command("mcp")
-    .description("Controlled reliability testing for authorized MCP servers.");
   mcp
     .command("serve")
     .description("Serve ResiliReplay itself as a local stdio MCP server.")
@@ -909,11 +1011,13 @@ export function createProgram(): Command {
             : {}),
         });
         const output = await boundedOutputDirectory(plannedOutput!);
-        await writeTrace(join(output, "trace.jsonl"), result.events, {
+        const persistedEvents = metadataOnlyMcpEvidence(result.events);
+        const persistedResult = { ...result, events: persistedEvents };
+        await writeTrace(join(output, "trace.jsonl"), persistedEvents, {
           allowedRoot: process.cwd(),
         });
-        await writeMcpCertification(result, output);
-        const report = await writeReportBundle(result.events, output);
+        await writeMcpCertification(persistedResult, output);
+        const report = await writeReportBundle(persistedEvents, output);
         console.log(report.terminal);
         for (const finding of result.findings) {
           console.log(`${finding.severity.toUpperCase()} ${finding.id} ${finding.title}`);

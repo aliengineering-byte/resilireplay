@@ -1,0 +1,11 @@
+Official MCP Everything verification: PASS
+Server: @modelcontextprotocol/server-everything@2026.8.18
+Transport: stdio
+Tool: echo (inert)
+Clean tool call: PASS
+Fault: mcp-tool-error
+Recovery attempts: 1
+Duplicate effects: 0
+Regression: generated and passed
+Cleanup: complete
+Evidence: sha256:<digest>

@@ -1,0 +1,38 @@
+name: Public npm smoke
+
+on:
+  workflow_run:
+    workflows: [Publish npm package]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  public-package:
+    if: >-
+      github.repository == 'aliengineering-byte/resilireplay' &&
+      github.event.workflow_run.conclusion == 'success'
+    name: Public package / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+          package-manager-cache: false
+      - name: Verify from the public registry in a clean runner
+        shell: bash
+        run: |
+          test "$(npm view resilireplay@0.7.0 version)" = "0.7.0"
+          npm view resilireplay@0.7.0 dist.integrity dist.shasum
+          test "$(npx --yes resilireplay@0.7.0 --version)" = "0.7.0"
+          npx --yes resilireplay@0.7.0 --help > help.txt
+          grep -q "mcp" help.txt
+          npx --yes resilireplay@0.7.0 mcp demo --json > demo.json
+          node -e "const r=require('./demo.json');if(r.result!=='PASS'||r.cleanControl!=='PASS'||r.recoveryAttempts!==1||r.duplicateEffects!==0||!r.regressionExecuted||!r.cleanupComplete)process.exit(1)"

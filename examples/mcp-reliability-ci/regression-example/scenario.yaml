@@ -1,0 +1,14 @@
+schemaVersion: "1.0"
+id: regression-eec8c970cb0d
+description: Generated from regression; first critical step
+  da0c2e9e-3630-4018-ac33-b240d4e3466e
+seed: 42
+sourceTraceSha256: eec8c970cb0d5eb067c2634eeb1211b7a849d4129808180b454a419de2478372
+expected:
+  outcome: failed
+  firstCriticalStep: da0c2e9e-3630-4018-ac33-b240d4e3466e
+rules:
+  - fault: mcp-tool-error
+    event: tool_result
+    occurrence: 1
+    parameters: {}

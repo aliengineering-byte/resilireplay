@@ -84,7 +84,7 @@ await execFileAsync(process.execPath, [packageManagerCli, "pack", "--pack-destin
   windowsHide: true,
   maxBuffer: 5 * 1024 * 1024,
 });
-const tarballPath = join(output, "resilireplay-0.6.0.tgz");
+const tarballPath = join(output, "resilireplay-0.7.0.tgz");
 const packedBytes = (await stat(tarballPath)).size;
 async function listPackageFiles(directory) {
   const files = [];
@@ -101,6 +101,7 @@ const packageFiles = [
   "README.md",
   join("bin", "resilireplay.mjs"),
   join("dist", "resilireplay.js"),
+  join("fixtures", "demo-mcp-server.mjs"),
   "package.json",
   ...(await listPackageFiles(join(root, "packages", "cli", "portable-skill"))),
 ];

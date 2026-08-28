@@ -78,7 +78,7 @@ function parseObject(raw: string | undefined, label: string): Record<string, unk
 }
 
 function hookCommand(source: Exclude<ConnectAgent, "auto">): string {
-  return `npx --yes resilireplay@0.6.0 hook ingest --agent ${source}`;
+  return `npx --yes resilireplay@0.7.0 hook ingest --agent ${source}`;
 }
 
 function mergeHook(
@@ -110,7 +110,7 @@ function mergeMcp(original: Record<string, unknown>): Record<string, unknown> {
       : {};
   servers.resilireplay = {
     command: "npx",
-    args: ["--yes", "resilireplay@0.6.0", "mcp", "serve"],
+    args: ["--yes", "resilireplay@0.7.0", "mcp", "serve"],
   };
   return { ...original, mcpServers: servers };
 }
@@ -228,7 +228,7 @@ export async function planConnection(
           path,
           `${JSON.stringify(mergeMcp(parseObject(raw, path)), null, 2)}\n`,
           "Stage a local-first ResiliReplay MCP definition for reviewed Hermes import",
-          ["set mcpServers.resilireplay: command=npx; args=--yes,resilireplay@0.6.0,mcp,serve"],
+          ["set mcpServers.resilireplay: command=npx; args=--yes,resilireplay@0.7.0,mcp,serve"],
         ),
       );
     }
@@ -265,7 +265,7 @@ export async function planConnection(
           "Hooks observe results only; they never retry or inject failures.",
           ...(selected.includes("hermes")
             ? [
-                "Hermes does not auto-discover these repository files; after review run `hermes mcp add resilireplay --command npx --args --yes resilireplay@0.6.0 mcp serve`. ResiliReplay never edits the global Hermes profile.",
+                "Hermes does not auto-discover these repository files; after review run `hermes mcp add resilireplay --command npx --args --yes resilireplay@0.7.0 mcp serve`. ResiliReplay never edits the global Hermes profile.",
               ]
             : []),
         ];

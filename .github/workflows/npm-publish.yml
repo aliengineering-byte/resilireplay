@@ -3,33 +3,29 @@ name: Publish npm package
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      release_ref:
-        description: Existing v-prefixed release tag to publish
-        required: true
-        type: string
 
 permissions:
   contents: read
   id-token: write
 
 concurrency:
-  group: npm-${{ github.ref }}
+  group: npm-${{ github.event.release.tag_name }}
   cancel-in-progress: false
 
 jobs:
   publish:
     if: >-
       github.repository == 'aliengineering-byte/resilireplay' &&
-      (github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')))
+      startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     environment: npm
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
       - uses: pnpm/action-setup@v6
         with:
           version: 10.14.0
@@ -37,18 +33,56 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
-      - name: Verify release tag and package version
+          package-manager-cache: false
+      - name: Pin npm trusted-publishing client
+        run: npm install --global npm@11.9.0
+      - name: Record exact toolchain
+        run: |
+          node --version
+          npm --version
+          pnpm --version
+      - name: Verify annotated release tag, source, version, and npm absence
         shell: bash
         env:
-          RELEASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.release_ref || github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
+          test "$(git cat-file -t "refs/tags/${RELEASE_TAG}")" = "tag"
+          test "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")" = "$(git rev-parse HEAD)"
           package_version="$(node --print "require('./packages/cli/package.json').version")"
-          if [[ "v${package_version}" != "${RELEASE_REF}" ]]; then
-            echo "Tag ${RELEASE_REF} does not match resilireplay ${package_version}." >&2
+          test "v${package_version}" = "${RELEASE_TAG}"
+          if npm view "resilireplay@${package_version}" version >/dev/null 2>&1; then
+            echo "resilireplay@${package_version} already exists; refusing to republish." >&2
             exit 1
           fi
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality
-      - run: pnpm demo:studio
-      - name: Publish with npm Trusted Publishing
-        run: npm publish ./packages/cli --access public
+      - run: pnpm mcp:example:verify
+      - name: Pack and inspect the exact publication tarball
+        shell: bash
+        run: |
+          mkdir -p .artifacts/npm-release
+          npm pack ./packages/cli --pack-destination .artifacts/npm-release --json > .artifacts/npm-release/pack.json
+          node --input-type=module <<'NODE'
+          import { readFile } from "node:fs/promises";
+          const manifest = JSON.parse(await readFile(".artifacts/npm-release/pack.json", "utf8"));
+          const packed = manifest[0];
+          if (packed.name !== "resilireplay" || packed.version !== "0.7.0") throw new Error("Packed identity mismatch");
+          if (!packed.files.some((entry) => entry.path === "dist/resilireplay.js")) throw new Error("CLI bundle missing");
+          if (!packed.files.some((entry) => entry.path === "fixtures/demo-mcp-server.mjs")) throw new Error("Local MCP demo fixture missing");
+          if (packed.files.some((entry) => entry.path.includes("node_modules") || entry.path.startsWith("src/"))) {
+            throw new Error("Private build inputs entered the npm tarball");
+          }
+          NODE
+          sha256sum .artifacts/npm-release/resilireplay-0.7.0.tgz
+      - name: Publish through npm Trusted Publishing
+        run: npm publish .artifacts/npm-release/resilireplay-0.7.0.tgz --access public --provenance
+      - name: Verify the immutable public package
+        shell: bash
+        run: |
+          for attempt in {1..12}; do
+            if npm view resilireplay@0.7.0 version >/dev/null 2>&1; then break; fi
+            sleep 10
+          done
+          test "$(npm view resilireplay@0.7.0 version)" = "0.7.0"
+          test "$(npx --yes resilireplay@0.7.0 --version)" = "0.7.0"
+          npx --yes resilireplay@0.7.0 mcp demo --json

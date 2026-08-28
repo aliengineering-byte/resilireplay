@@ -9,7 +9,11 @@ const artifacts = join(root, ".artifacts", "package-smoke");
 const packageDirectory = join(root, "packages", "cli");
 const project = join(artifacts, "installed");
 const npmCandidates = [
+  ...(process.env.RESILIREPLAY_NPM_CLI_PATH
+    ? [resolve(process.env.RESILIREPLAY_NPM_CLI_PATH)]
+    : []),
   join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js"),
+  resolve(dirname(process.execPath), "..", "node_modules", "npm", "bin", "npm-cli.js"),
   resolve(dirname(process.execPath), "..", "lib", "node_modules", "npm", "bin", "npm-cli.js"),
 ];
 let npmCli;
@@ -132,6 +136,7 @@ const expectedFiles = [
   "README.md",
   "bin/resilireplay.mjs",
   "dist/resilireplay.js",
+  "fixtures/demo-mcp-server.mjs",
   "package.json",
   "portable-skill/SKILL.md",
   "portable-skill/agents/openai.yaml",
@@ -215,7 +220,7 @@ try {
 
 const demoProject = join(artifacts, "demo-empty");
 await mkdir(demoProject, { recursive: true });
-const demo = spawnSync(process.execPath, [cli, "demo", "--json", "--no-color"], {
+const demo = spawnSync(process.execPath, [cli, "mcp", "demo", "--json", "--no-color"], {
   cwd: demoProject,
   encoding: "utf8",
   windowsHide: true,
@@ -226,7 +231,12 @@ if (demo.status !== 0) {
 }
 const demoResult = JSON.parse(demo.stdout);
 if (
-  demoResult.status !== "passed" ||
+  demoResult.result !== "PASS" ||
+  demoResult.cleanControl !== "PASS" ||
+  demoResult.recoveryAttempts !== 1 ||
+  demoResult.duplicateEffects !== 0 ||
+  demoResult.regressionExecuted !== true ||
+  demoResult.cleanupComplete !== true ||
   demoResult.durationMs >= 30_000 ||
   demoResult.outputDirectory !== null ||
   (await readdir(demoProject)).length !== 0

@@ -25,6 +25,9 @@ jobs:
         node: [22, 24]
     steps:
       - uses: actions/checkout@v6
+        with:
+          # The required attribution audit compares every new commit with origin/main.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
         with:
           version: 10.14.0
@@ -43,6 +46,8 @@ jobs:
       - run: pnpm build
       - run: pnpm test
       - run: pnpm package:smoke
+      - name: Packed CLI and real MCP Everything verification
+        run: pnpm mcp:example:verify
       - name: Focused hardening controls
         run: >-
           pnpm exec vitest run

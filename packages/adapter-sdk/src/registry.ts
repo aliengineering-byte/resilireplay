@@ -73,7 +73,7 @@ const profiles = FrameworkSupportProfileSchema.array().parse([
     capabilities: ["OTLP trace/span ingestion", "neutral lifecycle and tool boundaries"],
     limitations: [
       "Only compatible public OTLP output is normalized.",
-      "No pinned AutoGen runtime execution is claimed in v0.6.0.",
+      "No pinned AutoGen runtime execution is claimed in v0.7.0.",
     ],
   },
   {
@@ -86,7 +86,7 @@ const profiles = FrameworkSupportProfileSchema.array().parse([
     evidenceClass: "DOCUMENTED_ONLY",
     integration: "callback-events",
     capabilities: ["documented callback/event mapping"],
-    limitations: ["No deterministic pinned CrewAI runtime fixture is included in v0.6.0."],
+    limitations: ["No deterministic pinned CrewAI runtime fixture is included in v0.7.0."],
   },
   {
     id: "llamaindex",
@@ -98,7 +98,7 @@ const profiles = FrameworkSupportProfileSchema.array().parse([
     evidenceClass: "DOCUMENTED_ONLY",
     integration: "callback-events",
     capabilities: ["documented callback/event mapping"],
-    limitations: ["No deterministic pinned LlamaIndex runtime fixture is included in v0.6.0."],
+    limitations: ["No deterministic pinned LlamaIndex runtime fixture is included in v0.7.0."],
   },
 ]);
 

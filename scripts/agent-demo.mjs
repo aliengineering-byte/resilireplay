@@ -85,16 +85,16 @@ await writeFile(
 );
 
 const transcript = [
-  "ResiliReplay v0.6.0 Everywhere — genuine local fixture demo",
-  "$ npx --yes resilireplay@0.6.0 capture start",
+  "ResiliReplay v0.7.0 Everywhere — genuine local fixture demo",
+  "$ npx --yes resilireplay@0.7.0 capture start",
   "Capture armed · project-local · bounded · no telemetry",
   '$ node -e "process.exit(7)"',
   `Controlled tool result: exit ${controlledExit}`,
-  "$ npx --yes resilireplay@0.6.0 capture last",
+  "$ npx --yes resilireplay@0.7.0 capture last",
   `Failure: ${evidence.toolName} · ${evidence.errorClass} · ${evidence.summary}`,
   `Evidence: ${evidence.evidenceId}`,
-  "$ npx --yes resilireplay@0.6.0 capture stop",
-  "$ npx --yes resilireplay@0.6.0 capture generate-test",
+  "$ npx --yes resilireplay@0.7.0 capture stop",
+  "$ npx --yes resilireplay@0.7.0 capture generate-test",
   generatedOutput
     .split(/\r?\n/u)
     .find((line) => line.startsWith("Generated and verified"))

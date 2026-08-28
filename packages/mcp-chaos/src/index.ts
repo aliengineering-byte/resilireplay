@@ -117,6 +117,11 @@ export interface McpAuditResult {
   sourceConfigSha256?: string;
   recovery: { attempted: boolean; succeeded: boolean };
   secretOutputDetected: boolean;
+  cleanup: {
+    clientClosed: boolean;
+    childProcessExited: boolean;
+    listenerCountsRestored: boolean;
+  };
 }
 
 export class McpConnectionError extends Error {
@@ -267,6 +272,20 @@ function exampleForSchema(schema: unknown): Record<string, unknown> {
       return [name, value];
     }),
   );
+}
+
+async function waitForChildExit(pid: number): Promise<boolean> {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    try {
+      process.kill(pid, 0);
+    } catch (error) {
+      return (error as NodeJS.ErrnoException).code === "ESRCH";
+    }
+    await new Promise<void>((resolveDelay) => {
+      setTimeout(resolveDelay, 10);
+    });
+  }
+  return false;
 }
 
 function inspectText(text: string, tool: string | undefined, findings: McpFinding[]): void {
@@ -496,6 +515,11 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
     { name: "resilireplay", version: PRODUCT_VERSION },
     { capabilities: {} },
   );
+  const observedSignals = ["SIGINT", "SIGTERM", "uncaughtException", "unhandledRejection"] as const;
+  const listenerBaseline = Object.fromEntries(
+    observedSignals.map((signal) => [signal, process.listenerCount(signal)]),
+  );
+  let completedResult: McpAuditResult | undefined;
   let secretOutputDetected = false;
   let recoveryAttempted = false;
   let recoveredFaultCount = 0;
@@ -721,7 +745,7 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       }),
     );
     const passed = passedBeforeMetrics && calculateMetrics(events, { retryBudget }).passed;
-    return {
+    completedResult = {
       target,
       transport: transportName,
       tools,
@@ -733,7 +757,13 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       ...(options.sourceConfigSha256 ? { sourceConfigSha256: options.sourceConfigSha256 } : {}),
       recovery: { attempted: recoveryAttempted, succeeded: recoverySucceeded },
       secretOutputDetected,
+      cleanup: {
+        clientClosed: false,
+        childProcessExited: transportName !== "stdio",
+        listenerCountsRestored: false,
+      },
     };
+    return completedResult;
   } catch (error) {
     if (
       error instanceof McpInspectorConfigError ||
@@ -747,7 +777,18 @@ export async function auditMcp(options: McpAuditOptions): Promise<McpAuditResult
       cause: error,
     });
   } finally {
+    const childPid = transport instanceof StdioClientTransport ? transport.pid : null;
     await client.close().catch(() => undefined);
+    const childProcessExited = childPid === null ? true : await waitForChildExit(childPid);
+    if (completedResult) {
+      completedResult.cleanup = {
+        clientClosed: true,
+        childProcessExited,
+        listenerCountsRestored: observedSignals.every(
+          (signal) => process.listenerCount(signal) === listenerBaseline[signal],
+        ),
+      };
+    }
   }
 }
 

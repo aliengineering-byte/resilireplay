@@ -276,7 +276,7 @@ export const CampaignRunSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-campaign-run"),
-    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0", "0.7.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     runId: z.string().min(1).max(128),
@@ -322,7 +322,7 @@ export const CampaignBaselineSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-baseline"),
-    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0", "0.7.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     approvedAt: z.string().datetime({ offset: true }),
@@ -352,7 +352,7 @@ export const CampaignComparisonSchema = z
   .object({
     schemaVersion: z.literal("1.0"),
     kind: z.literal("resilireplay-comparison"),
-    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0"]),
+    productVersion: z.enum(["0.3.0", "0.3.1", "0.4.0", "0.5.0", "0.6.0", "0.7.0"]),
     campaignId: CampaignIdentifierSchema,
     campaignHash: z.string().regex(SHA256),
     baselineHash: z.string().regex(SHA256),
