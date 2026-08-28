@@ -260,6 +260,37 @@ describe("MCP Inspector configuration integration", () => {
     expect(classifyInspectorPath("build/server.js", "win32")).toBe("relative");
   });
 
+  it("accepts a repository root reached through a directory link", async () => {
+    const container = await artifactDirectory("mcp-linked-root-");
+    const physicalRoot = join(container, "physical");
+    const linkedRoot = join(container, "linked");
+    await mkdir(physicalRoot);
+    await writeFile(
+      join(physicalRoot, "mcp.json"),
+      JSON.stringify({ mcpServers: { fixture: { command: "node" } } }),
+      "utf8",
+    );
+    try {
+      await symlink(physicalRoot, linkedRoot, process.platform === "win32" ? "junction" : "dir");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "EPERM") {
+        await rm(container, { recursive: true, force: true });
+        return;
+      }
+      throw error;
+    }
+    try {
+      const config = join(linkedRoot, "mcp.json");
+      const summary = await listInspectorServers(config, { allowedRoot: linkedRoot });
+      const imported = await loadInspectorConfig(config, { allowedRoot: linkedRoot });
+      expect(summary.serverNames).toEqual(["fixture"]);
+      expect(imported.serverName).toBe("fixture");
+      expect(imported.transport).toBe("stdio");
+    } finally {
+      await rm(container, { recursive: true, force: true });
+    }
+  });
+
   it("resolves declared environment references while keeping plans value-free", async () => {
     const secret = `sk-${"fixture".repeat(7)}`;
     const imported = await importFixture("stdio-environment.json", {
