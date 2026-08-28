@@ -1,6 +1,6 @@
 {
   "name": "@resilireplay/trace",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "license": "Apache-2.0",
   "main": "./dist/index.js",
@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@resilireplay/core": "workspace:*",
-    "yaml": "2.8.1"
+    "yaml": "2.8.3"
   }
 }

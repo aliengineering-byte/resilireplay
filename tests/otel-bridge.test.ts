@@ -14,7 +14,7 @@ const context = {
   framework: "test-framework",
   frameworkVersion: "1.0.0",
   adapter: "otel-bridge",
-  adapterVersion: "0.6.0",
+  adapterVersion: "0.7.0",
   runId: "bridge-run",
 };
 
@@ -24,7 +24,7 @@ const lineEvent = JSON.stringify({
   framework: "test-framework",
   frameworkVersion: "1.0.0",
   adapter: "otel-bridge",
-  adapterVersion: "0.6.0",
+  adapterVersion: "0.7.0",
   turnId: "turn-1",
   actorId: "agent-1",
   traceId: "trace-1",

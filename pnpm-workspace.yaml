@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - examples/*
+  - "!examples/mcp-reliability-ci"
 
 allowBuilds:
   esbuild: true

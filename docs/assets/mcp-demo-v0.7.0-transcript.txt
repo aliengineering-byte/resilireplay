@@ -1,0 +1,13 @@
+$ npx --yes resilireplay@latest mcp demo
+
+ResiliReplay MCP demo
+
+✓ Clean MCP tool call
+✓ Deterministic failure reproduced
+✓ Recovery bounded to one retry
+✓ Duplicate effects observed: 0
+✓ Regression generated
+✓ Regression executed
+
+MCP reliability check passed.
+Evidence: sha256:4d2479b98453732d6011c699c061d023353c8d5cf4159bdf6c5b096961f94c06

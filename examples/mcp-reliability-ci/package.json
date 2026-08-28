@@ -1,0 +1,13 @@
+{
+  "name": "resilireplay-mcp-reliability-ci-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@modelcontextprotocol/server-everything": "2026.8.18"
+  }
+}

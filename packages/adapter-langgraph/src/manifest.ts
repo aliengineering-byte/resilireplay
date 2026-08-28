@@ -8,7 +8,7 @@ import {
 
 export const LANGGRAPH_ADAPTER_ID = "langgraph" as const;
 export const LANGGRAPH_ADAPTER_NAME = "@resilireplay/adapter-langgraph" as const;
-export const LANGGRAPH_ADAPTER_VERSION = "0.6.0" as const;
+export const LANGGRAPH_ADAPTER_VERSION = "0.7.0" as const;
 export const LANGGRAPH_FRAMEWORK_VERSION = "1.4.9" as const;
 export const LANGGRAPH_FRAMEWORK_VERSION_RANGE = ">=1.4.9 <1.5.0" as const;
 

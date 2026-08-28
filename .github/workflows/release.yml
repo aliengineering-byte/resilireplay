@@ -25,6 +25,7 @@ jobs:
       - run: pnpm demo:mcp
       - run: pnpm demo:studio
       - run: pnpm release:gates
+      - run: pnpm mcp:example:verify
       - run: pnpm agent:gates
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e

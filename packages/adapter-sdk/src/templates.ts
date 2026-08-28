@@ -3,7 +3,7 @@ import { AdapterTemplateSchema, parseAdapterTemplate, type AdapterTemplate } fro
 
 const OWNER = {
   repository: "aliengineering-byte/resilireplay",
-  version: "0.6.0",
+  version: "0.7.0",
 } as const;
 
 const templates: readonly AdapterTemplate[] = [

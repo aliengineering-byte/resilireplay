@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { runAdopt } from "../packages/cli/src/adopt.js";
-import { runDemo } from "../packages/cli/src/demo.js";
+import { DemoResultSchema, runDemo } from "../packages/cli/src/demo.js";
 
 const cli = resolve("packages/cli/dist/bin.js");
 const temporaryDirectories: string[] = [];
@@ -74,36 +74,51 @@ describe("zero-configuration demo", () => {
   it("executes the source path directly for coverage and cleanup evidence", async () => {
     const directory = await project("demo-direct");
     const result = await runDemo({ rootDirectory: directory, seed: 42 });
-    expect(result.status).toBe("passed");
+    expect(DemoResultSchema.parse(result).result).toBe("PASS");
     expect(result.durationMs).toBeLessThan(30_000);
     expect(await readdir(directory)).toEqual([]);
   });
 
   it("runs from an empty directory, is fast, deterministic, and leaves no project files", async () => {
     const directory = await project("demo-empty");
-    const first = runSync(["demo", "--json", "--no-color"], directory);
-    const second = runSync(["demo", "--json", "--no-color"], directory);
+    const first = runSync(["mcp", "demo", "--json", "--no-color"], directory);
+    const second = runSync(["mcp", "demo", "--json", "--no-color"], directory);
     expect(first.status, first.stderr).toBe(0);
     expect(second.status, second.stderr).toBe(0);
     const firstResult = JSON.parse(first.stdout) as {
       durationMs: number;
       outputDirectory: null;
-      hashes: { canonicalEvidenceSha256: string };
+      evidenceSha256: string;
     };
     const secondResult = JSON.parse(second.stdout) as typeof firstResult;
     expect(firstResult.durationMs).toBeLessThan(30_000);
     expect(firstResult.outputDirectory).toBeNull();
-    expect(firstResult.hashes.canonicalEvidenceSha256).toBe(
-      secondResult.hashes.canonicalEvidenceSha256,
-    );
+    expect(firstResult.evidenceSha256).toBe(secondResult.evidenceSha256);
+    expect(Object.keys(firstResult)).toEqual([
+      "cleanControl",
+      "cleanupComplete",
+      "duplicateEffects",
+      "durationMs",
+      "evidenceSha256",
+      "faultObserved",
+      "nextCommand",
+      "outputDirectory",
+      "productVersion",
+      "recoveryAttempts",
+      "regressionExecuted",
+      "regressionGenerated",
+      "result",
+      "schemaVersion",
+      "seed",
+    ]);
     expect(await readdir(directory)).toEqual([]);
   });
 
   it("keeps genuine evidence and an executable regression only when --output is supplied", async () => {
     const directory = await project("demo-output");
-    const result = runSync(["demo", "--json", "--output", "evidence"], directory);
+    const result = runSync(["mcp", "demo", "--json", "--output", "evidence"], directory);
     expect(result.status, result.stderr).toBe(0);
-    expect(JSON.parse(result.stdout).status).toBe("passed");
+    expect(JSON.parse(result.stdout).result).toBe("PASS");
     const regression = runSync(["--version"], directory);
     expect(regression.status).toBe(0);
     const generated = spawnSync(
@@ -112,6 +127,31 @@ describe("zero-configuration demo", () => {
       { cwd: directory, encoding: "utf8", windowsHide: true },
     );
     expect(generated.status, `${generated.stdout}\n${generated.stderr}`).toBe(0);
+  });
+
+  it("publishes --keep output idempotently, with the bundle manifest last", async () => {
+    const directory = await project("demo-keep");
+    const first = runSync(["mcp", "demo", "--keep", "--json"], directory);
+    const second = runSync(["mcp", "demo", "--keep", "--json"], directory);
+    expect(first.status, first.stderr).toBe(0);
+    expect(second.status, second.stderr).toBe(0);
+    expect(JSON.parse(first.stdout).outputDirectory).toBe(".resilireplay/demo");
+    expect(await readdir(join(directory, ".resilireplay", "demo"))).toContain("manifest.json");
+  });
+
+  it("refuses mismatched persistent output without changing its manifest", async () => {
+    const directory = await project("demo-conflict");
+    expect(runSync(["mcp", "demo", "--output", "evidence", "--seed", "42"], directory).status).toBe(
+      0,
+    );
+    const before = await readFile(join(directory, "evidence", "manifest.json"), "utf8");
+    const conflict = runSync(
+      ["mcp", "demo", "--output", "evidence", "--seed", "43", "--json"],
+      directory,
+    );
+    expect(conflict.status).toBe(31);
+    expect(JSON.parse(conflict.stderr).error.message).toContain("mismatched");
+    expect(await readFile(join(directory, "evidence", "manifest.json"), "utf8")).toBe(before);
   });
 
   it("rejects a persistent output junction that escapes the project", async () => {
@@ -123,7 +163,7 @@ describe("zero-configuration demo", () => {
       if ((error as NodeJS.ErrnoException).code === "EPERM") return;
       throw error;
     }
-    const result = runSync(["demo", "--output", "evidence", "--json"], directory);
+    const result = runSync(["mcp", "demo", "--output", "evidence", "--json"], directory);
     expect(result.status).toBe(31);
     expect(JSON.parse(result.stderr).error.message).toContain("outside the current project");
     expect(await readdir(outside)).toEqual([]);
@@ -156,6 +196,67 @@ async function stdioProject(name: string): Promise<string> {
 }
 
 describe("five-minute adopt flow", () => {
+  it("dry-runs and executes mcp test through one reviewed plan", async () => {
+    const directory = await stdioProject("mcp-test");
+    const before = (await readdir(directory)).sort();
+    const dryRun = runSync(
+      [
+        "mcp",
+        "test",
+        "--config",
+        "mcp.json",
+        "--server",
+        "fixture",
+        "--tool",
+        "read_fixture",
+        "--safety",
+        "inert",
+        "--dry-run",
+        "--json",
+      ],
+      directory,
+    );
+    expect(dryRun.status, dryRun.stderr).toBe(0);
+    expect((await readdir(directory)).sort()).toEqual(before);
+    const plan = JSON.parse(dryRun.stdout) as { planSha256: string };
+    const execution = runSync(
+      [
+        "mcp",
+        "test",
+        "--config",
+        "mcp.json",
+        "--server",
+        "fixture",
+        "--tool",
+        "read_fixture",
+        "--safety",
+        "inert",
+        "--approve",
+        plan.planSha256,
+        "--json",
+      ],
+      directory,
+    );
+    expect(execution.status, execution.stderr).toBe(0);
+    const result = JSON.parse(execution.stdout) as {
+      result: string;
+      recoveryAttempts: number;
+      duplicateEffects: number;
+      regressionExecuted: boolean;
+      cleanupComplete: boolean;
+    };
+    expect(result).toMatchObject({
+      result: "PASS",
+      recoveryAttempts: 1,
+      duplicateEffects: 0,
+      regressionExecuted: true,
+      cleanupComplete: true,
+    });
+    expect(await readdir(join(directory, ".resilireplay", "mcp-test"))).toContain(
+      "clean-control.jsonl",
+    );
+  });
+
   it("executes a complete source-level adoption against the real stdio fixture", async () => {
     const directory = await stdioProject("adopt-direct");
     const result = await runAdopt({
@@ -304,7 +405,7 @@ describe("five-minute adopt flow", () => {
     expect(persisted).not.toContain("PRIVATE_TOOL_BODY_SHOULD_NOT_PERSIST");
     expect(persisted).not.toMatch(/[A-Z]:\\Users\\/iu);
     expect(persisted).toContain("evidenceMode: metadata-only");
-    expect(persisted).toContain("aliengineering-byte/resilireplay@v0.6.0");
+    expect(persisted).toContain("aliengineering-byte/resilireplay@v0.7.0");
     const regression = spawnSync(
       process.execPath,
       ["--test", join(directory, "tests", "resilireplay", "regression.test.mjs")],

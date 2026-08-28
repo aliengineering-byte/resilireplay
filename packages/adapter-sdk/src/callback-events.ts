@@ -100,7 +100,7 @@ export function normalizeDocumentedCallbackEvent(
     framework: parsedContext.framework,
     frameworkVersion: parsedContext.frameworkVersion,
     adapter: "@resilireplay/adapter-sdk/documented-callback",
-    adapterVersion: "0.6.0",
+    adapterVersion: "0.7.0",
     operation: parsedInput.eventName,
     boundary: boundary(kind),
     phase: phase(kind),

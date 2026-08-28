@@ -19,7 +19,7 @@ const autogen = parseOtlpJsonBridgeEvents({
     framework: "autogen",
     frameworkVersion: "documented-stable",
     adapter: "@resilireplay/otel-bridge/autogen",
-    adapterVersion: "0.6.0",
+    adapterVersion: "0.7.0",
     runId: "framework-demo",
   },
   raw: JSON.stringify({

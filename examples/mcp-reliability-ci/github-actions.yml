@@ -1,0 +1,24 @@
+name: MCP reliability
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  packed-mcp-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci
+        working-directory: examples/mcp-reliability-ci
+      - run: npm run build --if-present
+      - name: Verify the packed ResiliReplay CLI against MCP Everything
+        run: node scripts/verify-packed-mcp-example.mjs

@@ -9,11 +9,7 @@ const readme = await readFile(join(root, "README.md"), "utf8");
 const packageReadme = await readFile(join(root, "packages", "cli", "README.md"), "utf8");
 const adoptGuide = await readFile(join(docs, "ADOPT.md"), "utf8");
 const demoTranscript = await readFile(
-  join(docs, "assets", "everywhere-demo-transcript.txt"),
-  "utf8",
-);
-const mcpStandardTranscript = await readFile(
-  join(docs, "assets", "mcp-reliability-standard-demo-transcript.txt"),
+  join(docs, "assets", "mcp-demo-v0.7.0-transcript.txt"),
   "utf8",
 );
 
@@ -37,16 +33,17 @@ for (const [name, content] of [
   ["landing page", html],
 ]) {
   invariant(
-    content.includes("resilireplay@0.6.0 demo"),
-    `${name} must include the shipped v0.6.0 demo command`,
+    content.includes("resilireplay@latest mcp demo"),
+    `${name} must include the MCP-first public demo command`,
   );
   invariant(
-    content.includes("resilireplay@0.6.0 connect"),
-    `${name} must include the shipped v0.6.0 connect command`,
+    content.includes("resilireplay@latest mcp test"),
+    `${name} must include the reviewed real-server command`,
   );
   invariant(
-    content.includes("resilireplay@0.6.0 mcp serve"),
-    `${name} must include the shipped v0.6.0 MCP server command`,
+    content.indexOf("resilireplay@latest mcp demo") <
+      content.indexOf("resilireplay@latest mcp test"),
+    `${name} must present mcp demo before other public commands`,
   );
 }
 invariant(
@@ -54,30 +51,24 @@ invariant(
   "Historical v0.4 adoption guide lost its pinned command",
 );
 invariant(
-  html.includes("assets/everywhere-demo.gif"),
-  "Landing page must use the genuine demo GIF",
+  html.includes("assets/mcp-demo-v0.7.0.gif"),
+  "Landing page must use the packed-package MCP demo GIF",
 );
 invariant(
-  html.includes("assets/everywhere-demo.png"),
-  "Landing page must link the static demo fallback",
+  html.includes("assets/mcp-demo-v0.7.0.png"),
+  "Landing page must link the packed-package static fallback",
 );
 invariant(
-  html.includes("mcp-reliability/MCP_RELIABILITY_STANDARD.md") &&
-    html.includes("assets/mcp-reliability-standard-demo.gif") &&
-    html.includes("assets/mcp-reliability-standard-demo.png"),
-  "Landing page must publish the MCP standard and verified demo assets",
-);
-invariant(
-  readme.includes("docs/mcp-reliability/MCP_RELIABILITY_STANDARD.md") &&
-    readme.includes("docs/assets/mcp-reliability-standard-demo.gif"),
-  "README must make the MCP standard and verified demo prominent",
+  readme.includes("examples/mcp-reliability-ci/README.md") &&
+    readme.includes("@modelcontextprotocol/server-everything@2026.8.18"),
+  "README must link the pinned real MCP example",
 );
 invariant(
   html.includes('href="standards/mcp-res/"') &&
     readme.includes("docs/standards/mcp-res/README.md") &&
     readme.includes("MCP-RES is independent of the official MCP specification") &&
-    html.includes("does not imply MCP endorsement or security certification"),
-  "MCP-RES draft or required disclaimer is not prominent",
+    html.includes("independent of the official MCP specification"),
+  "MCP-RES v0.2 or its required disclaimer is missing",
 );
 const mcpResPagePath = join(docs, "standards", "mcp-res", "index.html");
 const mcpResPage = await readFile(mcpResPagePath, "utf8");
@@ -101,18 +92,20 @@ for (const phrase of [
   invariant(mcpResPage.includes(phrase), `MCP-RES page is missing: ${phrase}`);
 }
 invariant(
-  demoTranscript.includes("PASS 1 executable regression") &&
-    demoTranscript.includes("original command was not retried") &&
-    demoTranscript.includes("under-60s=true"),
-  "Genuine agent demo transcript is incomplete",
+  demoTranscript.includes("npx --yes resilireplay@latest mcp demo") &&
+    demoTranscript.includes("Duplicate effects observed: 0") &&
+    demoTranscript.includes("Regression executed") &&
+    !/[A-Z]:\\Users\\/u.test(demoTranscript),
+  "Packed-package MCP demo transcript is incomplete or unsanitized",
 );
+
+const readmeLines = readme.split(/\r?\n/u);
+invariant(readmeLines.length >= 200 && readmeLines.length <= 300, "README must be 200–300 lines");
 invariant(
-  mcpStandardTranscript.includes("Scenarios       3/3 matched expectations") &&
-    mcpStandardTranscript.includes("PASSED    canary-expected-failure") &&
-    mcpStandardTranscript.includes("INFO pass 1") &&
-    mcpStandardTranscript.includes("INFO fail 0") &&
-    !/[A-Z]:\\Users\\/u.test(mcpStandardTranscript),
-  "Verified MCP standard demo transcript is incomplete or unsanitized",
+  !/(?:^|\n)(?:#+\s+Architecture|.*framework matrix|git clone|pnpm install)/iu.test(
+    readmeLines.slice(0, 120).join("\n"),
+  ),
+  "README first 120 lines contain secondary architecture or maintainer onboarding",
 );
 
 const ids = new Set([...html.matchAll(/\bid="([^"]+)"/gu)].map((match) => match[1]));

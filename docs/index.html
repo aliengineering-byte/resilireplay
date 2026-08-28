@@ -3,28 +3,28 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ResiliReplay Everywhere — agent failure to regression</title>
+    <title>ResiliReplay — MCP failure recovery to regression</title>
     <meta
       name="description"
-      content="Turn a supported coding-agent tool failure into sanitized, deterministic, executable regression evidence."
+      content="Inject deterministic MCP failures, verify bounded recovery, and generate executable regression tests."
     />
     <meta name="theme-color" content="#10232a" />
     <meta name="color-scheme" content="light" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="ResiliReplay Everywhere — keep agent recovery fixed" />
+    <meta property="og:title" content="ResiliReplay — prove MCP recovery" />
     <meta
       property="og:description"
-      content="Passive local capture, causal evidence, and an executable regression for supported agent tool failures."
+      content="One local command tests a clean MCP call, deterministic failure, bounded recovery, duplicate effects, and an executable regression."
     />
     <meta
       property="og:image"
-      content="https://aliengineering-byte.github.io/resilireplay/assets/everywhere-demo.png"
+      content="https://aliengineering-byte.github.io/resilireplay/assets/mcp-demo-v0.7.0.png"
     />
     <meta property="og:url" content="https://aliengineering-byte.github.io/resilireplay/" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href="https://aliengineering-byte.github.io/resilireplay/" />
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="site.css?v=050everywhere" />
+    <link rel="stylesheet" href="site.css?v=070mcpfirst" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
@@ -37,11 +37,11 @@
         ><span class="brand-mark" aria-hidden="true">RR</span><span>ResiliReplay</span></a
       >
       <nav aria-label="Primary navigation">
-        <a href="#quick-start">Try it</a>
-        <a href="#mcp-standard">MCP standard</a>
-        <a href="#workflow">Workflow</a>
-        <a href="#compatibility">Compatibility</a>
-        <a href="#security">Safety</a>
+        <a href="#quick-start">Demo</a>
+        <a href="#test-server">Test a server</a>
+        <a href="#evidence">Evidence</a>
+        <a href="#safety">Safety</a>
+        <a href="#mcp-res">MCP-RES</a>
         <a href="https://github.com/aliengineering-byte/resilireplay">GitHub</a>
       </nav>
     </header>
@@ -49,291 +49,316 @@
     <main id="main">
       <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow">v0.6.0 · Everywhere · local-first</p>
-          <h1>Failed tool call.<br />Passing regression.</h1>
+          <p class="eyebrow">v0.7.0 · MCP first · local by default</p>
+          <h1>Break the MCP call.<br />Prove the recovery.</h1>
           <p class="hero-statement">
-            Turn a supported coding-agent tool failure into sanitized, deterministic, executable
-            regression evidence.
+            ResiliReplay injects deterministic MCP failures, verifies bounded recovery, and turns
+            failures into executable regression tests.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#quick-start">Try it in five minutes</a>
-            <a class="button secondary" href="#comparison">See the boundary</a>
+            <a class="button primary" href="#quick-start">Run the ten-second demo</a>
+            <a class="button secondary" href="#test-server">Test your server</a>
           </div>
           <ul class="trust-list" aria-label="Product boundaries">
-            <li>Capture off by default</li>
+            <li>No account or API key</li>
             <li>No telemetry</li>
-            <li>No hosted backend</li>
+            <li>No remote target in the demo</li>
           </ul>
         </div>
-        <aside class="signal-card" aria-label="Everywhere evidence">
+        <aside class="signal-card" aria-label="MCP reliability result">
           <div class="signal-topline">
-            <span>CAPTURE PATH</span><span class="status">VERIFIED</span>
+            <span>MCP RELIABILITY</span><span class="status">PASS</span>
           </div>
-          <p class="signal-number">1</p>
-          <p class="signal-label">failure → executable test</p>
+          <p class="signal-number">0</p>
+          <p class="signal-label">duplicate effects</p>
           <dl>
             <div>
-              <dt>Raw transcript</dt>
-              <dd>NO</dd>
+              <dt>Clean call</dt>
+              <dd>PASS</dd>
             </div>
             <div>
-              <dt>Automatic retry</dt>
-              <dd>NO</dd>
+              <dt>Injected fault</dt>
+              <dd>OBSERVED</dd>
             </div>
             <div>
-              <dt>Evidence hash</dt>
-              <dd>SHA-256</dd>
+              <dt>Recovery</dt>
+              <dd>1 RETRY</dd>
             </div>
             <div>
               <dt>Regression</dt>
               <dd>PASS</dd>
             </div>
           </dl>
-          <p class="signal-footnote">Reliability evidence, not a security certification.</p>
+          <p class="signal-footnote">Exact-scope evidence, not a security certification.</p>
         </aside>
       </section>
 
       <section class="quick-start band" id="quick-start">
         <div>
-          <p class="eyebrow">Three entry points</p>
-          <h2>Demo. Connect. Serve.</h2>
-          <p>Node.js 22 or 24. Previewing writes nothing and starts no process.</p>
+          <p class="eyebrow">Ten-second local workflow</p>
+          <h2>One command. One result.</h2>
+          <p>Node.js 22 or 24. No checkout, pnpm, config, account, credential, or paid model.</p>
         </div>
         <div class="code-wrap">
-          <pre tabindex="0"><code id="install-command">npx --yes resilireplay@0.6.0 demo
-npx --yes resilireplay@0.6.0 connect --agent auto --dry-run
-npx --yes resilireplay@0.6.0 mcp serve</code></pre>
-          <button class="copy-button" type="button" data-copy="install-command">Copy</button>
+          <pre
+            tabindex="0"
+          ><code id="demo-command">npx --yes resilireplay@latest mcp demo</code></pre>
+          <button class="copy-button" type="button" data-copy="demo-command">Copy</button>
         </div>
         <div class="quick-links">
-          <a href="https://github.com/aliengineering-byte/resilireplay/blob/main/docs/PLUGINS.md"
-            >Plugin guide →</a
-          ><a href="https://www.npmjs.com/package/resilireplay/v/0.6.0">npm package →</a>
+          <a href="https://www.npmjs.com/package/resilireplay">npm package →</a>
+          <a href="https://github.com/aliengineering-byte/resilireplay#artifact-behavior"
+            >artifact behavior →</a
+          >
         </div>
       </section>
 
-      <section class="demo section" id="mcp-standard">
+      <section class="demo section" id="evidence">
         <div class="section-heading">
-          <p class="eyebrow">Project-defined open draft · MCP-RES v0.1.0</p>
-          <h2>Portable evidence for an MCP reliability claim.</h2>
+          <p class="eyebrow">Exact packed-package output</p>
+          <h2>Clean call → fault → one retry → regression pass.</h2>
           <p>
-            Pin the target and authority. Run a clean control, deterministic fault, bounded
-            recovery, and expected failure. Bind the result to hashes, execute the causal
-            regression, and verify cleanup. MCP-RES is independent of the official MCP specification
-            and does not imply MCP endorsement or security certification.
+            The bundled fixture contacts no network target. Temporary state is removed after the
+            generated regression executes; only the final SHA-256 evidence identity is printed.
           </p>
         </div>
         <figure class="demo-frame">
           <img
-            src="assets/mcp-reliability-standard-demo.gif"
-            alt="Verified public ResiliReplay 0.6.0 terminal run showing a clean MCP control, one recovered tool error, one expected failure, and a passing generated causal regression"
+            src="assets/mcp-demo-v0.7.0.gif"
+            alt="ResiliReplay MCP demo showing a clean call, deterministic failure, one recovery retry, zero duplicate effects, and a passing generated regression"
             width="1200"
             height="760"
           />
           <figcaption>
-            Real public-package output ·
-            <a href="assets/mcp-reliability-standard-demo.png">static PNG</a> ·
-            <a href="assets/mcp-reliability-standard-demo-transcript.txt">transcript</a> ·
-            <a href="standards/mcp-res/">MCP-RES draft</a> ·
-            <a href="mcp-reliability/MCP_RELIABILITY_STANDARD.md">ResiliReplay profile</a> ·
-            <a href="mcp-reliability/FIVE_MINUTE_MCP_TEST.md">five-minute test</a>
+            Generated from the exact packed package ·
+            <a href="assets/mcp-demo-v0.7.0.png">static PNG</a> ·
+            <a href="assets/mcp-demo-v0.7.0-transcript.txt">terminal transcript</a>
           </figcaption>
         </figure>
       </section>
 
-      <section class="demo section" id="demo">
+      <section class="section contrast" id="before-after">
         <div class="section-heading">
-          <p class="eyebrow">Genuine local fixture output</p>
-          <h2>Arm. Fail safely. Preserve. Regress.</h2>
+          <p class="eyebrow">Before and after</p>
+          <h2>Replace recovery guesses with executable evidence.</h2>
+        </div>
+        <div class="case-grid">
+          <article class="accent-card">
+            <p class="step-number">BEFORE</p>
+            <h3>The happy path works.</h3>
+            <p>Clean tool call ✓</p>
+            <p>Recovery behavior ?</p>
+            <p>Duplicate effects ?</p>
+            <p>Regression missing</p>
+          </article>
+          <article class="accent-card">
+            <p class="step-number">AFTER RESILIREPLAY</p>
+            <h3>The failure path is reviewable.</h3>
+            <p>Deterministic failure ✓</p>
+            <p>Recovery bounded ✓</p>
+            <p>Duplicate effects 0</p>
+            <p>Regression executed ✓</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="what-it-does">
+        <div class="section-heading">
+          <p class="eyebrow">Three jobs</p>
+          <h2>Focused MCP reliability testing.</h2>
+        </div>
+        <div class="case-grid">
+          <article class="accent-card">
+            <p class="step-number">01</p>
+            <h3>Inject</h3>
+            <p>Reproduce a declared MCP fault deterministically at a reviewable boundary.</p>
+          </article>
+          <article class="accent-card">
+            <p class="step-number">02</p>
+            <h3>Verify</h3>
+            <p>Bound recovery and record duplicate-effect behavior under the approved policy.</p>
+          </article>
+          <article class="accent-card">
+            <p class="step-number">03</p>
+            <h3>Regress</h3>
+            <p>Compile causal failure evidence into an executable test and run it in isolation.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="quick-start band" id="test-server">
+        <div>
+          <p class="eyebrow">Your reviewed MCP server</p>
+          <h2>Plan first. Execute the exact digest.</h2>
           <p>
-            A real Node command exits 7, the passive Codex-shaped hook becomes bounded process-exit
-            evidence, capture stops, and the generated Node regression passes. The original command
-            is never retried.
+            Dry-run starts nothing and writes nothing. It prints the selected transport, tool,
+            fault, retry/time bounds, and SHA-256 approval identity.
           </p>
         </div>
-        <figure class="demo-frame">
-          <img
-            src="assets/everywhere-demo.gif"
-            alt="Terminal demo showing passive capture arm, a safe Node exit 7, sanitized process-exit evidence, capture stop, and a passing generated regression"
-            width="1240"
-            height="720"
-          />
-          <figcaption>
-            Real v0.6.0 release-candidate output ·
-            <a href="assets/everywhere-demo.png">static PNG</a> ·
-            <a href="assets/everywhere-demo-transcript.txt">transcript</a>
-          </figcaption>
-        </figure>
+        <div class="code-wrap">
+          <pre
+            tabindex="0"
+          ><code id="test-command">npx --yes resilireplay@latest mcp test --config ./mcp.json --server my-server --tool echo --safety inert --dry-run</code></pre>
+          <button class="copy-button" type="button" data-copy="test-command">Copy</button>
+        </div>
+        <div class="quick-links">
+          <a href="MCP_INSPECTOR.md">configuration guide →</a>
+          <a
+            href="https://github.com/aliengineering-byte/resilireplay/tree/main/examples/mcp-reliability-ci"
+            >real CI example →</a
+          >
+        </div>
       </section>
 
-      <section class="section contrast" id="comparison">
+      <section class="section contrast" id="real-server">
         <div class="section-heading">
-          <p class="eyebrow">Different jobs</p>
-          <h2>Reliability evidence has a narrow purpose.</h2>
+          <p class="eyebrow">Real public MCP subject</p>
+          <h2>Official Everything server. Packed ResiliReplay client.</h2>
+          <p>
+            Cross-platform CI installs `@modelcontextprotocol/server-everything@2026.8.18` and the
+            packed CLI in a clean npm project. A real SDK 1.30.0 client discovers and invokes inert
+            `echo` over local stdio, injects `mcp-tool-error`, retries once, generates the
+            regression, verifies cleanup, and scans evidence for credentials and private paths.
+          </p>
         </div>
         <div class="case-grid">
           <article class="accent-card">
-            <p class="step-number">MCP INSPECTOR</p>
-            <h3>Explore and debug</h3>
-            <p>Inspect server capabilities, schemas, and behavior interactively.</p>
+            <h3>Pinned</h3>
+            <p>Exact version, npm integrity, SDK runtime, protocol revision, and operation.</p>
           </article>
           <article class="accent-card">
-            <p class="step-number">EVAL / OBSERVABILITY</p>
-            <h3>Measure outputs</h3>
-            <p>Evaluate quality, safety properties, traces, or model behavior.</p>
-          </article>
-          <article class="accent-card">
-            <p class="step-number">RESILIREPLAY</p>
-            <h3>Keep recovery fixed</h3>
+            <h3>Bounded</h3>
             <p>
-              Preserve a bounded failure boundary and execute its deterministic regression in CI.
+              One inert operation, one deterministic fault, one approved retry, finite timeouts.
             </p>
           </article>
+          <article class="accent-card">
+            <h3>Honest</h3>
+            <p>Product-owned validation, not an independent adopter or vendor endorsement.</p>
+          </article>
         </div>
-        <p class="disclaimer">
-          Functions overlap at the edges. Compatibility names are factual and imply no endorsement.
-        </p>
       </section>
 
-      <section class="section" id="workflow">
+      <section class="section" id="support">
         <div class="section-heading">
-          <p class="eyebrow">Five-minute path</p>
-          <h2>From agent failure to reviewable evidence.</h2>
+          <p class="eyebrow">MCP-only support</p>
+          <h2>Evidence labels describe the boundary.</h2>
         </div>
-        <ol class="workflow-list">
-          <li>
-            <span>01</span>
-            <div>
-              <h3>Preview connection</h3>
-              <p>
-                <code>resilireplay connect --agent codex --dry-run</code> shows file operations and
-                hashes with no writes.
-              </p>
-            </div>
-          </li>
-          <li>
-            <span>02</span>
-            <div>
-              <h3>Install, still inert</h3>
-              <p>Confirm the smallest config merge and recoverable backup. Capture remains off.</p>
-            </div>
-          </li>
-          <li>
-            <span>03</span>
-            <div>
-              <h3>Arm passive capture</h3>
-              <p>
-                <code>resilireplay capture start</code> enables bounded metadata-only observation
-                for this repository.
-              </p>
-            </div>
-          </li>
-          <li>
-            <span>04</span>
-            <div>
-              <h3>Reproduce safely</h3>
-              <p>
-                The agent emits a stable result hook. No retry, fault injection, transcript
-                scraping, or permission expansion occurs.
-              </p>
-            </div>
-          </li>
-          <li>
-            <span>05</span>
-            <div>
-              <h3>Generate and run</h3>
-              <p>
-                Inspect the evidence ID, stop capture, then generate an exclusive-create executable
-                regression.
-              </p>
-            </div>
-          </li>
-        </ol>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="MCP support table">
+          <table>
+            <thead>
+              <tr>
+                <th>Surface</th>
+                <th>Evidence</th>
+                <th>Boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bundled fixture</td>
+                <td>Fixture verified</td>
+                <td>Local, deterministic, zero network</td>
+              </tr>
+              <tr>
+                <td>Inspector stdio</td>
+                <td>Live verified</td>
+                <td>Real SDK process, reviewed tool, bounded recovery</td>
+              </tr>
+              <tr>
+                <td>Streamable HTTP</td>
+                <td>Live verified</td>
+                <td>Authenticated loopback fixture; explicit remote ownership</td>
+              </tr>
+              <tr>
+                <td>SSE</td>
+                <td>Protocol verified</td>
+                <td>Supported SDK transport and config import</td>
+              </tr>
+              <tr>
+                <td>Everything 2026.8.18</td>
+                <td>Install + live verified</td>
+                <td>Pinned local stdio, inert echo, packed CLI</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      <section class="section contrast" id="compatibility">
+      <section class="section contrast" id="mcp-res">
         <div class="section-heading">
-          <p class="eyebrow">Honest compatibility</p>
-          <h2>Evidence level, not logo count.</h2>
+          <p class="eyebrow">Supporting credibility · MCP-RES v0.2</p>
+          <h2>Portable reliability evidence, independent of one tool.</h2>
+          <p>
+            MCP-RES is the project-defined open evidence standard behind the result vocabulary.
+            ResiliReplay is a reference implementation, not a required dependency. MCP-RES is
+            independent of the official MCP specification and is not an official MCP standard,
+            security certification, or endorsement.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <a class="button primary" href="standards/mcp-res/">Open the standards site</a>
+          <a class="button secondary light" href="standards/mcp-res/v0.2.0/MCP_RES.md">Read v0.2</a>
+        </div>
+      </section>
+
+      <section class="section" id="safety">
+        <div class="section-heading">
+          <p class="eyebrow">Safety and scope</p>
+          <h2>Keep the target, effects, and evidence reviewable.</h2>
         </div>
         <div class="case-grid">
           <article class="accent-card">
-            <p class="step-number">CLAUDE CODE</p>
-            <h3>Install + fixture verified</h3>
-            <p>
-              Official validation, isolated marketplace install, installed stable-hook capture,
-              passing regression.
-            </p>
+            <h3>Explicit authority</h3>
+            <p>One selected config entry, one allowlisted tool, and an exact plan digest.</p>
           </article>
           <article class="accent-card">
-            <p class="step-number">CODEX</p>
-            <h3>Install + fixture verified</h3>
-            <p>
-              Isolated repo marketplace install, documented result classification, passing
-              regression.
-            </p>
-          </article>
-          <article class="accent-card">
-            <p class="step-number">HERMES</p>
-            <h3>Installation verified</h3>
-            <p>
-              Portable skill discovered and nine stdio MCP tools connected; no model flow claimed.
-            </p>
-          </article>
-        </div>
-        <p class="disclaimer">
-          <a href="COMPATIBILITY.md">Read the complete matrix</a>, including documented-only and
-          unsupported surfaces.
-        </p>
-      </section>
-
-      <section class="section" id="security">
-        <div class="section-heading">
-          <p class="eyebrow">Safety boundary</p>
-          <h2>Capture less. Prove exactly what remains.</h2>
-        </div>
-        <div class="case-grid">
-          <article class="accent-card">
-            <h3>Private by default</h3>
-            <p>
-              No raw prompts, transcripts, tokens, environment values, unrestricted bodies, personal
-              paths, telemetry, or uploads.
-            </p>
-          </article>
-          <article class="accent-card">
-            <h3>Bounded and recoverable</h3>
-            <p>
-              20,000 events, 32 KiB each, locked writers, exact dedupe, atomic state,
-              interrupted-tail repair, and config rollback.
-            </p>
+            <h3>Metadata-only persistence</h3>
+            <p>Tool bodies and arguments become bounded hashes before artifacts are written.</p>
           </article>
           <article class="accent-card">
             <h3>Fail closed</h3>
             <p>
-              Exact evidence/campaign hashes gate writes and execution. Hooks never retry or inject
-              failure.
+              Path escape, mismatched overwrite, missing approval, secrets, and exhausted bounds
+              fail.
             </p>
           </article>
         </div>
         <p class="disclaimer">
-          Commands run with your OS authority and are not sandboxed.
+          ResiliReplay is not a sandbox or authorization layer. Commands run with your OS authority.
           <a href="https://github.com/aliengineering-byte/resilireplay/blob/main/SECURITY.md"
             >Security policy</a
           >
           · <a href="LIMITATIONS.md">limitations</a>
         </p>
       </section>
+
+      <section class="section contrast" id="secondary">
+        <div class="section-heading">
+          <p class="eyebrow">Secondary workflow</p>
+          <h2>Agent-runtime capture remains available.</h2>
+          <p>
+            Genuine local/no-key evidence exists for LangGraph and OpenAI Agents SDK. Claude Code
+            and Codex are installation- and fixture-verified; Hermes is installation-verified.
+            Authenticated hosted models, billed calls, production APIs, and vendor endorsement are
+            not claimed.
+          </p>
+        </div>
+        <div class="quick-links">
+          <a href="FRAMEWORKS.md">framework evidence →</a>
+          <a href="PLUGINS.md">plugin boundaries →</a>
+          <a href="COMPATIBILITY.md">complete labels →</a>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
-      <p>Apache-2.0 · local-first · no telemetry · built by Ali</p>
+      <p>Apache-2.0 · local-first · no telemetry · maintained by Ali</p>
       <p>
         <a href="https://github.com/aliengineering-byte/resilireplay">Source</a> ·
-        <a href="https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.6.0"
+        <a href="https://github.com/aliengineering-byte/resilireplay/releases/tag/v0.7.0"
           >Release</a
         >
-        · <a href="ECOSYSTEM.md">Ecosystem</a> · <a href="PRIVACY.md">Privacy</a> ·
-        <a href="TERMS.md">Terms</a>
+        · <a href="PRIVACY.md">Privacy</a> · <a href="TERMS.md">Terms</a>
       </p>
     </footer>
     <p class="copy-status" role="status" aria-live="polite"></p>

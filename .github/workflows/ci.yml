@@ -43,6 +43,8 @@ jobs:
       - run: pnpm build
       - run: pnpm test
       - run: pnpm package:smoke
+      - name: Packed CLI and real MCP Everything verification
+        run: pnpm mcp:example:verify
       - name: Focused hardening controls
         run: >-
           pnpm exec vitest run

@@ -96,8 +96,6 @@ workflow remains far under the 60-second gate.
   Streamable HTTP.
 - Trace input is capped at 100,000 events and 32 MiB. Studio sessions expire after 15 minutes or
   immediately on shutdown.
-- DeepSeek's read-only architecture/security hypotheses and independent dispositions are retained in
-  [`docs/HYBRID_EXECUTION_REPORT.md`](docs/HYBRID_EXECUTION_REPORT.md).
 
 ## Release/publication policy
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.6.0/schemas/campaign.schema.json",
+  "$id": "https://github.com/aliengineering-byte/resilireplay/blob/v0.7.0/schemas/campaign.schema.json",
   "title": "ResiliReplay Campaign 1.0",
   "type": "object",
   "additionalProperties": false,

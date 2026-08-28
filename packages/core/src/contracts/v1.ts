@@ -398,7 +398,7 @@ export function migrateLegacyEvent(event: LegacyTraceEvent): EventEnvelopeV1 {
     framework: "resilireplay-legacy",
     frameworkVersion: "1.0.0",
     adapter: "legacy-migrator",
-    adapterVersion: "0.6.0",
+    adapterVersion: "0.7.0",
     operation,
     boundary,
     phase,

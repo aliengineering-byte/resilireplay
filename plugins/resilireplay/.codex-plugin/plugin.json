@@ -1,6 +1,6 @@
 {
   "name": "resilireplay",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Turn supported coding-agent tool failures into sanitized, deterministic regression evidence.",
   "author": {
     "name": "Ali",

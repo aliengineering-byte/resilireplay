@@ -2,6 +2,37 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.7.0] - 2026-08-28
+
+### Added
+
+- MCP-first `mcp demo`, `mcp test`, and `mcp validate` workflows with stable JSON evidence,
+  reviewed plan digests, bounded retries, duplicate-effect counts, and generated regressions.
+- Standalone packed-package CI against the pinned official MCP Everything server, including clean
+  installation, real stdio discovery/call, deterministic failure, cleanup, and privacy checks.
+- Packed-package terminal transcript, accessible static image, and animated product demo.
+
+### Changed
+
+- README, website, CLI help, npm metadata, and repository positioning now lead with MCP reliability.
+- MCP evidence persistence removes tool arguments and result bodies before reports are written.
+- Dependabot runs monthly with one grouped patch/minor PR per ecosystem.
+- npm release publishing verifies an annotated tag and exact tarball before OIDC trusted publishing.
+
+### Compatibility
+
+- `mcp audit`, campaigns, replay, reports, Studio, agent capture, adapters, and the hidden root
+  `demo` alias remain available. MCP-RES v0.1 and v0.2 normative trees are unchanged.
+
+### Security
+
+- Persistent demo output is contained, idempotent for byte-identical bundles, conflict-safe for
+  mismatches, and completion-manifest-last.
+- Real MCP execution requires one explicit tool, a safety classification, finite bounds, and the
+  exact SHA-256 of the reviewed dry-run plan.
+- Current registry advisories are resolved with patch-only Vitest, YAML, and transitive dependency
+  updates; the published CLI API and supported runtime range are unchanged.
+
 ## [0.6.0] - 2026-08-07
 
 ### Added
