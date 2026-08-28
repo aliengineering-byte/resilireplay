@@ -1,5 +1,5 @@
 {
-  "name": "@resilireplay-smoke/resilireplay-monorepo",
+  "name": "resilireplay-monorepo",
   "version": "0.7.0",
   "private": true,
   "type": "module",
@@ -98,11 +98,5 @@
     "resilireplay": "workspace:*",
     "typescript": "5.8.3",
     "vitest": "3.2.6"
-  },
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "example": "examples",
-    "test": "tests"
   }
 }
