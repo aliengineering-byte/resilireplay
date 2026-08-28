@@ -6,9 +6,23 @@ import { dirname, join, resolve } from "node:path";
 
 async function npmInvocation(args) {
   if (process.platform !== "win32") return { command: "npm", args };
-  const npmCli = join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js");
-  await access(npmCli);
-  return { command: process.execPath, args: [npmCli, ...args] };
+  const executableDirectory = dirname(process.execPath);
+  const candidates = [
+    ...(process.env.RESILIREPLAY_NPM_CLI_PATH
+      ? [resolve(process.env.RESILIREPLAY_NPM_CLI_PATH)]
+      : []),
+    join(executableDirectory, "node_modules", "npm", "bin", "npm-cli.js"),
+    join(dirname(executableDirectory), "node_modules", "npm", "bin", "npm-cli.js"),
+  ];
+  for (const npmCli of candidates) {
+    try {
+      await access(npmCli);
+      return { command: process.execPath, args: [npmCli, ...args] };
+    } catch {
+      // Try the next supported Node installation layout.
+    }
+  }
+  throw new Error("npm CLI was not found next to the active Node.js runtime");
 }
 
 function run(command, args, cwd, timeoutMs = 60_000) {

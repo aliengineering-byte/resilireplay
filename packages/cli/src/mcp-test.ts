@@ -1,3 +1,4 @@
+import { realpath } from "node:fs/promises";
 import { join, relative } from "node:path";
 import {
   calculateMetrics,
@@ -101,10 +102,16 @@ function relativeOutput(root: string, output: string): string {
   return relative(root, output).replaceAll("\\", "/") || ".";
 }
 
-async function importedPlan(
-  options: McpTestOptions,
-): Promise<{ imported: ImportedInspectorServer; output: string; plan: McpTestPlan }> {
-  const root = options.rootDirectory ?? process.cwd();
+async function importedPlan(options: McpTestOptions): Promise<{
+  imported: ImportedInspectorServer;
+  output: string;
+  plan: McpTestPlan;
+  root: string;
+}> {
+  // Windows runners can expose the working directory through a junction (for
+  // example, a TEMP alias). Use the physical project root consistently so a
+  // legitimate in-project config is not mistaken for a link escape.
+  const root = await realpath(options.rootDirectory ?? process.cwd());
   validateTool(options.tool);
   const retries = checkedInteger(options.retries, 1, "--retries");
   if (retries > 10) {
@@ -145,6 +152,7 @@ async function importedPlan(
     imported,
     output,
     plan: { ...unsigned, planSha256: sha256(stableStringify(unsigned)) },
+    root,
   };
 }
 
@@ -178,8 +186,7 @@ export function mcpTestPlanReport(plan: McpTestPlan, config: string): string {
 }
 
 export async function runMcpTest(options: McpTestOptions): Promise<McpTestPlan | McpTestResult> {
-  const root = options.rootDirectory ?? process.cwd();
-  const { imported, output, plan } = await importedPlan(options);
+  const { imported, output, plan, root } = await importedPlan(options);
   if (options.dryRun) return plan;
   const tool = options.tool;
   if (!tool) {

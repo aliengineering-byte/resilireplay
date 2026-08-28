@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          # pnpm quality includes a fail-closed new-commit attribution audit.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v6
         with:
           version: 10.14.0

@@ -9,7 +9,11 @@ const artifacts = join(root, ".artifacts", "package-smoke");
 const packageDirectory = join(root, "packages", "cli");
 const project = join(artifacts, "installed");
 const npmCandidates = [
+  ...(process.env.RESILIREPLAY_NPM_CLI_PATH
+    ? [resolve(process.env.RESILIREPLAY_NPM_CLI_PATH)]
+    : []),
   join(dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js"),
+  resolve(dirname(process.execPath), "..", "node_modules", "npm", "bin", "npm-cli.js"),
   resolve(dirname(process.execPath), "..", "lib", "node_modules", "npm", "bin", "npm-cli.js"),
 ];
 let npmCli;
