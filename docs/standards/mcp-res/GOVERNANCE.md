@@ -8,6 +8,8 @@ The standard uses semantic versioning. Before 1.0, a minor version MAY make a sc
 
 Profiles progress `EXPERIMENTAL` → `PROVISIONAL` → `NORMATIVE`. Promotion requires executable positive evidence, at least one expected-failure control, integrity mutation coverage, privacy review, cleanup coverage, and an explicit limitations section. Deprecation requires a replacement or rationale, one minor-version notice period after 1.0, and retained validation guidance for historical evidence.
 
+The machine-readable profile registry, promotion history, mutation guard, deprecation process, and errata boundary are defined in [PROFILE_LIFECYCLE.md](PROFILE_LIFECYCLE.md). The [licensing/IPR statement](LICENSE.md) describes the Apache-2.0 boundary without inventing additional legal protections.
+
 ## Changes
 
 Anyone may propose a change through a repository issue, GitHub Discussion, and pull request. Substantive changes require:
@@ -21,6 +23,8 @@ Anyone may propose a change through a repository issue, GitHub Discussion, and p
 - maintainer review and a recorded disposition of material objections.
 
 Maintainers SHOULD prefer the smallest implementation-neutral rule supported by executable evidence. Vendor-specific behavior belongs in a profile or adapter, not the core.
+
+The repository uses documented squash merges for standards PRs. Protected-branch and tag rules are audited by ruleset ID; administrator bypass, if platform policy permits it, remains a residual risk and never counts as independent review.
 
 ## Security and conduct
 

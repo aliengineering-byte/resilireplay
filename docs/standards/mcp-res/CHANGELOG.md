@@ -6,6 +6,7 @@
 - PR 2 ([#51](https://github.com/aliengineering-byte/resilireplay/pull/51)): separated integrity/authenticity/trust, added offline Ed25519 DSSE/in-toto-informed attestations, reproducible SBOM/provenance packaging, a dependency-free Python validator, and deterministic non-promoting v0.1 migration.
 - PR 3 ([#52](https://github.com/aliengineering-byte/resilireplay/pull/52)): added inert official-conformance attachments, six provisional protocol/async/transport/cache/extension profiles, reason-bound profile evaluation in JavaScript and Python, and an eight-row-per-leg TypeScript/Python × revision × local-transport field matrix.
 - PR 4 ([#53](https://github.com/aliengineering-byte/resilireplay/pull/53)): added a provisional OAuth boundary profile, a synthetic loopback authorization-code fixture, reason-bound resource/audience/PKCE/discovery/redirect/mix-up/CIMD/token/SSRF checks, and separately pinned experimental future-identity profiles.
+- PR 5: added the provisional operational profile and 18-fault taxonomy, bounded runtime workload evidence, a four-subject Windows/Linux field corpus, inert-reader safety limits, a machine profile registry, implementer/governance material, and scheduled source-drift observation.
 - Preserved the v0.1.0 normative tree and digest semantics unchanged.
 
 ## 0.1.0 — 2026-08-27

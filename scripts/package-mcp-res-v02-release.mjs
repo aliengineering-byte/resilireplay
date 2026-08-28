@@ -74,12 +74,80 @@ const attachments = new Map([
   ],
   ["mcp-res-v0.2.0-test-vectors.json", await aggregate(join(versionRoot, "test-vectors"))],
   ["mcp-res-v0.2.0-conformance-kit.json", await aggregate(join(versionRoot, "conformance-kit"))],
+  [
+    "mcp-res-v0.2.0-javascript-validator.json",
+    await aggregate(
+      join(versionRoot, "conformance-kit"),
+      (path) => !path.includes(`${sep}python${sep}`),
+    ),
+  ],
   ["mcp-res-v0.2.0-profiles.json", await aggregate(join(versionRoot, "profiles"))],
+  [
+    "mcp-res-v0.2.0-profile-registry.json",
+    await readFile(join(versionRoot, "PROFILE_REGISTRY.json"), "utf8"),
+  ],
+  [
+    "mcp-res-v0.2.0-fault-taxonomy.json",
+    await readFile(join(versionRoot, "FAULT_TAXONOMY.json"), "utf8"),
+  ],
   [
     "mcp-res-v0.2.0-official-conformance-fixtures.json",
     await aggregate(join(versionRoot, "official-conformance")),
   ],
   ["mcp-res-v0.2.0-field-fixtures.json", await aggregate(join(versionRoot, "field-fixtures"))],
+  ["mcp-res-v0.2.0-field-evidence.json", await aggregate(join(versionRoot, "field-evidence"))],
+  [
+    "mcp-res-v0.2.0-migration-corpus.json",
+    await aggregate(join(root, ".artifacts", "mcp-res-v02", "migration-corpus")),
+  ],
+  [
+    "mcp-res-v0.2.0-attestation-corpus.json",
+    await aggregate(join(root, ".artifacts", "mcp-res-v02", "attestation-corpus")),
+  ],
+  [
+    "mcp-res-v0.2.0-runtime-profile-corpus.json",
+    await aggregate(join(root, ".artifacts", "mcp-res-v02", "profile-corpus")),
+  ],
+  [
+    "mcp-res-v0.2.0-canonicalization-corpus.json",
+    await aggregate(join(root, ".artifacts", "mcp-res-v02", "python-edge-corpus")),
+  ],
+  [
+    "mcp-res-v0.2.0-authorization-corpus.json",
+    await aggregate(join(root, ".artifacts", "mcp-res-v02", "oauth-corpus")),
+  ],
+  [
+    "mcp-res-v0.2.0-validator-safety.json",
+    await readFile(
+      join(root, ".artifacts", "mcp-res-v02", "validator-safety", "report.json"),
+      "utf8",
+    ),
+  ],
+  [
+    "mcp-res-v0.2.0-verification-report.json",
+    `${JSON.stringify(
+      {
+        schemaVersion: "mcp-res.release-verification-report/0.2.0",
+        javascript: JSON.parse(
+          await readFile(join(root, ".artifacts", "mcp-res-v02", "verification.json"), "utf8"),
+        ),
+        python: JSON.parse(
+          await readFile(
+            join(root, ".artifacts", "mcp-res-v02", "python-verification.json"),
+            "utf8",
+          ),
+        ),
+        operations: JSON.parse(
+          await readFile(
+            join(root, ".artifacts", "mcp-res-v02", "operational-field-verification.json"),
+            "utf8",
+          ),
+        ),
+      },
+      null,
+      2,
+    )}\n`,
+  ],
 ]);
 for (const [name, content] of attachments) {
   await writeFile(join(output, name), content, { encoding: "utf8", flag: "wx" });
@@ -87,6 +155,11 @@ for (const [name, content] of attachments) {
 await copyFile(
   join(root, "scripts", "migrate-mcp-res-v01-to-v02.mjs"),
   join(output, "mcp-res-v0.1-to-v0.2-migrate.source.mjs"),
+  constants.COPYFILE_EXCL,
+);
+await copyFile(
+  join(versionRoot, "conformance-kit", "python", "mcp_res_validator.py"),
+  join(output, "mcp-res-v0.2.0-python-validator.py"),
   constants.COPYFILE_EXCL,
 );
 const metadata = {

@@ -1,0 +1,803 @@
+{
+  "schemaVersion": "mcp-res.profile-registry/0.2.0",
+  "standardVersion": "0.2.0",
+  "mutationPolicy": "Any manifest digest change requires a profile version change or a documented draft erratum before release.",
+  "compatibilityRule": "Overlapping incompatible released versions under one profile ID are forbidden.",
+  "profiles": [
+    {
+      "id": "mcp-res/async-operation/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "OFFLINE_MODEL"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "mrtr-original-call-binding",
+        "mrtr-input-request-identity",
+        "mrtr-requested-schema",
+        "mrtr-bounded-rounds",
+        "mrtr-cancellation",
+        "mrtr-invalid-response",
+        "mrtr-input-privacy",
+        "mrtr-resume",
+        "mrtr-terminal-result",
+        "task-handle-identity",
+        "task-state-transitions",
+        "task-poll-or-update",
+        "task-cancellation",
+        "task-duplicate-update",
+        "task-late-completion",
+        "task-timeout",
+        "task-expired-handle",
+        "task-wrong-subject-handle",
+        "task-restart-persistence-when-claimed",
+        "task-cleanup",
+        "subscription-filter",
+        "subscription-acknowledgment",
+        "subscription-identity",
+        "subscription-opted-in-only",
+        "subscription-ordering-when-defined",
+        "subscription-duplicate-notification",
+        "subscription-abrupt-stream-loss",
+        "subscription-graceful-end",
+        "subscription-reconnect-when-claimed",
+        "subscription-cleanup",
+        "progress-request-scoped",
+        "progress-monotonic-when-claimed",
+        "progress-not-requested-silence",
+        "progress-after-terminal-rejected",
+        "progress-bounded-message-size",
+        "progress-cancellation-interaction"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/async-operation-v1.json",
+        "sha256": "388e235a3a7e7eca4ef68960207404cd4e6a16c4c2522471f8ecf1e39373f680"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/cache-behavior/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "OFFLINE_MODEL"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "ttl-ms",
+        "cache-scope",
+        "cache-key-identity",
+        "protocol-revision-keying",
+        "subject-version-keying",
+        "user-tenant-separation",
+        "stale-result",
+        "expiry",
+        "list-resource-consistency",
+        "negative-caching",
+        "cache-poisoning-boundary",
+        "capability-change-invalidation",
+        "personalized-data-not-public"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/cache-behavior-v1.json",
+        "sha256": "286f525aef25663d8e3f6e9b21ce318ad30094c8a612b41df6a2cd2fda36533e"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/dpop/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "EXPERIMENTAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "AUTHORIZATION_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "capability-explicit",
+        "proof-key-binding",
+        "http-method-uri-binding",
+        "nonce-replay-rejection"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/dpop-v1.json",
+        "sha256": "79ee1188a0fc412d63621dddcd0491445b0af30729ee21f6e45656e2fe06ba97"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "EXPERIMENTAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/enterprise-managed-authorization/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "EXPERIMENTAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "AUTHORIZATION_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "extension-negotiated",
+        "enterprise-policy-identity",
+        "authorization-server-selection",
+        "policy-failure-reason"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/enterprise-managed-authorization-v1.json",
+        "sha256": "115e011dfe6375f9f495469ffe83904e558af738f79b553c73b60ce0fe6a8f5c"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "EXPERIMENTAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/extension-boundary/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "OFFLINE_MODEL"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "extension-identifier",
+        "extension-version",
+        "extension-capability-declaration",
+        "unsupported-extension",
+        "unknown-extension-result",
+        "generic-json-rpc-fallback-when-allowed",
+        "core-extension-schema-separation",
+        "extension-version-skew",
+        "malformed-extension-settings",
+        "extension-data-limits"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/extension-boundary-v1.json",
+        "sha256": "c5452ecaa404654d3b0b25649b22c2bab35413658994993ef02ad545366afe60"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/oauth-boundary/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "AUTHORIZATION_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "protected-resource-metadata-discovery",
+        "authorization-server-metadata",
+        "issuer-binding",
+        "authorization-request-resource",
+        "token-request-resource",
+        "access-token-audience",
+        "wrong-resource-token-rejection",
+        "token-passthrough-prohibited",
+        "pkce-s256",
+        "pkce-downgrade-refused",
+        "exact-redirect-uri",
+        "state-binding",
+        "mix-up-resistance",
+        "authorization-code-binding",
+        "token-endpoint-identity",
+        "cimd-identity",
+        "cimd-trust-policy-recorded",
+        "scope-minimization",
+        "token-storage-omission",
+        "sanitized-authorization-errors",
+        "bounded-redirects",
+        "ssrf-resistant-metadata-resolution",
+        "loopback-redirect-collision",
+        "proxy-consent-client-binding",
+        "refresh-token-rotation-when-claimed"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/oauth-boundary-v1.json",
+        "sha256": "9cc044cc17a4018bc26051525e4d0985d543bb643c40deac11c9201c315aed28"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/oauth-client-credentials/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "EXPERIMENTAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "AUTHORIZATION_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "extension-negotiated",
+        "client-authentication-method",
+        "resource-audience-binding",
+        "secret-omission"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/oauth-client-credentials-v1.json",
+        "sha256": "83f98aba24179921de60d3d6769053fc487c1cf627ad7b043e3f643116c86bf8"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "EXPERIMENTAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/operational-resilience/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "TRANSPORT_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "cold-start",
+        "warm-start",
+        "bounded-concurrency",
+        "queue-saturation",
+        "backpressure",
+        "overload-rejection",
+        "rate-limiting",
+        "retry-after",
+        "timeout",
+        "partial-outage",
+        "process-crash",
+        "restart",
+        "rolling-version-skew",
+        "downstream-failure",
+        "disk-full",
+        "permission-failure",
+        "malformed-flood",
+        "oversized-input",
+        "duplicate-delivery",
+        "graceful-shutdown",
+        "forced-shutdown",
+        "memory-resource-leak",
+        "listener-leak",
+        "child-process-leak",
+        "bounded-soak",
+        "cleanup"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/operational-resilience-v1.json",
+        "sha256": "3fecb11d2273cef9e72202ae0a4114edc9d49b7156bc4bf33c645dc47dfa01eb"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/protocol-revision/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "OFFLINE_MODEL"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "explicit-protocol-revision",
+        "supported-version-advertisement",
+        "unsupported-version-failure",
+        "modern-legacy-auto-behavior",
+        "stdio-backward-compatibility",
+        "request-identity-metadata",
+        "result-identity-metadata",
+        "capability-declaration",
+        "extension-declaration",
+        "json-schema-dialect-identity",
+        "safe-integer-constraints",
+        "interleaved-unrelated-requests",
+        "no-connection-as-conversation",
+        "stateless-request-metadata",
+        "server-discover",
+        "no-session-id-assumption",
+        "required-result-type"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/protocol-revision-v1.json",
+        "sha256": "fe26079110640f19a643158a5bc7d633f93c73932a363e89acfe55deea43e55e"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/stdio-transport/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "TRANSPORT_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "released-message-framing",
+        "stdout-protocol-purity",
+        "stderr-diagnostics",
+        "shell-free-argument-boundaries",
+        "executable-identity",
+        "startup-timeout",
+        "silent-process",
+        "malformed-output",
+        "partial-line",
+        "oversized-line",
+        "process-exit",
+        "child-tree-cleanup",
+        "backpressure",
+        "concurrent-requests",
+        "interruption",
+        "no-process-as-conversation",
+        "discovery-versus-legacy-initialization"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/stdio-transport-v1.json",
+        "sha256": "3f97d68bd80cbdcea9dd5c2343cc10b25aea9047d6186b97d78b152831dd02ac"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/streamable-http/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "PROVISIONAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "TRANSPORT_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "authenticated-loopback-http",
+        "request-response-binding",
+        "json-versus-sse-response",
+        "long-lived-response-stream",
+        "buffering-detection",
+        "keepalive",
+        "transport-header-message-metadata-separation",
+        "status-code-consistency",
+        "content-type",
+        "interrupted-body",
+        "early-close",
+        "timeout",
+        "retry",
+        "duplicate-delivery",
+        "cancellation-by-stream-close",
+        "malformed-chunk",
+        "oversized-event",
+        "slow-consumer",
+        "backpressure",
+        "proxy-added-headers",
+        "no-unauthorized-redirect",
+        "listener-cleanup",
+        "socket-cleanup"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/streamable-http-v1.json",
+        "sha256": "2e542401687dff8a843d491b3454ddf7ee9fbb1d0703f1ac090659d7ce548c98"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "PROVISIONAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    },
+    {
+      "id": "mcp-res/token-exchange/v1",
+      "version": "1.0.0",
+      "standardVersion": "0.2.0",
+      "status": "EXPERIMENTAL",
+      "subjectTypes": ["MCP_CLIENT", "MCP_SERVER", "AUTHORIZATION_FIXTURE"],
+      "evidenceClasses": ["SIMULATED", "GENUINE_RUNTIME"],
+      "normativeRequirements": [
+        "capability-explicit",
+        "subject-token-binding",
+        "requested-resource-binding",
+        "delegation-chain-bounded"
+      ],
+      "manifest": {
+        "path": "docs/standards/mcp-res/v0.2.0/profiles/token-exchange-v1.json",
+        "sha256": "5bf684fe93041cce97ceffe4178257d1359fe465640605ac99aa2a216d26a039"
+      },
+      "schemaDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/schemas/profile-evaluation.schema.json",
+          "sha256": "924513f8664c7aec26b117e6132c7ceef717efe84874cc211db121403a818c15"
+        }
+      ],
+      "vectorDigests": [
+        {
+          "path": "docs/standards/mcp-res/v0.2.0/test-vectors/catalog.json",
+          "sha256": "1e1dbb9ff825c6a856b7adb26f0ec08b1495b6ad8e58d91e2dcbd555883962c1"
+        }
+      ],
+      "validatorCompatibility": [
+        {
+          "language": "JavaScript",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/profile-lib.mjs",
+          "sha256": "a87d1d72bae72653e323432693bc189b1a153a55778f88510aa4cfccabc05e53"
+        },
+        {
+          "language": "Python",
+          "standard": "mcp-res/0.2.0",
+          "path": "docs/standards/mcp-res/v0.2.0/conformance-kit/python/mcp_res_validator.py",
+          "sha256": "5dc9b23880ba874447c73107e1f56f6b9f84040e17f1683a0077fe4685ce9193"
+        }
+      ],
+      "releaseDate": null,
+      "deprecationDate": null,
+      "successor": null,
+      "owner": "aliengineering-byte/resilireplay maintainers",
+      "changeHistory": [
+        {
+          "date": "2026-08-27",
+          "status": "EXPERIMENTAL",
+          "change": "Initial v0.2 draft registration"
+        }
+      ]
+    }
+  ]
+}

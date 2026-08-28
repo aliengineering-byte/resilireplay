@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "mcp-res.fault-taxonomy/1.0.0",
+  "status": "PROVISIONAL",
+  "ambientFailureRule": "An ambient failure is not a deterministic injected fault unless the evidence records the injection boundary, deterministic trigger, and seed.",
+  "faults": [
+    [
+      "protocol-error",
+      "MCP message parser",
+      "invalid-method",
+      1,
+      "protocol rejection",
+      "no subject execution",
+      "next valid message may proceed",
+      "parser state cleared"
+    ],
+    [
+      "transport-disconnect",
+      "loopback transport",
+      "request-2",
+      1,
+      "incomplete exchange",
+      "no success claim",
+      "reconnect allowed",
+      "socket closed"
+    ],
+    [
+      "timeout",
+      "operation deadline",
+      "delay-over-budget",
+      1,
+      "bounded timeout",
+      "no unbounded wait",
+      "retry per policy",
+      "timer cleared"
+    ],
+    [
+      "cancellation",
+      "operation controller",
+      "cancel-at-half-budget",
+      1,
+      "cancelled operation",
+      "no late success",
+      "new operation allowed",
+      "controller released"
+    ],
+    [
+      "malformed-message",
+      "JSON decoder",
+      "seeded-invalid-byte-sequence",
+      4,
+      "input rejection",
+      "no crash",
+      "next valid message allowed",
+      "buffer released"
+    ],
+    [
+      "schema-violation",
+      "schema validator",
+      "missing-required-field",
+      1,
+      "schema rejection",
+      "no coercive acceptance",
+      "corrected request allowed",
+      "validation state cleared"
+    ],
+    [
+      "extension-mismatch",
+      "capability negotiation",
+      "unadvertised-extension",
+      1,
+      "unsupported rejection",
+      "no extension execution",
+      "base protocol allowed",
+      "extension state absent"
+    ],
+    [
+      "duplicate",
+      "idempotency boundary",
+      "same-key-twice",
+      1,
+      "duplicate suppression observed",
+      "no duplicate effect in bounded case",
+      "original result replay allowed",
+      "key state bounded"
+    ],
+    [
+      "reorder",
+      "message scheduler",
+      "response-before-request-ack",
+      1,
+      "correlation rejection",
+      "no cross-operation binding",
+      "ordered retry allowed",
+      "queue drained"
+    ],
+    [
+      "partial-response",
+      "HTTP response body",
+      "close-after-prefix",
+      1,
+      "incomplete response",
+      "no complete success",
+      "retry per side-effect policy",
+      "socket closed"
+    ],
+    [
+      "delayed-response",
+      "dependency boundary",
+      "delay-75ms",
+      2,
+      "latency budget result",
+      "no clock fabrication",
+      "deadline policy applies",
+      "timer cleared"
+    ],
+    [
+      "process-crash",
+      "fixture process",
+      "forced-termination",
+      1,
+      "termination observed",
+      "no graceful-shutdown claim",
+      "fresh process restart allowed",
+      "child reaped"
+    ],
+    [
+      "dependency-failure",
+      "synthetic downstream",
+      "return-unavailable",
+      2,
+      "bounded dependency error",
+      "no false success",
+      "backoff/retry per policy",
+      "connection released"
+    ],
+    [
+      "authorization-rejection",
+      "loopback auth boundary",
+      "wrong-audience",
+      1,
+      "reason-bound rejection",
+      "no token passthrough",
+      "new valid token allowed",
+      "credentials omitted"
+    ],
+    [
+      "cache-stale-poisoned",
+      "response cache",
+      "version-key-mismatch",
+      1,
+      "stale entry rejected",
+      "no stale result promotion",
+      "refetch allowed",
+      "entry evicted"
+    ],
+    [
+      "resource-exhaustion",
+      "bounded queue",
+      "concurrency-over-limit",
+      8,
+      "overload rejection",
+      "no unbounded allocation",
+      "retry-after allowed",
+      "queue drained"
+    ],
+    [
+      "filesystem-publication-failure",
+      "synthetic publisher",
+      "disk-full-or-permission",
+      2,
+      "publication failure",
+      "no partial artifact claim",
+      "new destination allowed",
+      "temporary output removed"
+    ],
+    [
+      "cleanup-failure",
+      "cleanup verifier",
+      "retained-handle-mutant",
+      1,
+      "cleanup failure",
+      "no clean claim",
+      "explicit cleanup allowed",
+      "residual reported"
+    ]
+  ],
+  "fieldOrder": [
+    "id",
+    "injectionBoundary",
+    "seed",
+    "triggerCount",
+    "expectedEffect",
+    "forbiddenSideEffect",
+    "recoveryAllowance",
+    "cleanupExpectation"
+  ]
+}

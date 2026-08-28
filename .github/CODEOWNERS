@@ -1,0 +1,5 @@
+# Standards and their executable evidence require explicit maintainer ownership.
+/docs/standards/mcp-res/ @aliengineering-byte
+/scripts/*mcp-res* @aliengineering-byte
+/.github/workflows/mcp-res* @aliengineering-byte
+/.github/ISSUE_TEMPLATE/mcp_res_* @aliengineering-byte

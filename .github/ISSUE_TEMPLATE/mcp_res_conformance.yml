@@ -1,0 +1,26 @@
+name: MCP-RES conformance case
+description: Contribute a sanitized, digest-bound case without implying adoption.
+title: "[MCP-RES conformance]: "
+labels: ["mcp-res"]
+body:
+  - type: textarea
+    id: subject
+    attributes: { label: Exact subject identity, digest, version, and implementation language }
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes: { label: Profile, operation, environment, evidence class, and claim boundary }
+    validations: { required: true }
+  - type: textarea
+    id: controls
+    attributes: { label: Positive, reason-bound negative, cleanup, and privacy controls }
+    validations: { required: true }
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Publication
+      options:
+        - label: I have authority to publish the submitted evidence and it contains no credential or sensitive data.
+          required: true
+        - label: Testing by ResiliReplay does not make a third-party subject an adopter.
+          required: true

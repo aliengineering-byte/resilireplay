@@ -1,5 +1,9 @@
 # MCP-RES v0.2 conformance kit
 
+All public CLI entry points use a strict UTF-8, duplicate-key-aware, non-symlink reader bounded to 16 MiB, depth 128, 250,000 nodes, and 1,048,576 code units per string. Unsafe integers, floating-point values, lone surrogates, malformed UTF-8, and trailing data fail closed. Submitted values remain inert data: the validators do not launch subjects, execute regressions, follow submitted paths, fetch remote references, load plugins, evaluate code, or extract archives.
+
+The filesystem metadata check and subsequent read are not atomic, so filesystem TOCTOU remains a documented residual risk. Run `node scripts/verify-mcp-res-validator-safety.mjs` from a checkout for the executable safety controls; any platform-skipped symlink cell is reported as untestable, not verified.
+
 The kit evaluates `mcp-res.conformance-bundle/0.2.0` without importing ResiliReplay runtime packages.
 
 ```bash

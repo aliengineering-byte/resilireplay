@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { validateAttestedBundle } from "./attestation-lib.mjs";
+import { readInertJson } from "./safe-json.mjs";
 
 const args = process.argv.slice(2);
 const input = args[0];
@@ -13,11 +13,9 @@ if (!input) {
   process.exitCode = 2;
 } else {
   try {
-    const wrapper = JSON.parse(await readFile(resolve(input), "utf8"));
+    const wrapper = await readInertJson(resolve(input));
     const trustPolicy =
-      trustIndex >= 0
-        ? JSON.parse(await readFile(resolve(args[trustIndex + 1]), "utf8"))
-        : undefined;
+      trustIndex >= 0 ? await readInertJson(resolve(args[trustIndex + 1])) : undefined;
     const result = await validateAttestedBundle(wrapper, { trustPolicy });
     process.stdout.write(`${JSON.stringify(result)}\n`);
     process.exitCode = result.valid ? 0 : 1;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { validateMigrationResult } from "./migration-lib.mjs";
+import { readInertJson } from "./safe-json.mjs";
 
 const [input] = process.argv.slice(2);
 if (!input) {
@@ -9,9 +9,7 @@ if (!input) {
   process.exitCode = 2;
 } else {
   try {
-    const result = await validateMigrationResult(
-      JSON.parse(await readFile(resolve(input), "utf8")),
-    );
+    const result = await validateMigrationResult(await readInertJson(resolve(input)));
     process.stdout.write(`${JSON.stringify(result)}\n`);
     process.exitCode = result.valid ? 0 : 1;
   } catch (error) {

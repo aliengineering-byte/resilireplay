@@ -1,0 +1,21 @@
+name: MCP-RES profile proposal
+description: Propose a versioned reliability profile.
+title: "[MCP-RES profile]: "
+labels: ["mcp-res"]
+body:
+  - type: input
+    id: identity
+    attributes: { label: Proposed profile ID and version, placeholder: mcp-res/example/v1 @ 1.0.0 }
+    validations: { required: true }
+  - type: textarea
+    id: sources
+    attributes: { label: Pinned normative sources and subject types }
+    validations: { required: true }
+  - type: textarea
+    id: evidence
+    attributes: { label: Checks, vectors, validator, cleanup, and limitations }
+    validations: { required: true }
+  - type: dropdown
+    id: status
+    attributes: { label: Initial status, options: [EXPERIMENTAL, PROVISIONAL] }
+    validations: { required: true }

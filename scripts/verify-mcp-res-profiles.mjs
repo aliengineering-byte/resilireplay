@@ -89,7 +89,7 @@ function fixtureEvaluation(
 }
 
 const manifests = await loadProfileManifests(profiles, { schemaDirectory: schemas });
-invariant(manifests.size === 11, `Expected eleven profile manifests, got ${manifests.size}`);
+invariant(manifests.size === 12, `Expected twelve profile manifests, got ${manifests.size}`);
 const valid = [];
 let fullProfileChecks = 0;
 for (const manifest of manifests.values()) {
