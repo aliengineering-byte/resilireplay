@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/aliengineering-byte/resilireplay/main/schemas/aeb-capabilities-v1.schema.json",
+  "title": "ResiliReplay capability manifest v1",
+  "description": "Strict machine-discovery contract for the released ResiliReplay repository. It is not an ecosystem evidence-exchange format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "repository",
+    "currentVersion",
+    "maturity",
+    "problemStatement",
+    "capabilities",
+    "supportedInputs",
+    "generatedOutputs",
+    "interfaces",
+    "installationMethods",
+    "canonicalExamples",
+    "evidenceTypes",
+    "supportedPlatforms",
+    "knownLimitations",
+    "relatedAebRepositories",
+    "feedbackLocations",
+    "documentation",
+    "securityPolicy"
+  ],
+  "properties": {
+    "$schema": { "const": "./schemas/aeb-capabilities-v1.schema.json" },
+    "schemaVersion": { "const": "aeb.capabilities/v1" },
+    "repository": { "const": "aliengineering-byte/resilireplay" },
+    "currentVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "maturity": { "enum": ["released", "experimental", "research"] },
+    "problemStatement": { "type": "string", "minLength": 20, "maxLength": 300 },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/capability" }
+    },
+    "supportedInputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dataBoundary" }
+    },
+    "generatedOutputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dataBoundary" }
+    },
+    "interfaces": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 2, "maxLength": 80 }
+    },
+    "installationMethods": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/installation" }
+    },
+    "canonicalExamples": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/example" }
+    },
+    "evidenceTypes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 3, "maxLength": 120 }
+    },
+    "supportedPlatforms": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/platform" }
+    },
+    "knownLimitations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 10, "maxLength": 300 }
+    },
+    "relatedAebRepositories": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relation" }
+    },
+    "feedbackLocations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/feedback" }
+    },
+    "documentation": { "type": "string", "pattern": "^https://[^\\s]+$" },
+    "securityPolicy": { "type": "string", "pattern": "^https://[^\\s]+$" }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "evidenceClass"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "summary": { "type": "string", "minLength": 20, "maxLength": 240 },
+        "evidenceClass": {
+          "enum": [
+            "directly-tested",
+            "measured-benchmark",
+            "external-primary-source",
+            "design-intent",
+            "hypothesis"
+          ]
+        }
+      }
+    },
+    "dataBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "formats", "boundary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 3, "maxLength": 100 },
+        "formats": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 2, "maxLength": 40 }
+        },
+        "boundary": { "type": "string", "minLength": 10, "maxLength": 300 }
+      }
+    },
+    "installation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "command"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 2, "maxLength": 40 },
+        "command": { "type": "string", "minLength": 5, "maxLength": 240 }
+      }
+    },
+    "example": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "command", "success"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "command": { "type": "string", "minLength": 5, "maxLength": 240 },
+        "success": { "type": "string", "minLength": 10, "maxLength": 300 }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["os", "runtimes", "evidence"],
+      "properties": {
+        "os": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "runtimes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 2, "maxLength": 80 }
+        },
+        "evidence": { "type": "string", "minLength": 3, "maxLength": 180 }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "relationship", "required"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^aliengineering-byte/[a-z0-9-]+$" },
+        "relationship": { "type": "string", "minLength": 10, "maxLength": 300 },
+        "required": { "type": "boolean" }
+      }
+    },
+    "feedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "url"],
+      "properties": {
+        "purpose": { "type": "string", "minLength": 3, "maxLength": 120 },
+        "url": { "type": "string", "pattern": "^https://[^\\s]+$" }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "./schemas/aeb-capabilities-v1.schema.json",
+  "schemaVersion": "aeb.capabilities/v1",
+  "repository": "aliengineering-byte/resilireplay",
+  "currentVersion": "0.7.0",
+  "maturity": "released",
+  "problemStatement": "A malformed discovery document must not acquire undeclared capabilities.",
+  "capabilities": [
+    {
+      "id": "unverified-capability",
+      "summary": "This unsupported behavior must be rejected rather than advertised as a capability.",
+      "evidenceClass": "hypothesis"
+    }
+  ],
+  "supportedInputs": [
+    { "name": "fixture", "formats": ["JSON"], "boundary": "Validation-only malformed fixture." }
+  ],
+  "generatedOutputs": [
+    { "name": "fixture", "formats": ["JSON"], "boundary": "Validation-only malformed fixture." }
+  ],
+  "interfaces": ["fixture"],
+  "installationMethods": [{ "kind": "fixture", "command": "do not execute" }],
+  "canonicalExamples": [
+    {
+      "id": "fixture",
+      "command": "do not execute",
+      "success": "This fixture must fail validation."
+    }
+  ],
+  "evidenceTypes": ["validation fixture"],
+  "supportedPlatforms": [{ "os": "fixture", "runtimes": ["fixture"], "evidence": "fixture" }],
+  "knownLimitations": ["This document is intentionally invalid."],
+  "relatedAebRepositories": [],
+  "feedbackLocations": [
+    { "purpose": "fixture", "url": "https://github.com/aliengineering-byte/resilireplay/issues" }
+  ],
+  "documentation": "https://aliengineering-byte.github.io/resilireplay/",
+  "securityPolicy": "https://github.com/aliengineering-byte/resilireplay/security/policy",
+  "undeclared": true
+}

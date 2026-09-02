@@ -30,7 +30,8 @@ The demo is local, deterministic, credential-free, and cleaned up after it runs.
 
 [Product site](https://aliengineering-byte.github.io/resilireplay/) ·
 [npm package](https://www.npmjs.com/package/resilireplay) ·
-[real MCP CI example](examples/mcp-reliability-ci/README.md)
+[real MCP CI example](examples/mcp-reliability-ci/README.md) ·
+[machine-readable capabilities](aeb-capabilities.json)
 
 ## Ten-second before and after
 
