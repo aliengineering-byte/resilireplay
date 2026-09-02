@@ -8,7 +8,7 @@ ResiliReplay injects deterministic MCP failures, verifies bounded recovery, and 
 executable regression tests.
 
 ```console
-npx --yes resilireplay@latest mcp demo
+npx --yes resilireplay@0.7.0 mcp demo
 ```
 
 ```text
@@ -27,10 +27,13 @@ Evidence: sha256:4d2479b98453732d6011c699c061d023353c8d5cf4159bdf6c5b096961f94c0
 
 The demo is local, deterministic, credential-free, and cleaned up after it runs. It needs Node.js
 22 or 24—no repository checkout, configuration, account, API key, paid model, or remote MCP server.
+This quickstart pins the released `0.7.0` artifact for reproducibility. Later `@latest` examples are
+convenient for following current documentation; pin an exact version in CI and retained evidence.
 
 [Product site](https://aliengineering-byte.github.io/resilireplay/) ·
 [npm package](https://www.npmjs.com/package/resilireplay) ·
-[real MCP CI example](examples/mcp-reliability-ci/README.md)
+[real MCP CI example](examples/mcp-reliability-ci/README.md) ·
+[machine-readable capabilities](aeb-capabilities.json)
 
 ## Ten-second before and after
 

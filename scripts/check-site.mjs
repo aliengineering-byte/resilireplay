@@ -27,13 +27,13 @@ invariant(
   !/(google-analytics|googletagmanager|segment\.com|posthog|mixpanel)/iu.test(html),
   "Analytics are not allowed",
 );
-for (const [name, content] of [
-  ["README", readme],
-  ["npm README", packageReadme],
-  ["landing page", html],
+for (const [name, content, demoCommand] of [
+  ["README", readme, "resilireplay@0.7.0 mcp demo"],
+  ["npm README", packageReadme, "resilireplay@latest mcp demo"],
+  ["landing page", html, "resilireplay@latest mcp demo"],
 ]) {
   invariant(
-    content.includes("resilireplay@latest mcp demo"),
+    content.includes(demoCommand),
     `${name} must include the MCP-first public demo command`,
   );
   invariant(
@@ -41,11 +41,15 @@ for (const [name, content] of [
     `${name} must include the reviewed real-server command`,
   );
   invariant(
-    content.indexOf("resilireplay@latest mcp demo") <
-      content.indexOf("resilireplay@latest mcp test"),
+    content.indexOf(demoCommand) < content.indexOf("resilireplay@latest mcp test"),
     `${name} must present mcp demo before other public commands`,
   );
 }
+invariant(
+  readme.includes("quickstart pins the released `0.7.0` artifact") &&
+    readme.includes("Later `@latest` examples are"),
+  "README must distinguish the reproducible release pin from @latest convenience commands",
+);
 invariant(
   adoptGuide.includes("resilireplay@0.4.0 adopt"),
   "Historical v0.4 adoption guide lost its pinned command",

@@ -1,0 +1,134 @@
+{
+  "$schema": "./schemas/aeb-capabilities-v1.schema.json",
+  "schemaVersion": "aeb.capabilities/v1",
+  "repository": "aliengineering-byte/resilireplay",
+  "currentVersion": "0.7.0",
+  "maturity": "released",
+  "problemStatement": "Test how an MCP tool behaves under a reviewed deterministic fault, verify bounded recovery, and preserve executable regression evidence.",
+  "capabilities": [
+    {
+      "id": "local-mcp-recovery-demo",
+      "summary": "Run a credential-free local MCP failure, bounded retry, duplicate-effect check, and generated regression.",
+      "evidenceClass": "directly-tested"
+    },
+    {
+      "id": "reviewed-mcp-tool-test",
+      "summary": "Dry-run and execute one allowlisted MCP tool against an exact approved plan digest.",
+      "evidenceClass": "directly-tested"
+    },
+    {
+      "id": "deterministic-campaign",
+      "summary": "Run bounded fault campaigns against sanitized traces or reviewed MCP targets and emit a versioned campaign result.",
+      "evidenceClass": "directly-tested"
+    },
+    {
+      "id": "executable-regression-generation",
+      "summary": "Convert supported failure evidence into a minimized replay fixture and executable Node.js regression.",
+      "evidenceClass": "directly-tested"
+    }
+  ],
+  "supportedInputs": [
+    {
+      "name": "MCP Inspector configuration",
+      "formats": ["JSON"],
+      "boundary": "One reviewed server and one allowlisted tool; remote targets require explicit ownership confirmation."
+    },
+    {
+      "name": "ResiliReplay campaign",
+      "formats": ["YAML", "JSON"],
+      "boundary": "Schema version 1.0 with finite concurrency, retry, scenario, and total-time budgets."
+    },
+    {
+      "name": "Sanitized trace",
+      "formats": ["JSONL"],
+      "boundary": "Versioned ResiliReplay trace events; raw credentials and unrestricted tool bodies are not supported evidence."
+    }
+  ],
+  "generatedOutputs": [
+    {
+      "name": "MCP test evidence",
+      "formats": ["JSON", "JSONL"],
+      "boundary": "Metadata and hashes replace tool arguments and result bodies before persistence."
+    },
+    {
+      "name": "Executable regression bundle",
+      "formats": ["JavaScript", "JSONL", "YAML", "JSON"],
+      "boundary": "Generated only for supported causal failures and executed before a successful result is reported."
+    },
+    {
+      "name": "Campaign run",
+      "formats": ["JSON"],
+      "boundary": "Versioned campaign-run.json with an integrity hash and explicit complete, invalid, cancelled, or incomplete status."
+    }
+  ],
+  "interfaces": ["CLI", "GitHub Action", "local stdio MCP server"],
+  "installationMethods": [
+    {
+      "kind": "npx",
+      "command": "npx --yes resilireplay@0.7.0 --version"
+    }
+  ],
+  "canonicalExamples": [
+    {
+      "id": "local-mcp-demo",
+      "command": "npx --yes resilireplay@0.7.0 mcp demo --json",
+      "success": "JSON result is PASS, recoveryAttempts is 1, duplicateEffects is 0, regressionExecuted and cleanupComplete are true."
+    }
+  ],
+  "evidenceTypes": [
+    "MCP failure and recovery evidence",
+    "campaign-run.json",
+    "executable regression bundle",
+    "SARIF, JUnit, HTML, JSON, and Markdown reports"
+  ],
+  "supportedPlatforms": [
+    {
+      "os": "Ubuntu",
+      "runtimes": ["Node.js 22", "Node.js 24"],
+      "evidence": ".github/workflows/ci.yml"
+    },
+    {
+      "os": "Windows",
+      "runtimes": ["Node.js 22", "Node.js 24"],
+      "evidence": ".github/workflows/ci.yml"
+    }
+  ],
+  "knownLimitations": [
+    "ResiliReplay is not a sandbox, security certification, or authorization layer.",
+    "Retry safety remains the caller's responsibility for stateful, side-effecting, or unknown tools.",
+    "The bundled demo proves a local deterministic fixture, not every MCP server, transport, or production environment.",
+    "Secondary agent-runtime support has different evidence levels; named integrations do not imply vendor endorsement."
+  ],
+  "relatedAebRepositories": [
+    {
+      "repository": "aliengineering-byte/resilireplay-action-smoke",
+      "relationship": "Independent downstream CI verifies a released ResiliReplay GitHub Action.",
+      "required": false
+    },
+    {
+      "repository": "aliengineering-byte/gaugemesh",
+      "relationship": "GaugeMesh can invoke ResiliReplay across a process boundary; neither package is a runtime dependency of the other.",
+      "required": false
+    }
+  ],
+  "feedbackLocations": [
+    {
+      "purpose": "bug or reproducibility failure",
+      "url": "https://github.com/aliengineering-byte/resilireplay/issues/new?template=bug_report.yml"
+    },
+    {
+      "purpose": "MCP compatibility or integration request",
+      "url": "https://github.com/aliengineering-byte/resilireplay/issues/new?template=compatibility.yml"
+    },
+    {
+      "purpose": "successful field test or adoption evidence",
+      "url": "https://github.com/aliengineering-byte/resilireplay/issues/new?template=field_test.yml"
+    },
+    {
+      "purpose": "feature request or documentation confusion",
+      "url": "https://github.com/aliengineering-byte/resilireplay/issues/new?template=feature_request.yml"
+    }
+  ],
+  "documentation": "https://aliengineering-byte.github.io/resilireplay/",
+  "securityPolicy": "https://github.com/aliengineering-byte/resilireplay/security/policy"
+}
