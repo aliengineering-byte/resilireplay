@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/aliengineering-byte/resilireplay/main/schemas/aeb-capabilities-v1.schema.json",
+  "$id": "urn:aeb:resilireplay:schema:aeb-capabilities:v1",
   "title": "ResiliReplay capability manifest v1",
   "description": "Strict machine-discovery contract for the released ResiliReplay repository. It is not an ecosystem evidence-exchange format.",
   "type": "object",

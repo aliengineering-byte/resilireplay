@@ -17,9 +17,7 @@ describe("AEB capability manifest", () => {
     const validate = ajv.compile(schema as AnySchema);
 
     expect(validate(manifest), JSON.stringify(validate.errors)).toBe(true);
-    expect((schema as { $id: string }).$id).toBe(
-      "https://raw.githubusercontent.com/aliengineering-byte/resilireplay/main/schemas/aeb-capabilities-v1.schema.json",
-    );
+    expect((schema as { $id: string }).$id).toBe("urn:aeb:resilireplay:schema:aeb-capabilities:v1");
     expect(manifest).toMatchObject({
       schemaVersion: "aeb.capabilities/v1",
       repository: "aliengineering-byte/resilireplay",
