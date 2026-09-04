@@ -89,7 +89,13 @@ export async function resolveContainedOutputPath(
       cause: error,
     });
   }
-  const output = safeOutputPath(lexicalBase, candidate);
+  // Absolute paths can use an OS alias for the same directory (for example,
+  // Windows 8.3 names).  Their lexical spelling is not authoritative, so let
+  // the realpath containment check below decide whether they are safe.
+  rejectWindowsAliases(candidate);
+  const output = isAbsolute(candidate)
+    ? resolve(candidate)
+    : safeOutputPath(lexicalBase, candidate);
   const ancestor = await nearestExistingAncestor(output);
   const ancestorInfo = await lstat(ancestor);
   if (ancestor === output && ancestorInfo.isSymbolicLink()) {
