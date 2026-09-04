@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -15,7 +15,7 @@ describe("CLI end to end and subprocess safety", () => {
       windowsHide: true,
     });
     expect(version.status).toBe(0);
-    expect(version.stdout.trim()).toBe("0.7.0");
+    expect(version.stdout.trim()).toBe("0.7.1");
     const faults = spawnSync(process.execPath, [cli, "faults"], {
       encoding: "utf8",
       windowsHide: true,
@@ -118,6 +118,44 @@ describe("CLI end to end and subprocess safety", () => {
     }
   });
 
+  it("verifies portable MCP demo evidence and rejects tampering", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "resilireplay-demo-evidence-"));
+    const output = join(directory, "demo");
+    try {
+      const demo = spawnSync(process.execPath, [cli, "mcp", "demo", "--output", output, "--json"], {
+        cwd: directory,
+        encoding: "utf8",
+        windowsHide: true,
+        timeout: 15_000,
+      });
+      expect(demo.status, `${demo.stdout}\n${demo.stderr}`).toBe(0);
+      const evidence = join(output, "evidence.json");
+      const verified = spawnSync(
+        process.execPath,
+        [cli, "mcp", "verify-evidence", evidence, "--json"],
+        { cwd: directory, encoding: "utf8", windowsHide: true },
+      );
+      expect(verified.status, verified.stderr).toBe(0);
+      expect(JSON.parse(verified.stdout)).toMatchObject({
+        valid: true,
+        duplicateEffects: 0,
+        recoveryAttempts: 1,
+        packageVersion: "0.7.1",
+      });
+      const changed = JSON.parse(await readFile(evidence, "utf8"));
+      changed.duplicateEffects = 1;
+      await writeFile(evidence, `${JSON.stringify(changed)}\n`);
+      const rejected = spawnSync(process.execPath, [cli, "mcp", "verify-evidence", evidence], {
+        cwd: directory,
+        encoding: "utf8",
+        windowsHide: true,
+      });
+      expect(rejected.status).not.toBe(0);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  });
+
   it("validates, runs, approves, and compares a reviewed campaign", async () => {
     const output = resolve(".artifacts", "tests", `cli-campaign-${process.pid}`);
     try {
@@ -145,8 +183,19 @@ describe("CLI end to end and subprocess safety", () => {
         { encoding: "utf8", windowsHide: true, timeout: 30_000 },
       );
       expect(run.status, `${run.stdout}\n${run.stderr}`).toBe(0);
-      expect(run.stdout).toContain("ResiliReplay Campaign v0.7.0");
+      expect(run.stdout).toContain("ResiliReplay Campaign v0.7.1");
       expect(run.stdout).toContain("Scenarios       4/4");
+
+      const verify = spawnSync(process.execPath, [cli, "campaign", "verify", output, "--json"], {
+        encoding: "utf8",
+        windowsHide: true,
+      });
+      expect(verify.status, verify.stderr).toBe(0);
+      expect(JSON.parse(verify.stdout)).toMatchObject({
+        valid: true,
+        packageVersion: "0.7.1",
+        capability: "verify-resilireplay-evidence",
+      });
 
       const baseline = join(output, "baseline.json");
       const approve = spawnSync(
@@ -163,6 +212,17 @@ describe("CLI end to end and subprocess safety", () => {
       );
       expect(compare.status, `${compare.stdout}\n${compare.stderr}`).toBe(0);
       expect(compare.stdout).toContain("No reliability regressions detected.");
+
+      const receiptPath = join(output, "campaign-run.json");
+      const tampered = JSON.parse(await readFile(receiptPath, "utf8"));
+      tampered.status = "incomplete";
+      await writeFile(receiptPath, `${JSON.stringify(tampered)}\n`);
+      const rejected = spawnSync(process.execPath, [cli, "campaign", "verify", receiptPath], {
+        encoding: "utf8",
+        windowsHide: true,
+      });
+      expect(rejected.status).toBe(24);
+      expect(rejected.stderr).toContain("integrity hash mismatch");
     } finally {
       await rm(output, { recursive: true, force: true });
     }

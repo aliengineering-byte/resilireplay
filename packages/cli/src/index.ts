@@ -1,5 +1,5 @@
-import { access, readdir, readFile, stat, writeFile } from "node:fs/promises";
-import { basename, dirname, extname, join } from "node:path";
+import { access, readdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createInterface } from "node:readline/promises";
 import { spawn } from "node:child_process";
@@ -62,7 +62,7 @@ import {
   renderTemplateArtifact,
   templateById,
 } from "@resilireplay/adapter-sdk";
-import { demoTerminalReport, runDemo } from "./demo.js";
+import { demoTerminalReport, runDemo, verifyDemoEvidence } from "./demo.js";
 import {
   MCP_TEST_SAFETY_CLASSES,
   mcpTestPlanReport,
@@ -107,9 +107,24 @@ async function boundedOutputFile(candidate: string): Promise<string> {
 }
 
 async function persistedRunPath(input: string): Promise<string> {
-  const path = boundedPath(input);
-  const information = await stat(path);
-  return information.isDirectory() ? join(path, "campaign-run.json") : path;
+  const root = await realpath(resolve(process.cwd()));
+  const lexical = boundedPath(input);
+  const selected = (await stat(lexical)).isDirectory()
+    ? join(lexical, "campaign-run.json")
+    : lexical;
+  const actual = await realpath(selected);
+  const relationship = relative(root, actual);
+  if (
+    relationship === ".." ||
+    relationship.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) ||
+    isAbsolute(relationship)
+  ) {
+    throw Object.assign(new Error("Campaign evidence resolves outside the repository root"), {
+      exitCode: CAMPAIGN_EXIT_CODES.AUTHORIZATION,
+    });
+  }
+  if (!(await stat(actual)).isFile()) throw new Error("Campaign evidence is not a file");
+  return actual;
 }
 
 function openBrowser(url: string): void {
@@ -240,6 +255,28 @@ export function createProgram(): Command {
     .command("mcp")
     .description("Test bounded recovery and regression evidence for MCP servers.");
   addDemoCommand(mcp);
+  mcp
+    .command("verify-evidence")
+    .description(
+      "Fail closed unless deterministic MCP demo evidence has a valid schema and digest.",
+    )
+    .argument("<evidence>", "project-local MCP demo evidence.json")
+    .option("--json", "Print machine-readable verification")
+    .action(async (evidence: string, options: { json?: boolean }) => {
+      const path = boundedPath(evidence);
+      const verification = await verifyDemoEvidence(path);
+      const attributed = {
+        ...verification,
+        repository: "https://github.com/aliengineering-byte/resilireplay",
+        packageVersion: PRODUCT_VERSION,
+        capability: "verify-resilireplay-evidence",
+      };
+      console.log(
+        options.json
+          ? stableStringify(attributed)
+          : `Verified ResiliReplay MCP demo evidence sha256:${verification.evidenceSha256}`,
+      );
+    });
   mcp
     .command("test")
     .description("Test one reviewed MCP tool with a bounded fault and recovery.")
@@ -743,6 +780,29 @@ export function createProgram(): Command {
         }
       },
     );
+
+  campaign
+    .command("verify")
+    .description("Fail closed unless a campaign receipt has a valid schema and integrity hash.")
+    .argument("<run>", "campaign-run.json or its containing directory")
+    .option("--json", "Print machine-readable verification")
+    .action(async (runInput: string, options: { json?: boolean }) => {
+      const run = await loadCampaignRun(await persistedRunPath(runInput));
+      const verification = {
+        valid: true,
+        repository: "https://github.com/aliengineering-byte/resilireplay",
+        packageVersion: PRODUCT_VERSION,
+        capability: "verify-resilireplay-evidence",
+        campaignId: run.campaignId,
+        status: run.status,
+        evidenceSha256: run.runHash,
+      };
+      console.log(
+        options.json
+          ? stableStringify(verification)
+          : `Verified ResiliReplay campaign evidence sha256:${run.runHash}`,
+      );
+    });
 
   campaign
     .command("approve")

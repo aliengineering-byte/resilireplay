@@ -1,0 +1,51 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.aliengineering-byte/resilireplay",
+  "title": "ResiliReplay",
+  "description": "Run bounded, deterministic MCP reliability tests and generate executable regressions.",
+  "websiteUrl": "https://aliengineering-byte.github.io/resilireplay/",
+  "repository": {
+    "url": "https://github.com/aliengineering-byte/resilireplay",
+    "source": "github",
+    "subfolder": "packages/cli"
+  },
+  "version": "0.7.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "resilireplay",
+      "version": "0.7.1",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        },
+        {
+          "type": "positional",
+          "value": "serve"
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "capabilities": [
+        "inspect-mcp-target",
+        "validate-campaign",
+        "run-reliability-campaign",
+        "capture-failure",
+        "generate-regression"
+      ],
+      "security": {
+        "workingDirectoryBoundary": "repository-root",
+        "remoteTargetsRequireExplicitAuthorization": true,
+        "telemetry": false
+      }
+    }
+  }
+}

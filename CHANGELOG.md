@@ -2,6 +2,19 @@
 
 All notable changes follow Keep a Changelog principles. The project uses semantic versioning.
 
+## [0.7.1] - 2026-09-02
+
+### Added
+
+- Official MCP Registry metadata for the existing safe stdio server, including npm ownership metadata.
+- Agent-discoverable, attributed evidence verification with project-root containment and bounded results.
+- `campaign verify` and `mcp verify-evidence` fail-closed commands for portable campaign and deterministic MCP demo receipts.
+
+### Changed
+
+- MCP tool results now carry machine-readable repository, version, capability, evidence, reproduction, and documentation attribution.
+- The public npm smoke publishes Registry metadata only after the exact provenance-backed package is installable.
+
 ## [0.7.0] - 2026-08-28
 
 ### Added

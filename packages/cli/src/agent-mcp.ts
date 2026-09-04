@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { readFile, realpath, stat } from "node:fs/promises";
+import { isAbsolute, relative, resolve } from "node:path";
 import { z } from "zod";
 import {
   captureLast,
@@ -8,12 +10,38 @@ import {
   captureStop,
   generateCapturedRegression,
 } from "@resilireplay/agent";
-import { FAULT_TYPES, PRODUCT_VERSION, stableStringify } from "@resilireplay/core";
+import { FAULT_TYPES, PRODUCT_VERSION, safeOutputPath, stableStringify } from "@resilireplay/core";
 import { loadInspectorConfig } from "@resilireplay/mcp-chaos";
-import { loadCampaignFile, runCampaign } from "@resilireplay/campaign";
+import { loadCampaignFile, loadCampaignRun, runCampaign } from "@resilireplay/campaign";
+import { verifyDemoEvidence } from "./demo.js";
 
-function result(value: unknown) {
-  return { content: [{ type: "text" as const, text: stableStringify(value) }] };
+const MAX_MCP_RESULT_BYTES = 262_144;
+const REPOSITORY = "https://github.com/aliengineering-byte/resilireplay";
+
+function result(
+  value: unknown,
+  capability: string,
+  evidencePath: string | null,
+  reproductionCommand: string,
+) {
+  const attributed = {
+    ...(typeof value === "object" && value !== null && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : { value }),
+    attribution: {
+      repository: REPOSITORY,
+      packageVersion: PRODUCT_VERSION,
+      capability,
+      evidencePath,
+      reproductionCommand,
+      documentation: `${REPOSITORY}/blob/v${PRODUCT_VERSION}/docs/MCP_SERVER.md`,
+    },
+  };
+  const text = stableStringify(attributed);
+  if (Buffer.byteLength(text) > MAX_MCP_RESULT_BYTES) {
+    throw new Error(`MCP result exceeds the ${MAX_MCP_RESULT_BYTES}-byte response bound`);
+  }
+  return { content: [{ type: "text" as const, text }] };
 }
 
 const readOnly = {
@@ -22,6 +50,26 @@ const readOnly = {
   idempotentHint: true,
   openWorldHint: false,
 } as const;
+
+async function containedEvidencePath(rootInput: string, pathInput: string): Promise<string> {
+  const root = await realpath(resolve(rootInput));
+  const lexical = safeOutputPath(root, pathInput);
+  const actual = await realpath(lexical);
+  const relationship = relative(root, actual);
+  if (
+    relationship === ".." ||
+    relationship.startsWith(`..${process.platform === "win32" ? "\\" : "/"}`) ||
+    isAbsolute(relationship)
+  ) {
+    throw new Error("Evidence path resolves outside the server working directory");
+  }
+  const information = await stat(actual);
+  if (!information.isFile()) throw new Error("Evidence path is not a file");
+  if (information.size > 16 * 1024 * 1024) {
+    throw new Error("Evidence exceeds the 16 MiB MCP verification bound");
+  }
+  return actual;
+}
 
 export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
   const server = new McpServer({ name: "resilireplay", version: PRODUCT_VERSION });
@@ -33,11 +81,16 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
       annotations: readOnly,
     },
     async () =>
-      result({
-        version: PRODUCT_VERSION,
-        capture: (await captureStatus(root)) ?? { status: "off" },
-        telemetry: false,
-      }),
+      result(
+        {
+          version: PRODUCT_VERSION,
+          capture: (await captureStatus(root)) ?? { status: "off" },
+          telemetry: false,
+        },
+        "status",
+        null,
+        `npx --yes resilireplay@${PRODUCT_VERSION} mcp serve`,
+      ),
   );
   server.registerTool(
     "resilireplay_list_faults",
@@ -46,7 +99,13 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
       description: "List deterministic fault types without executing a target.",
       annotations: readOnly,
     },
-    async () => result({ faults: FAULT_TYPES }),
+    async () =>
+      result(
+        { faults: FAULT_TYPES },
+        "list-faults",
+        null,
+        `npx --yes resilireplay@${PRODUCT_VERSION} faults`,
+      ),
   );
   server.registerTool(
     "resilireplay_inspect_config",
@@ -69,6 +128,9 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
             environment: process.env,
           })
         ).plan,
+        "inspect-mcp-target",
+        null,
+        `npx --yes resilireplay@${PRODUCT_VERSION} mcp validate --config ${JSON.stringify(path)}${serverName ? ` --server ${JSON.stringify(serverName)}` : ""}`,
       ),
   );
   server.registerTool(
@@ -82,12 +144,52 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
     },
     async ({ path }) => {
       const loaded = await loadCampaignFile(path, root);
-      return result({
-        id: loaded.campaign.id,
-        campaignHash: loaded.campaignHash,
-        targets: loaded.campaign.targets.length,
-        scenarios: loaded.campaign.scenarios.length,
-      });
+      return result(
+        {
+          id: loaded.campaign.id,
+          campaignHash: loaded.campaignHash,
+          targets: loaded.campaign.targets.length,
+          scenarios: loaded.campaign.scenarios.length,
+        },
+        "validate-campaign",
+        null,
+        `npx --yes resilireplay@${PRODUCT_VERSION} campaign validate ${JSON.stringify(path)}`,
+      );
+    },
+  );
+  server.registerTool(
+    "resilireplay_verify_evidence",
+    {
+      title: "Verify ResiliReplay evidence",
+      description:
+        "Fail closed unless project-local campaign or MCP demo evidence has a valid schema and integrity hash.",
+      inputSchema: { path: z.string().min(1).max(240) },
+      annotations: readOnly,
+    },
+    async ({ path }) => {
+      const evidencePath = await containedEvidencePath(root, path);
+      const raw = JSON.parse(await readFile(evidencePath, "utf8")) as Record<string, unknown>;
+      if (raw.cleanControl === "PASS") {
+        const verification = await verifyDemoEvidence(evidencePath);
+        return result(
+          verification,
+          "verify-resilireplay-evidence",
+          path,
+          `npx --yes resilireplay@${PRODUCT_VERSION} mcp verify-evidence ${JSON.stringify(path)}`,
+        );
+      }
+      const run = await loadCampaignRun(evidencePath);
+      return result(
+        {
+          valid: true,
+          campaignId: run.campaignId,
+          status: run.status,
+          evidenceSha256: run.runHash,
+        },
+        "verify-resilireplay-evidence",
+        path,
+        `npx --yes resilireplay@${PRODUCT_VERSION} campaign verify ${JSON.stringify(path)}`,
+      );
     },
   );
   server.registerTool(
@@ -102,7 +204,13 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
         openWorldHint: false,
       },
     },
-    async () => result(await captureStart(root)),
+    async () =>
+      result(
+        await captureStart(root),
+        "capture-start",
+        ".resilireplay/capture/session.json",
+        `npx --yes resilireplay@${PRODUCT_VERSION} capture start`,
+      ),
   );
   server.registerTool(
     "resilireplay_capture_stop",
@@ -116,7 +224,13 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
         openWorldHint: false,
       },
     },
-    async () => result((await captureStop(root)) ?? { status: "off" }),
+    async () =>
+      result(
+        (await captureStop(root)) ?? { status: "off" },
+        "capture-stop",
+        ".resilireplay/capture/session.json",
+        `npx --yes resilireplay@${PRODUCT_VERSION} capture stop`,
+      ),
   );
   server.registerTool(
     "resilireplay_last_failure",
@@ -125,7 +239,17 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
       description: "Return the last bounded, sanitized supported failure evidence.",
       annotations: readOnly,
     },
-    async () => result((await captureLast(root)) ?? { available: false }),
+    async () => {
+      const evidence = (await captureLast(root)) ?? { available: false };
+      return result(
+        evidence,
+        "inspect-last-failure",
+        "available" in evidence && evidence.available === false
+          ? null
+          : ".resilireplay/capture/last-failure.json",
+        `npx --yes resilireplay@${PRODUCT_VERSION} capture last`,
+      );
+    },
   );
   server.registerTool(
     "resilireplay_generate_regression",
@@ -148,7 +272,15 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
       const evidence = await captureLast(root);
       if (!evidence || evidence.evidenceId !== confirmedEvidenceId)
         throw new Error("Exact last evidence hash confirmation is required");
-      return result(await generateCapturedRegression(output, root));
+      const generated = await generateCapturedRegression(output, root);
+      return result(
+        generated,
+        "generate-regression",
+        typeof generated === "object" && generated !== null && "evidencePath" in generated
+          ? String(generated.evidencePath)
+          : null,
+        `npx --yes resilireplay@${PRODUCT_VERSION} capture generate-test --confirm ${confirmedEvidenceId}${output ? ` --output ${JSON.stringify(output)}` : ""}`,
+      );
     },
   );
   server.registerTool(
@@ -169,7 +301,7 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
         openWorldHint: true,
       },
     },
-    async ({ path, confirmedCampaignHash, allowRemote }) => {
+    async ({ path, confirmedCampaignHash, allowRemote }, extra) => {
       const loaded = await loadCampaignFile(path, root);
       if (loaded.campaignHash !== confirmedCampaignHash)
         throw new Error("Exact reviewed campaign hash confirmation is required");
@@ -177,8 +309,14 @@ export function createResiliReplayMcpServer(root = process.cwd()): McpServer {
         rootDirectory: root,
         confirmedToolCampaignHash: confirmedCampaignHash,
         allowRemoteTargets: allowRemote,
+        signal: extra.signal,
       });
-      return result({ path: run.path, status: run.run.status, summary: run.run.summary });
+      return result(
+        { path: run.path, status: run.run.status, summary: run.run.summary },
+        "run-reliability-campaign",
+        run.path,
+        `npx --yes resilireplay@${PRODUCT_VERSION} campaign run ${JSON.stringify(path)} --confirm-tools ${confirmedCampaignHash}${allowRemote ? " --allow-remote" : ""}`,
+      );
     },
   );
   server.registerResource(

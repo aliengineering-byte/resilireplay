@@ -63,6 +63,46 @@ export const DemoResultSchema = z
 
 export type DemoResult = z.infer<typeof DemoResultSchema>;
 
+const DemoEvidenceSchema = z
+  .object({
+    schemaVersion: z.literal("1.0"),
+    productVersion: z.literal(PRODUCT_VERSION),
+    seed: z.number().int(),
+    cleanControl: z.literal("PASS"),
+    faultObserved: z.literal(true),
+    recoveryAttempts: z.literal(1),
+    duplicateEffects: z.literal(0),
+    regressionGenerated: z.literal(true),
+    regressionExecuted: z.literal(true),
+    cleanupComplete: z.literal(true),
+    cleanTraceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+    recoveredTraceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+    controlledFailureTraceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+    regressionFixtureSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+    regressionTestSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+    evidenceSha256: z.string().regex(/^[a-f0-9]{64}$/u),
+  })
+  .strict();
+
+export async function verifyDemoEvidence(path: string): Promise<{
+  valid: true;
+  evidenceSha256: string;
+  duplicateEffects: 0;
+  recoveryAttempts: 1;
+}> {
+  const evidence = DemoEvidenceSchema.parse(JSON.parse(await readFile(path, "utf8")));
+  const { evidenceSha256, ...canonical } = evidence;
+  if (sha256(stableStringify(canonical)) !== evidenceSha256) {
+    throw new Error("ResiliReplay demo evidence digest mismatch");
+  }
+  return {
+    valid: true,
+    evidenceSha256,
+    duplicateEffects: evidence.duplicateEffects,
+    recoveryAttempts: evidence.recoveryAttempts,
+  };
+}
+
 interface BundleEntry {
   path: string;
   bytes: number;
