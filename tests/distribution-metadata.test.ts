@@ -64,4 +64,27 @@ describe("distribution metadata", () => {
     expect(workflow).toContain("github.event.release.tag_name");
     expect(workflow).not.toContain('push:\n    tags: ["v*.*.*"]');
   });
+
+  it("binds the npm package to schema-current Official MCP Registry metadata", async () => {
+    const [server, packageJson] = await Promise.all([
+      readFile(join(root, "server.json"), "utf8").then((value) => JSON.parse(value)),
+      readFile(join(root, "packages", "cli", "package.json"), "utf8").then((value) =>
+        JSON.parse(value),
+      ),
+    ]);
+    expect(packageJson.mcpName).toBe("io.github.aliengineering-byte/resilireplay");
+    expect(server.$schema).toBe(
+      "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    );
+    expect(server.name).toBe(packageJson.mcpName);
+    expect(server.version).toBe(packageJson.version);
+    expect(server.packages).toEqual([
+      expect.objectContaining({
+        registryType: "npm",
+        identifier: "resilireplay",
+        version: packageJson.version,
+        transport: { type: "stdio" },
+      }),
+    ]);
+  });
 });

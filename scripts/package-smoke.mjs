@@ -203,7 +203,7 @@ try {
   await mcpClient.connect(mcpTransport);
   const listed = await mcpClient.listTools();
   if (
-    listed.tools.length !== 9 ||
+    listed.tools.length !== 10 ||
     listed.tools.some(
       (tool) =>
         !tool.annotations ||
@@ -212,7 +212,7 @@ try {
         ),
     )
   ) {
-    throw new Error("Packed MCP server did not expose nine fully annotated tools");
+    throw new Error("Packed MCP server did not expose ten fully annotated tools");
   }
 } finally {
   await mcpClient.close();

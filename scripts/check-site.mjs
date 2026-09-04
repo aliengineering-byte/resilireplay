@@ -28,7 +28,7 @@ invariant(
   "Analytics are not allowed",
 );
 for (const [name, content, demoCommand] of [
-  ["README", readme, "resilireplay@0.7.0 mcp demo"],
+  ["README", readme, "resilireplay@0.7.1 mcp demo"],
   ["npm README", packageReadme, "resilireplay@latest mcp demo"],
   ["landing page", html, "resilireplay@latest mcp demo"],
 ]) {
@@ -46,7 +46,7 @@ for (const [name, content, demoCommand] of [
   );
 }
 invariant(
-  readme.includes("quickstart pins the released `0.7.0` artifact") &&
+  readme.includes("quickstart pins the released `0.7.1` artifact") &&
     readme.includes("Later `@latest` examples are"),
   "README must distinguish the reproducible release pin from @latest convenience commands",
 );

@@ -2,7 +2,7 @@
   "$schema": "./schemas/aeb-capabilities-v1.schema.json",
   "schemaVersion": "aeb.capabilities/v1",
   "repository": "aliengineering-byte/resilireplay",
-  "currentVersion": "0.7.0",
+  "currentVersion": "0.7.1",
   "maturity": "released",
   "problemStatement": "Test how an MCP tool behaves under a reviewed deterministic fault, verify bounded recovery, and preserve executable regression evidence.",
   "capabilities": [

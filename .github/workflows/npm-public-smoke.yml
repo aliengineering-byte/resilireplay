@@ -21,7 +21,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
@@ -29,10 +29,70 @@ jobs:
       - name: Verify from the public registry in a clean runner
         shell: bash
         run: |
-          test "$(npm view resilireplay@0.7.0 version)" = "0.7.0"
-          npm view resilireplay@0.7.0 dist.integrity dist.shasum
-          test "$(npx --yes resilireplay@0.7.0 --version)" = "0.7.0"
-          npx --yes resilireplay@0.7.0 --help > help.txt
+          test "$(npm view resilireplay@0.7.1 version)" = "0.7.1"
+          npm view resilireplay@0.7.1 dist.integrity dist.shasum
+          test "$(npx --yes resilireplay@0.7.1 --version)" = "0.7.1"
+          npx --yes resilireplay@0.7.1 --help > help.txt
           grep -q "mcp" help.txt
-          npx --yes resilireplay@0.7.0 mcp demo --json > demo.json
+          npx --yes resilireplay@0.7.1 mcp demo --json > demo.json
           node -e "const r=require('./demo.json');if(r.result!=='PASS'||r.cleanControl!=='PASS'||r.recoveryAttempts!==1||r.duplicateEffects!==0||!r.regressionExecuted||!r.cleanupComplete)process.exit(1)"
+
+  publish-mcp-registry:
+    needs: public-package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Verify public package ownership metadata
+        run: |
+          test "$(npm view resilireplay@0.7.1 version)" = "0.7.1"
+          test "$(npm view resilireplay@0.7.1 mcpName)" = "io.github.aliengineering-byte/resilireplay"
+      - name: Install checksum-pinned official publisher
+        shell: bash
+        run: |
+          curl --fail --location --silent --show-error \
+            --output mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
+          echo "a06c9096dcb9727c13555b6be26c7effa707b01f06a4c561ba7a3635443cf2cc  mcp-publisher.tar.gz" | sha256sum --check
+          tar -xzf mcp-publisher.tar.gz mcp-publisher
+          test "$(./mcp-publisher --version 2>&1 | grep -o '1\.8\.1' | head -1)" = "1.8.1"
+      - name: Publish through GitHub OIDC
+        shell: bash
+        run: |
+          if curl --fail --silent --show-error \
+            "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.aliengineering-byte/resilireplay" \
+            --output existing.json && \
+            node -e 'const r=require("./existing.json");const s=r.servers?.find(x=>(x.server??x).name==="io.github.aliengineering-byte/resilireplay"&&(x.server??x).version==="0.7.1");process.exit(s?0:1)'; then
+            echo "Exact Registry version already exists; publication is idempotently complete."
+          else
+            ./mcp-publisher login github-oidc
+            ./mcp-publisher publish server.json
+          fi
+      - name: Verify exact public Registry record
+        shell: bash
+        run: |
+          for attempt in {1..12}; do
+            curl --fail --silent --show-error \
+              "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.aliengineering-byte/resilireplay" \
+              --output registry.json && \
+              node -e 'const r=require("./registry.json");const s=r.servers?.find(x=>(x.server??x).name==="io.github.aliengineering-byte/resilireplay"&&(x.server??x).version==="0.7.1");if(!s)process.exit(1)' && break
+            sleep 10
+          done
+          node - <<'NODE'
+          const response = require("./registry.json");
+          const record = response.servers?.map((entry) => entry.server ?? entry)
+            .find((entry) => entry.name === "io.github.aliengineering-byte/resilireplay" && entry.version === "0.7.1");
+          if (!record) throw new Error("Exact Registry record is not public");
+          const pkg = record.packages?.find((entry) => entry.registryType === "npm");
+          if (!pkg || pkg.identifier !== "resilireplay" || pkg.version !== "0.7.1" || pkg.transport?.type !== "stdio") {
+            throw new Error("Registry package or command metadata mismatch");
+          }
+          const args = pkg.packageArguments?.map((entry) => entry.value);
+          if (JSON.stringify(args) !== JSON.stringify(["mcp", "serve"])) throw new Error("Registry startup arguments mismatch");
+          NODE

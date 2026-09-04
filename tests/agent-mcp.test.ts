@@ -27,11 +27,19 @@ describe("universal ResiliReplay MCP server", () => {
           "resilireplay_capture_start",
           "resilireplay_generate_regression",
           "resilireplay_run_campaign",
+          "resilireplay_verify_evidence",
         ]),
       );
       const status = await client.callTool({ name: "resilireplay_status", arguments: {} });
       expect(status.isError).not.toBe(true);
       expect(JSON.stringify(status)).toContain("capture");
+      const payload = JSON.parse(
+        ((status as { content: Array<{ text: string }> }).content[0] as { text: string }).text,
+      );
+      expect(payload.attribution.repository).toBe(
+        "https://github.com/aliengineering-byte/resilireplay",
+      );
+      expect(payload.attribution.packageVersion).toBe("0.7.1");
       const execution = listed.tools.find((tool) => tool.name === "resilireplay_run_campaign");
       expect(execution?.annotations).toMatchObject({
         destructiveHint: true,
@@ -52,4 +60,27 @@ describe("universal ResiliReplay MCP server", () => {
     expect(result.tools.length).toBeGreaterThanOrEqual(8);
     expect(result.events.some((event) => event.type === "tool_requested")).toBe(false);
   }, 15_000);
+
+  it("rejects malformed calls without terminating the stdio lifecycle", async () => {
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [cli, "mcp", "serve"],
+      stderr: "pipe",
+    });
+    const client = new Client(
+      { name: "resilireplay-negative-test", version: "1.0.0" },
+      { capabilities: {} },
+    );
+    try {
+      await client.connect(transport);
+      const invalid = await client.callTool({
+        name: "resilireplay_inspect_config",
+        arguments: { path: "../outside.json" },
+      });
+      expect(invalid.isError).toBe(true);
+      await expect(client.listTools()).resolves.toMatchObject({ tools: expect.any(Array) });
+    } finally {
+      await client.close();
+    }
+  });
 });

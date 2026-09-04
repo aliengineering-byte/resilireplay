@@ -1,14 +1,15 @@
 # ResiliReplay
 
+## Break an MCP server on purpose. Replay the failure. Ship the regression.
+
+ResiliReplay is the MCP reliability engine behind proof-carrying recovery changes: inspect one reviewed target, inject a deterministic fault, bound retries and duplicate effects, preserve evidence, and turn the failure into an executable regression.
+
 [![CI](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml/badge.svg)](https://github.com/aliengineering-byte/resilireplay/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/resilireplay)](https://www.npmjs.com/package/resilireplay)
 [![License](https://img.shields.io/github/license/aliengineering-byte/resilireplay)](LICENSE)
 
-ResiliReplay injects deterministic MCP failures, verifies bounded recovery, and turns failures into
-executable regression tests.
-
 ```console
-npx --yes resilireplay@0.7.0 mcp demo
+npx --yes resilireplay@0.7.1 mcp demo
 ```
 
 ```text
@@ -27,7 +28,7 @@ Evidence: sha256:4d2479b98453732d6011c699c061d023353c8d5cf4159bdf6c5b096961f94c0
 
 The demo is local, deterministic, credential-free, and cleaned up after it runs. It needs Node.js
 22 or 24—no repository checkout, configuration, account, API key, paid model, or remote MCP server.
-This quickstart pins the released `0.7.0` artifact for reproducibility. Later `@latest` examples are
+This quickstart pins the released `0.7.1` artifact for reproducibility. Later `@latest` examples are
 convenient for following current documentation; pin an exact version in CI and retained evidence.
 
 [Product site](https://aliengineering-byte.github.io/resilireplay/) ·

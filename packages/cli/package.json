@@ -1,6 +1,7 @@
 {
   "name": "resilireplay",
-  "version": "0.7.0",
+  "version": "0.7.1",
+  "mcpName": "io.github.aliengineering-byte/resilireplay",
   "type": "module",
   "license": "Apache-2.0",
   "description": "Inject deterministic MCP failures, verify bounded recovery, and generate executable regression tests.",

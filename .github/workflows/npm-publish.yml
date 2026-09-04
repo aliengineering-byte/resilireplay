@@ -21,15 +21,15 @@ jobs:
     timeout-minutes: 60
     environment: npm
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@f520eceda224fe1a4aed5a2a27a194379a409996 # v6
         with:
           version: 10.14.0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
@@ -66,23 +66,23 @@ jobs:
           import { readFile } from "node:fs/promises";
           const manifest = JSON.parse(await readFile(".artifacts/npm-release/pack.json", "utf8"));
           const packed = manifest[0];
-          if (packed.name !== "resilireplay" || packed.version !== "0.7.0") throw new Error("Packed identity mismatch");
+          if (packed.name !== "resilireplay" || packed.version !== "0.7.1") throw new Error("Packed identity mismatch");
           if (!packed.files.some((entry) => entry.path === "dist/resilireplay.js")) throw new Error("CLI bundle missing");
           if (!packed.files.some((entry) => entry.path === "fixtures/demo-mcp-server.mjs")) throw new Error("Local MCP demo fixture missing");
           if (packed.files.some((entry) => entry.path.includes("node_modules") || entry.path.startsWith("src/"))) {
             throw new Error("Private build inputs entered the npm tarball");
           }
           NODE
-          sha256sum .artifacts/npm-release/resilireplay-0.7.0.tgz
+          sha256sum .artifacts/npm-release/resilireplay-0.7.1.tgz
       - name: Publish through npm Trusted Publishing
-        run: npm publish .artifacts/npm-release/resilireplay-0.7.0.tgz --access public --provenance
+        run: npm publish .artifacts/npm-release/resilireplay-0.7.1.tgz --access public --provenance
       - name: Verify the immutable public package
         shell: bash
         run: |
           for attempt in {1..12}; do
-            if npm view resilireplay@0.7.0 version >/dev/null 2>&1; then break; fi
+            if npm view resilireplay@0.7.1 version >/dev/null 2>&1; then break; fi
             sleep 10
           done
-          test "$(npm view resilireplay@0.7.0 version)" = "0.7.0"
-          test "$(npx --yes resilireplay@0.7.0 --version)" = "0.7.0"
-          npx --yes resilireplay@0.7.0 mcp demo --json
+          test "$(npm view resilireplay@0.7.1 version)" = "0.7.1"
+          test "$(npx --yes resilireplay@0.7.1 --version)" = "0.7.1"
+          npx --yes resilireplay@0.7.1 mcp demo --json

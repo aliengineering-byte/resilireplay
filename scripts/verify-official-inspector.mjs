@@ -40,8 +40,8 @@ if (result.status !== 0) {
 
 const output = JSON.parse(result.stdout);
 const tools = output?.result?.tools;
-if (!Array.isArray(tools) || tools.length !== 9) {
-  throw new Error(`Official MCP Inspector returned ${tools?.length ?? 0} tools instead of 9`);
+if (!Array.isArray(tools) || tools.length !== 10) {
+  throw new Error(`Official MCP Inspector returned ${tools?.length ?? 0} tools instead of 10`);
 }
 for (const tool of tools) {
   const annotations = tool.annotations;
