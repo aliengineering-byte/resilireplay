@@ -25,11 +25,11 @@
     "zod": "3.25.76"
   },
   "peerDependencies": {
-    "@langchain/langgraph": "1.4.9"
+    "@langchain/langgraph": "1.4.13"
   },
   "devDependencies": {
-    "@langchain/core": "1.2.4",
-    "@langchain/langgraph": "1.4.9",
+    "@langchain/core": "1.2.9",
+    "@langchain/langgraph": "1.4.13",
     "@resilireplay/trace": "workspace:*"
   }
 }
