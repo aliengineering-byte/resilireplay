@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.30.0",
-    "@modelcontextprotocol/server-everything": "2026.8.18"
+    "@modelcontextprotocol/sdk": "1.30.1",
+    "@modelcontextprotocol/server-everything": "2026.8.31"
   }
 }
